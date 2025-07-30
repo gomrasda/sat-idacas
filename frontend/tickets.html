@@ -28,12 +28,13 @@
 </form>
 
 <script>
+const api = "https://sat-idacas.onrender.com/api";
 const params = new URLSearchParams(window.location.search);
 document.querySelector('input[name=aviso_id]').value = params.get('avisoId');
 
 // Cargar técnicos en el select
 async function cargarTecnicos() {
-  const res = await fetch('http://localhost:3000/usuarios');
+  const res = await fetch(`${api}/usuarios`);
   const usuarios = await res.json();
   const select = document.getElementById('tecnicoSelect');
   usuarios
@@ -51,7 +52,7 @@ cargarTecnicos();
 document.getElementById('ticketForm').onsubmit = async e => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target).entries());
-  await fetch('http://localhost:3000/tickets', {
+  await fetch(`${api}/tickets`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
