@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"><title>Clientes</title></head>
@@ -12,40 +11,59 @@
 </form>
 <ul id="listaClientes"></ul>
 <script>
+const api = "https://sat-idacas.onrender.com/api";
 const token = localStorage.getItem('token');
 const lista = document.getElementById('listaClientes');
 const form = document.getElementById('clienteForm');
+
 async function cargar() {
   lista.innerHTML = '';
-  const res = await fetch('http://localhost:3000/clientes', { headers: { 'Authorization': 'Bearer ' + token } });
+  const res = await fetch(`${api}/clientes`, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
   const clientes = await res.json();
   clientes.forEach(c => {
     const li = document.createElement('li');
-    li.innerHTML = c.nombre + ' - ' + c.obs + ' ' +
-      '<button onclick="editar('+c.id+',''+c.nombre+'',''+c.obs+'')">Editar</button> ' +
-      '<button onclick="borrar('+c.id+')">Borrar</button>';
+    li.innerHTML = `${c.nombre} - ${c.obs || ''} ` +
+      `<button onclick="editar(${c.id}, '${c.nombre.replace(/'/g, "\\'")}', '${(c.obs || '').replace(/'/g, "\\'")}')">Editar</button> ` +
+      `<button onclick="borrar(${c.id})">Borrar</button>`;
     lista.appendChild(li);
   });
 }
+
 form.onsubmit = async e => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(form).entries());
   const metodo = data.id ? 'PUT' : 'POST';
-  const url = data.id ? 'clientes/'+data.id : 'clientes';
-  await fetch('http://localhost:3000/' + url, {
+  const url = data.id ? `${api}/clientes/${data.id}` : `${api}/clientes`;
+  await fetch(url, {
     method: metodo,
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
     body: JSON.stringify(data)
   });
-  form.reset(); cargar();
+  form.reset();
+  cargar();
 };
-function editar(id,nombre,obs){form.id.value=id;form.nombre.value=nombre;form.obs.value=obs;}
-async function borrar(id){
-  if (confirm('¿Borrar cliente?')){
-    await fetch('http://localhost:3000/clientes/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+
+function editar(id, nombre, obs) {
+  form.id.value = id;
+  form.nombre.value = nombre;
+  form.obs.value = obs;
+}
+
+async function borrar(id) {
+  if (confirm('¿Borrar cliente?')) {
+    await fetch(`${api}/clientes/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
     cargar();
   }
 }
+
 cargar();
 </script>
 </body>
