@@ -72,7 +72,6 @@
 
   <div class="container">
     <button onclick="window.location.href='index.html#avisos'" class="btn" style="background:#6c757d;">🔙 Volver a Avisos</button>
-
     <h2 id="tituloCliente">Tickets del Aviso</h2>
 
     <label>Filtrar por Estado:</label>
@@ -96,6 +95,7 @@
   <div id="modal" style="display:none;"></div>
 
   <script>
+    const api = "https://sat-idacas.onrender.com/api";
     const token = localStorage.getItem('token');
     if (!token) window.location.href = 'login.html';
 
@@ -110,14 +110,14 @@
     let tecnicos = [];
 
     async function cargarTecnicos() {
-      const res = await fetch('http://localhost:3000/usuarios', { headers });
+      const res = await fetch(api + '/usuarios', { headers });
       const usuarios = await res.json();
       tecnicos = usuarios.filter(u => u.rol === 'Técnico' || u.rol === 'tecnico');
     }
 
     async function cargarTitulo(){
       try {
-        const res = await fetch(`http://localhost:3000/tickets/aviso/${avisoId}`, { headers });
+        const res = await fetch(`${api}/tickets/aviso/${avisoId}`, { headers });
         const data = await res.json();
         document.getElementById('tituloCliente').innerText = "Tickets de " + data.cliente;
       } catch(e){
@@ -131,7 +131,7 @@
     });
 
     async function cargarTickets(){
-      const res = await fetch('http://localhost:3000/tickets?aviso_id=' + avisoId, { headers });
+      const res = await fetch(`${api}/tickets?aviso_id=${avisoId}`, { headers });
       const tickets = await res.json();
       const body = document.getElementById('ticketsBody');
       const filtro = document.getElementById('filtroEstado').value;
@@ -160,7 +160,7 @@
     }
 
     async function actualizarCampo(id, campo, valor){
-      await fetch('http://localhost:3000/tickets/' + id, {
+      await fetch(`${api}/tickets/${id}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ [campo]: parseFloat(valor) })
@@ -202,7 +202,7 @@
         precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
         estado: document.getElementById('estado').value
       };
-      await fetch('http://localhost:3000/tickets', {
+      await fetch(`${api}/tickets`, {
         method: 'POST',
         headers,
         body: JSON.stringify(data)
@@ -213,7 +213,7 @@
 
     async function borrarTicket(id){
       if (confirm("¿Eliminar ticket?")) {
-        await fetch('http://localhost:3000/tickets/' + id, {
+        await fetch(`${api}/tickets/${id}`, {
           method: 'DELETE',
           headers
         });
@@ -222,7 +222,7 @@
     }
 
     async function cambiarEstadoTicket(id, nuevoEstado){
-      await fetch('http://localhost:3000/tickets/' + id + '/estado', {
+      await fetch(`${api}/tickets/${id}/estado`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({ estado: nuevoEstado })
@@ -260,7 +260,7 @@
         precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
         estado: document.getElementById('estado').value
       };
-      await fetch('http://localhost:3000/tickets/' + id, {
+      await fetch(`${api}/tickets/${id}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(data)
