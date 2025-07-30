@@ -178,7 +178,8 @@
     const payload = JSON.parse(atob(token.split('.')[1]));
     const rol = payload.rol;
 
-    const api = "http://localhost:3000";
+    const api = "https://sat-backend.onrender.com";
+
     let clientes = [], tecnicos = [];
     const headers = {
       'Content-Type': 'application/json',
