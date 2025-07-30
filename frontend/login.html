@@ -49,32 +49,34 @@
 </form>
 
 <script>
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const data = {
-    usuario: e.target.usuario.value,
-    password: e.target.password.value
-  };
+  const api = "https://sat-idacas.onrender.com/api"; // ✅ URL del backend en producción
 
-  try {
-    const res = await fetch('http://localhost:3000/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      usuario: e.target.usuario.value,
+      password: e.target.password.value
+    };
 
-    const result = await res.json();
+    try {
+      const res = await fetch(api + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
 
-    if (res.ok && result.token) {
-      localStorage.setItem('token', result.token);
-      location.href = 'index.html';
-    } else {
-      alert(result.mensaje || 'Error al iniciar sesión');
+      const result = await res.json();
+
+      if (res.ok && result.token) {
+        localStorage.setItem('token', result.token);
+        location.href = 'index.html';
+      } else {
+        alert(result.mensaje || 'Error al iniciar sesión');
+      }
+    } catch (err) {
+      alert('No se pudo conectar con el servidor');
     }
-  } catch (err) {
-    alert('No se pudo conectar con el servidor');
-  }
-});
+  });
 </script>
 
 </body>
