@@ -17,13 +17,16 @@
   <ul id="listaAvisos"></ul>
 
   <script>
+    const api = "https://sat-idacas.onrender.com/api";
     const token = localStorage.getItem('token');
     const lista = document.getElementById('listaAvisos');
     const form = document.getElementById('avisoForm');
 
     async function cargar() {
       lista.innerHTML = '';
-      const res = await fetch('http://localhost:3000/avisos', { headers: { 'Authorization': 'Bearer ' + token } });
+      const res = await fetch(`${api}/avisos`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
       const avisos = await res.json();
       avisos.forEach(a => {
         const li = document.createElement('li');
@@ -37,7 +40,9 @@
     }
 
     async function cargarTecnicos(){
-      const res = await fetch('http://localhost:3000/usuarios', { headers: { 'Authorization': 'Bearer ' + token } });
+      const res = await fetch(`${api}/usuarios`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
       const usuarios = await res.json();
       const select = document.getElementById('tecnicos');
       select.innerHTML = '';
@@ -53,10 +58,13 @@
       e.preventDefault();
       const data = Object.fromEntries(new FormData(form).entries());
       const metodo = data.id ? 'PUT' : 'POST';
-      const url = data.id ? 'avisos/' + data.id : 'avisos';
-      await fetch('http://localhost:3000/' + url, {
+      const url = data.id ? `${api}/avisos/${data.id}` : `${api}/avisos`;
+      await fetch(url, {
         method: metodo,
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
         body: JSON.stringify(data)
       });
       form.reset();
@@ -72,7 +80,7 @@
 
     async function borrar(id) {
       if (confirm('¿Borrar aviso?')) {
-        await fetch('http://localhost:3000/avisos/' + id, {
+        await fetch(`${api}/avisos/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': 'Bearer ' + token }
         });
@@ -116,8 +124,7 @@
 
       document.body.appendChild(modal);
 
-      // Cargar técnicos en el select del modal
-      fetch('http://localhost:3000/usuarios', {
+      fetch(`${api}/usuarios`, {
         headers: { 'Authorization': 'Bearer ' + token }
       })
         .then(res => res.json())
@@ -136,9 +143,12 @@
       document.getElementById('ticketForm').onsubmit = async e => {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target).entries());
-        await fetch('http://localhost:3000/tickets', {
+        await fetch(`${api}/tickets`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
           body: JSON.stringify(data)
         });
         alert('Ticket creado correctamente');
