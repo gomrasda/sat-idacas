@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Clientes</title></head>
+<body>
+<h2>Clientes</h2>
+<form id="clienteForm">
+  <input type="hidden" name="id">
+  <input type="text" name="nombre" placeholder="Nombre" required><br>
+  <input type="text" name="obs" placeholder="Observaciones"><br>
+  <button type="submit">Guardar</button>
+</form>
+<ul id="listaClientes"></ul>
+<script>
+const token = localStorage.getItem('token');
+const lista = document.getElementById('listaClientes');
+const form = document.getElementById('clienteForm');
+async function cargar() {
+  lista.innerHTML = '';
+  const res = await fetch('http://localhost:3000/clientes', { headers: { 'Authorization': 'Bearer ' + token } });
+  const clientes = await res.json();
+  clientes.forEach(c => {
+    const li = document.createElement('li');
+    li.innerHTML = c.nombre + ' - ' + c.obs + ' ' +
+      '<button onclick="editar('+c.id+',''+c.nombre+'',''+c.obs+'')">Editar</button> ' +
+      '<button onclick="borrar('+c.id+')">Borrar</button>';
+    lista.appendChild(li);
+  });
+}
+form.onsubmit = async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(form).entries());
+  const metodo = data.id ? 'PUT' : 'POST';
+  const url = data.id ? 'clientes/'+data.id : 'clientes';
+  await fetch('http://localhost:3000/' + url, {
+    method: metodo,
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify(data)
+  });
+  form.reset(); cargar();
+};
+function editar(id,nombre,obs){form.id.value=id;form.nombre.value=nombre;form.obs.value=obs;}
+async function borrar(id){
+  if (confirm('¿Borrar cliente?')){
+    await fetch('http://localhost:3000/clientes/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+    cargar();
+  }
+}
+cargar();
+</script>
+</body>
+</html>

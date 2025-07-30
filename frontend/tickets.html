@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Crear Ticket</title>
+</head>
+<body>
+<h2>Crear Ticket</h2>
+
+<form id="ticketForm">
+  <input type="hidden" name="aviso_id">
+  <label>Fecha:</label>
+  <input type="date" name="fecha" required><br>
+
+  <label>Técnico:</label>
+  <select name="tecnico" id="tecnicoSelect" required>
+    <option value="">-- Selecciona un técnico --</option>
+  </select><br>
+
+  <label>Estado:</label>
+  <select name="estado">
+    <option value="Pausado">Pausado</option>
+    <option value="Cerrado">Cerrado</option>
+    <option value="Facturado">Facturado</option>
+  </select><br><br>
+
+  <button type="submit">Guardar Ticket</button>
+</form>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+document.querySelector('input[name=aviso_id]').value = params.get('avisoId');
+
+// Cargar técnicos en el select
+async function cargarTecnicos() {
+  const res = await fetch('http://localhost:3000/usuarios');
+  const usuarios = await res.json();
+  const select = document.getElementById('tecnicoSelect');
+  usuarios
+    .filter(u => u.rol === 'Técnico' || u.rol === 'tecnico')
+    .forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.nombre;
+      opt.text = u.nombre_completo || u.nombre;
+      select.appendChild(opt);
+    });
+}
+cargarTecnicos();
+
+// Guardar ticket
+document.getElementById('ticketForm').onsubmit = async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  await fetch('http://localhost:3000/tickets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  alert('Ticket creado correctamente');
+  window.close();
+};
+</script>
+</body>
+</html>
