@@ -22,6 +22,8 @@ app.use('/avisos', authMiddleware, avisos);
 app.use('/clientes', authMiddleware, clientes);
 app.use('/tickets', authMiddleware, tickets);
 
+// Ruta para comprobar que el servidor está activo
+app.get('/', (req, res) => res.send('Servidor SAT activo'));
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor SAT corriendo en puerto ${PORT}`));
-
