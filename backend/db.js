@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // Asegúrate que esta variable esté en .env
+  connectionString: process.env.DATABASE_URL_EXTERNAL,  // Usamos la variable de entorno externa
   ssl: {
     rejectUnauthorized: false,
   },
