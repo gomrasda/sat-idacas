@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const db = require('./db'); // nuevo db.js con pg
+const db = require('./db');
 
 const SECRET_KEY = 'secreto123';
 
@@ -20,6 +20,11 @@ router.post('/login', async (req, res) => {
     res.json({ token });
   } catch (err) {
     console.error('Error completo en /login:', err);
+    if (err instanceof AggregateError) {
+      for (const individualError of err.errors) {
+        console.error('Suberror:', individualError);
+      }
+    }
     res.status(500).json({ mensaje: 'Error en el servidor', error: err.toString() });
   }
 });
