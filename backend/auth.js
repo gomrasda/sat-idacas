@@ -19,8 +19,8 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ id: user.id, rol: user.rol, nombre: user.nombre }, SECRET_KEY, { expiresIn: '1h' });
     res.json({ token });
   } catch (err) {
-    console.error('Error en /login:', err); // log más detallado
-    res.status(500).json({ mensaje: 'Error en el servidor', error: err.message });
+    console.error('Error completo en /login:', err);
+    res.status(500).json({ mensaje: 'Error en el servidor', error: err.toString() });
   }
 });
 
