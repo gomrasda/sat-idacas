@@ -2,55 +2,63 @@ const express = require('express');
 const db = require('./db');
 const router = express.Router();
 
-// Obtener todos los avisos con cliente, tarea, etc.
-router.get('/', (req, res) => {
-  db.all('SELECT id, cliente, tarea, fecha_programada, tecnico, estado FROM avisos', [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
+// Obtener todos los avisos
+router.get('/', async (req, res) => {
+  try {
+    const result = await db.query('SELECT id, cliente, tarea, fecha_programada, tecnico, estado FROM avisos');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Crear un aviso
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { cliente, tarea, fecha_programada, tecnico, estado } = req.body;
-  db.run(`INSERT INTO avisos (cliente, tarea, fecha_programada, tecnico, estado) VALUES (?, ?, ?, ?, ?)`,
-    [cliente, tarea, fecha_programada, tecnico, estado],
-    function(err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID });
-    }
-  );
+  try {
+    const result = await db.query(
+      'INSERT INTO avisos (cliente, tarea, fecha_programada, tecnico, estado) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+      [cliente, tarea, fecha_programada, tecnico, estado]
+    );
+    res.json({ id: result.rows[0].id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Editar un aviso existente
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const { cliente, tarea, fecha_programada, tecnico, estado } = req.body;
-  db.run(`UPDATE avisos SET cliente=?, tarea=?, fecha_programada=?, tecnico=?, estado=? WHERE id=?`,
-    [cliente, tarea, fecha_programada, tecnico, estado, req.params.id],
-    function(err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: 'Aviso actualizado' });
-    }
-  );
+  try {
+    await db.query(
+      'UPDATE avisos SET cliente=$1, tarea=$2, fecha_programada=$3, tecnico=$4, estado=$5 WHERE id=$6',
+      [cliente, tarea, fecha_programada, tecnico, estado, req.params.id]
+    );
+    res.json({ message: 'Aviso actualizado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Eliminar un aviso
-router.delete('/:id', (req, res) => {
-  db.run('DELETE FROM avisos WHERE id=?', [req.params.id], function(err) {
-    if (err) return res.status(500).json({ error: err.message });
+router.delete('/:id', async (req, res) => {
+  try {
+    await db.query('DELETE FROM avisos WHERE id=$1', [req.params.id]);
     res.json({ message: 'Aviso eliminado' });
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Obtener un aviso por ID
-router.get('/:id', (req, res) => {
-  const id = req.params.id;
-  db.get('SELECT * FROM avisos WHERE id = ?', [id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: 'Aviso no encontrado' });
-    res.json(row);
-  });
+router.get('/:id', async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM avisos WHERE id=$1', [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Aviso no encontrado' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
-
 
 module.exports = router;

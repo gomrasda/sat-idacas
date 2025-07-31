@@ -2,25 +2,26 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const db = require('./db');
+const db = require('./db'); // nuevo db.js con pg
 
 const SECRET_KEY = 'secreto123';
 
-// LOGIN
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { usuario, password } = req.body;
-
-  db.get('SELECT * FROM usuarios WHERE usuario = ?', [usuario], (err, user) => {
-    if (err) return res.status(500).json({ mensaje: 'Error en el servidor' });
-    if (!user) return res.status(401).json({ mensaje: 'Usuario no encontrado' });
-
-    bcrypt.compare(password, user.password, (err, match) => {
-      if (err || !match) return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
-
-      const token = jwt.sign({ id: user.id, rol: user.rol, nombre: user.nombre }, SECRET_KEY, { expiresIn: '1h' });
-      res.json({ token });
-    });
-  });
+  try {
+    const result = await db.query('SELECT * FROM usuarios WHERE usuario = $1', [usuario]);
+    if (result.rows.length === 0) return res.status(401).json({ mensaje: 'Usuario no encontrado' });
+    
+    const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
+    
+    const token = jwt.sign({ id: user.id, rol: user.rol, nombre: user.nombre }, SECRET_KEY, { expiresIn: '1h' });
+    res.json({ token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
 });
 
-module.exports = router; // ✅ IMPORTANTE
+module.exports = router;

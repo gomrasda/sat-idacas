@@ -4,11 +4,13 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 
 // Obtener todos los usuarios
-router.get('/', (req, res) => {
-  db.all('SELECT id, nombre, usuario, email, rol FROM usuarios', [], (err, rows) => {
-    if (err) return res.status(500).json({ mensaje: 'Error al obtener usuarios' });
-    res.json(rows);
-  });
+router.get('/', async (req, res) => {
+  try {
+    const result = await db.query('SELECT id, nombre, usuario, email, rol FROM usuarios');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+  }
 });
 
 // Crear un nuevo usuario
@@ -23,17 +25,13 @@ router.post('/', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const sql = `INSERT INTO usuarios (nombre, usuario, email, password, rol)
-                 VALUES (?, ?, ?, ?, ?)`;
+                 VALUES ($1, $2, $3, $4, $5) RETURNING id`;
 
-    db.run(sql, [nombre, usuario, email, hashedPassword, rol], function(err) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ mensaje: 'Error al crear usuario' });
-      }
-      res.status(201).json({ id: this.lastID, mensaje: 'Usuario creado' });
-    });
+    const result = await db.query(sql, [nombre, usuario, email, hashedPassword, rol]);
+    res.status(201).json({ id: result.rows[0].id, mensaje: 'Usuario creado' });
   } catch (err) {
-    res.status(500).json({ mensaje: 'Error en el servidor' });
+    console.error(err);
+    res.status(500).json({ mensaje: 'Error al crear usuario' });
   }
 });
 
@@ -46,45 +44,37 @@ router.put('/:id', async (req, res) => {
   }
 
   try {
-    let hashedPassword;
+    let hashedPassword = null;
 
     if (password && password.trim() !== '') {
       hashedPassword = await bcrypt.hash(password, 10);
     } else {
-      const row = await new Promise((resolve, reject) => {
-        db.get("SELECT password FROM usuarios WHERE id = ?", [req.params.id], (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      });
-      hashedPassword = row.password;
+      const current = await db.query("SELECT password FROM usuarios WHERE id = $1", [req.params.id]);
+      if (current.rows.length === 0) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+      hashedPassword = current.rows[0].password;
     }
 
     const sql = `
       UPDATE usuarios
-      SET nombre = ?, usuario = ?, email = ?, password = ?, rol = ?
-      WHERE id = ?`;
+      SET nombre = $1, usuario = $2, email = $3, password = $4, rol = $5
+      WHERE id = $6`;
 
-    db.run(sql, [nombre, usuario, email, hashedPassword, rol, req.params.id], function(err) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ mensaje: 'Error al actualizar el usuario' });
-      }
-      res.json({ mensaje: 'Usuario actualizado' });
-    });
+    await db.query(sql, [nombre, usuario, email, hashedPassword, rol, req.params.id]);
+    res.json({ mensaje: 'Usuario actualizado' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ mensaje: 'Error en el servidor' });
+    res.status(500).json({ mensaje: 'Error al actualizar el usuario' });
   }
 });
 
 // Eliminar un usuario
-router.delete('/:id', (req, res) => {
-  db.run('DELETE FROM usuarios WHERE id=?', [req.params.id], function(err) {
-    if (err) return res.status(500).json({ mensaje: 'Error al eliminar usuario' });
+router.delete('/:id', async (req, res) => {
+  try {
+    await db.query('DELETE FROM usuarios WHERE id = $1', [req.params.id]);
     res.json({ mensaje: 'Usuario eliminado' });
-  });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error al eliminar usuario' });
+  }
 });
 
 module.exports = router;
-
