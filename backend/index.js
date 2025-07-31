@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
+require('dotenv').config();
+
+
 const authMiddleware = require('./authMiddleware'); // ✅ Middleware de autenticación
 
 const auth = require('./auth');        // Rutas públicas: login y registro
