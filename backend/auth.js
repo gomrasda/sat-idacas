@@ -1,13 +1,14 @@
-// auth.js
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const db = require('./db'); // ahora apunta correctamente al pool
+const db = require('./db');
 
 const SECRET_KEY = 'secreto123';
 
 router.post('/login', async (req, res) => {
+  console.log("BODY RECIBIDO:", req.body);  // 👈 Verificación clave
+
   const { usuario, password } = req.body;
 
   try {
@@ -31,7 +32,7 @@ router.post('/login', async (req, res) => {
 
     res.json({ token });
   } catch (err) {
-    console.error(err);
+    console.error("ERROR en login:", err);
     res.status(500).json({ mensaje: 'Error en el servidor' });
   }
 });
