@@ -6,7 +6,7 @@ const db = require('./db');
 
 console.log("Conectando a la base de datos:", process.env.DATABASE_URL);
 
-const SECRET_KEY = 'secreto123';
+const SECRET_KEY = process.env.SECRET_KEY || 'secreto123';
 
 router.post('/login', async (req, res) => {
   console.log("BODY RECIBIDO:", req.body);  // 👈 Verificación clave
