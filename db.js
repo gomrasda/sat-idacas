@@ -1,38 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const db = require('./db'); // pg Pool wrapper
+require('dotenv').config();
+const { Pool } = require('pg');
 
-const SECRET_KEY = 'secreto123';
+console.log("Intentando conectar con:", process.env.DATABASE_URL);
 
-router.post('/login', async (req, res) => {
-  const { usuario, password } = req.body;
-
-  try {
-    const result = await db.query('SELECT * FROM usuarios WHERE usuario = $1', [usuario]);
-    const user = result.rows[0];
-
-    if (!user) {
-      return res.status(401).json({ mensaje: 'Usuario no encontrado' });
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, rol: user.rol, nombre: user.nombre },
-      SECRET_KEY,
-      { expiresIn: '1h' }
-    );
-
-    res.json({ token });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ mensaje: 'Error en el servidor' });
-  }
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
-module.exports = router;
+pool.connect()
+  .then(() => console.log("✅ ¡Conexión exitosa a PostgreSQL desde Node!"))
+  .catch(err => console.error("❌ Error conectando a PostgreSQL:", err));
+
+module.exports = pool;

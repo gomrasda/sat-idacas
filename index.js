@@ -4,29 +4,28 @@ const app = express();
 
 require('dotenv').config();
 
+const authMiddleware = require('./authMiddleware');
 
-const authMiddleware = require('./authMiddleware'); // ✅ Middleware de autenticación
-
-const auth = require('./auth');        // Rutas públicas: login y registro
+const auth = require('./auth');
 const usuarios = require('./usuarios');
 const avisos = require('./avisos');
 const clientes = require('./clientes');
 const tickets = require('./tickets');
 
-// 🔧 Middleware global
+// Middleware global
 app.use(cors());
 app.use(express.json());
 
-// 🟢 Rutas públicas
+// Rutas públicas
 app.use('/api/auth', auth);
 
-// 🔒 Rutas protegidas con prefijo /api
+// Rutas protegidas con autenticación
 app.use('/api/usuarios', authMiddleware, usuarios);
 app.use('/api/avisos', authMiddleware, avisos);
 app.use('/api/clientes', authMiddleware, clientes);
 app.use('/api/tickets', authMiddleware, tickets);
 
-// Ruta base para prueba rápida
+// Ruta base de prueba
 app.get('/', (req, res) => res.send('Servidor SAT activo'));
 
 // Iniciar el servidor

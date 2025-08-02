@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = 'secreto123'; // Usa la misma clave que en auth.js
+const SECRET_KEY = process.env.SECRET_KEY;
 
 function auth(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1]; // Formato "Bearer <token>"
+  const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ mensaje: 'Token requerido' });
 
   try {
