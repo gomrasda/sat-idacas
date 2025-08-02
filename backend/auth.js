@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('./db');
 
+console.log("Conectando a la base de datos:", process.env.DATABASE_URL);
+
+
 const SECRET_KEY = 'secreto123';
 
 router.post('/login', async (req, res) => {
