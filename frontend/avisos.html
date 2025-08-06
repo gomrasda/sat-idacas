@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Avisos</title>
+</head>
+<body>
+  <h2>Avisos</h2>
+
+  <form id="avisoForm">
+    <input type="hidden" name="id">
+    <select name="cliente" id="clientes" required></select><br>
+    <input type="text" name="tarea" placeholder="Tarea" required><br>
+    <input type="date" name="fecha_programada" required><br>
+    <select name="tecnico" id="tecnicos" required></select><br>
+    <button type="submit">Guardar</button>
+  </form>
+
+  <ul id="listaAvisos"></ul>
+
+  <script>
+    const api = "https://sat-idacas.onrender.com/api";
+    const token = localStorage.getItem('token');
+    const lista = document.getElementById('listaAvisos');
+    const form = document.getElementById('avisoForm');
+
+    async function cargarClientes() {
+      const res = await fetch(`${api}/clientes`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const clientes = await res.json();
+      const sel = document.getElementById('clientes');
+      sel.innerHTML = '';
+      clientes.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id; // ID numérico
+        opt.text = c.nombre;
+        sel.appendChild(opt);
+      });
+    }
+
+    async function cargarTecnicos() {
+      const res = await fetch(`${api}/usuarios`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const usuarios = await res.json();
+      const select = document.getElementById('tecnicos');
+      select.innerHTML = '';
+      usuarios
+        .filter(u => u.rol === 'tecnico' || u.rol === 'gestor')
+        .forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.nombre_completo || u.nombre;
+          opt.text = u.nombre_completo || u.nombre;
+          select.appendChild(opt);
+        });
+    }
+
+    async function cargarAvisos() {
+      lista.innerHTML = '';
+      const res = await fetch(`${api}/avisos`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const avisos = await res.json();
+      avisos.forEach(a => {
+        const li = document.createElement('li');
+        li.innerHTML = `${a.cliente} - ${a.tarea} - ${a.tecnico} - ${a.fecha_programada} ` +
+          `<button onclick="editar(${a.id}, ${a.cliente_id}, '${a.tarea}', '${a.fecha_programada}', '${a.tecnico}')">Editar</button> ` +
+          `<button onclick="borrar(${a.id})">Borrar</button>`;
+        lista.appendChild(li);
+      });
+    }
+
+    form.onsubmit = async e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      const metodo = data.id ? 'PUT' : 'POST';
+      const url = data.id ? `${api}/avisos/${data.id}` : `${api}/avisos`;
+      data.cliente = parseInt(data.cliente, 10); // aseguramos número
+      await fetch(url, {
+        method: metodo,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(data)
+      });
+      form.reset();
+      cargarAvisos();
+    };
+
+    function editar(id, clienteId, tarea, fecha, tecnico) {
+      form.id.value = id;
+      form.cliente.value = clienteId; // usar ID real
+      form.tarea.value = tarea;
+      form.fecha_programada.value = fecha;
+      form.tecnico.value = tecnico;
+    }
+
+    async function borrar(id) {
+      if (confirm("¿Borrar aviso?")) {
+        await fetch(`${api}/avisos/${id}`, {
+          method: "DELETE",
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        cargarAvisos();
+      }
+    }
+
+    async function init() {
+      await cargarClientes();
+      await cargarTecnicos();
+      await cargarAvisos();
+    }
+    init();
+  </script>
+</body>
+</html>

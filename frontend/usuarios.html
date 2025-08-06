@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Usuarios</title></head>
+<body>
+<h2>Usuarios</h2>
+<form id="usuarioForm">
+  <input type="hidden" name="id">
+  <input type="text" name="nombre_completo" placeholder="Nombre Completo" required><br>
+  <input type="text" name="usuario" placeholder="Usuario" required><br>
+  <input type="email" name="email" placeholder="Email" required><br>
+  <input type="text" name="rol" placeholder="Rol" required><br>
+  <button type="submit">Guardar</button>
+</form>
+<ul id="listaUsuarios"></ul>
+
+<script>
+const api = "https://sat-idacas.onrender.com/api";
+const token = localStorage.getItem('token');
+const lista = document.getElementById('listaUsuarios');
+const form = document.getElementById('usuarioForm');
+
+async function cargar() {
+  lista.innerHTML = '';
+  const res = await fetch(`${api}/usuarios`, {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  const usuarios = await res.json();
+  usuarios.forEach(u => {
+    const li = document.createElement('li');
+    li.innerHTML = u.nombre_completo + ' (' + u.usuario + ') ' +
+      `<button onclick="editar(${u.id}, '${u.nombre_completo}', '${u.usuario}', '${u.email}', '${u.rol}')">Editar</button> ` +
+      `<button onclick="borrar(${u.id})">Borrar</button>`;
+    lista.appendChild(li);
+  });
+}
+
+form.onsubmit = async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(form).entries());
+  const metodo = data.id ? 'PUT' : 'POST';
+  const url = data.id ? `${api}/usuarios/${data.id}` : `${api}/auth/register`;
+  await fetch(url, {
+    method: metodo,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify(data)
+  });
+  form.reset();
+  cargar();
+};
+
+function editar(id, nombre, usuario, email, rol) {
+  form.id.value = id;
+  form.nombre_completo.value = nombre;
+  form.usuario.value = usuario;
+  form.email.value = email;
+  form.rol.value = rol;
+}
+
+async function borrar(id) {
+  if (confirm('¿Borrar usuario?')) {
+    await fetch(`${api}/usuarios/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    cargar();
+  }
+}
+
+cargar();
+</script>
+</body>
+</html>

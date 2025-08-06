@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tickets del Aviso</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
+    .container { max-width: 600px; margin: auto; padding: 16px; }
+    h2 { margin-top: 0; text-align: center; }
+    label, select, input { display: block; width: 100%; margin: 10px 0; }
+    table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    th { background: #e9ecef; }
+    .btn { background: #007bff; color: white; border: none; padding: 10px 16px; margin-top: 10px; cursor: pointer; border-radius: 5px; }
+    .btn:hover { background: #0056b3; }
+    .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px; z-index: 1000; width: 90%; max-width: 400px; }
+    .modal input, .modal select { width: 100%; margin: 8px 0; padding: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <button onclick="window.location.href='index.html#avisos'" class="btn" style="background:#6c757d;">🔙 Volver a Avisos</button>
+  <h2 id="tituloCliente">Tickets del Aviso</h2>
+
+  <label>Filtrar por Estado:</label>
+  <select id="filtroEstado" onchange="cargarTickets()">
+    <option value="Todos">Todos</option>
+    <option value="Pausado">Pausado</option>
+    <option value="Cerrado">Cerrado</option>
+    <option value="Facturado">Facturado</option>
+  </select>
+
+  <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
+
+  <table>
+    <thead>
+      <tr><th>Fecha</th><th>Técnico</th><th>Horas</th><th>Materiales</th><th>Estado</th><th>Acciones</th></tr>
+    </thead>
+    <tbody id="ticketsBody"></tbody>
+  </table>
+</div>
+
+<div id="modal" style="display:none;"></div>
+
+<script>
+const api = "https://sat-idacas.onrender.com/api";
+const token = localStorage.getItem('token');
+if (!token) window.location.href = 'login.html';
+
+const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+
+const params = new URLSearchParams(window.location.search);
+const avisoId = parseInt(params.get('avisoId'), 10);
+
+let tecnicos = [];
+
+async function cargarTecnicos() {
+  const res = await fetch(api + '/usuarios', { headers });
+  const usuarios = await res.json();
+  tecnicos = usuarios.filter(u => u.rol === 'Técnico' || u.rol === 'tecnico');
+}
+
+async function cargarTitulo(){
+  try {
+    const res = await fetch(`${api}/avisos/${avisoId}`, { headers });
+    if (!res.ok) throw new Error(`Error al obtener aviso: ${res.status}`);
+    const aviso = await res.json();
+    if (aviso && aviso.cliente) {
+      document.getElementById('tituloCliente').innerText = "Tickets de " + aviso.cliente;
+    } else {
+      document.getElementById('tituloCliente').innerText = "Tickets del Aviso (ID: " + avisoId + ")";
+    }
+  } catch(e){
+    console.error("Error cargando título:", e);
+    document.getElementById('tituloCliente').innerText = "Tickets del Aviso (ID: "+avisoId+")";
+  }
+}
+
+document.getElementById('btnNuevo').addEventListener('click', async () => {
+  await cargarTecnicos();
+  abrirModal();
+});
+
+async function cargarTickets(){
+  const res = await fetch(`${api}/tickets?aviso_id=${avisoId}`, { headers });
+  const tickets = await res.json();
+  const body = document.getElementById('ticketsBody');
+  const filtro = document.getElementById('filtroEstado').value;
+
+  body.innerHTML = "";
+  tickets.filter(t => filtro === "Todos" || t.estado === filtro).forEach(t => {
+    const disabled = t.estado === "Cerrado" ? "disabled" : "";
+    body.innerHTML += `<tr>
+      <td>${t.fecha}</td>
+      <td>${t.tecnico}</td>
+      <td><input type="number" value="${t.horas_totales || 0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabled}></td>
+      <td><input type="number" value="${t.precio_materiales || 0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabled}></td>
+      <td>
+        <select onchange="cambiarEstadoTicket(${t.id}, this.value)">
+          <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+          <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+          <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+        </select>
+      </td>
+      <td>
+        <button onclick='editarTicket(${JSON.stringify(t)})'>✏️</button>
+        <button onclick="borrarTicket(${t.id})">🗑️</button>
+      </td>
+    </tr>`;
+  });
+}
+
+async function actualizarCampo(id, campo, valor){
+  await fetch(`${api}/tickets/${id}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({ [campo]: parseFloat(valor) })
+  });
+}
+
+function abrirModal(){
+  const modal = document.getElementById("modal");
+  modal.innerHTML = `
+    <div class='modal'>
+      <h3>Nuevo Ticket</h3>
+      <input id='fecha' type='date' required><br>
+      <select id='tecnico'>
+        ${tecnicos.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join("")}
+      </select><br>
+      <input id='horas_totales' type='number' placeholder='Horas Totales' min='0' step='0.1'><br>
+      <input id='precio_materiales' type='number' placeholder='Precio Materiales' min='0' step='0.01'><br>
+      <select id='estado'>
+        <option value="Pausado">Pausado</option>
+        <option value="Cerrado">Cerrado</option>
+        <option value="Facturado">Facturado</option>
+      </select><br><br>
+      <button onclick='guardarTicket()' class="btn">Guardar</button>
+      <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
+    </div>`;
+  modal.style.display = "block";
+}
+
+function cerrarModal(){
+  document.getElementById("modal").style.display = "none";
+}
+
+async function guardarTicket(){
+  const data = {
+    aviso_id: avisoId,
+    fecha: document.getElementById('fecha').value,
+    tecnico: document.getElementById('tecnico').value,
+    horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
+    precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
+    estado: document.getElementById('estado').value
+  };
+  await fetch(`${api}/tickets`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(data)
+  });
+  cerrarModal();
+  cargarTickets();
+}
+
+async function borrarTicket(id){
+  if (confirm("¿Eliminar ticket?")) {
+    await fetch(`${api}/tickets/${id}`, { method: 'DELETE', headers });
+    cargarTickets();
+  }
+}
+
+async function cambiarEstadoTicket(id, nuevoEstado){
+  await fetch(`${api}/tickets/${id}/estado`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({ estado: nuevoEstado })
+  });
+  cargarTickets();
+}
+
+function editarTicket(t){
+  const modal = document.getElementById("modal");
+  modal.innerHTML = `
+    <div class='modal'>
+      <h3>Editar Ticket</h3>
+      <input id='fecha' type='date' value='${t.fecha}'><br>
+      <select id='tecnico'>
+        ${tecnicos.map(te => `<option value="${te.nombre}" ${te.nombre === t.tecnico ? 'selected' : ''}>${te.nombre}</option>`).join("")}
+      </select><br>
+      <input id='horas_totales' type='number' value='${t.horas_totales || 0}' min='0' step='0.1'><br>
+      <input id='precio_materiales' type='number' value='${t.precio_materiales || 0}' min='0' step='0.01'><br>
+      <select id='estado'>
+        <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+        <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+        <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+      </select><br><br>
+      <button onclick='guardarEdicion(${t.id})' class="btn">Guardar</button>
+      <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
+    </div>`;
+  modal.style.display = "block";
+}
+
+async function guardarEdicion(id){
+  const data = {
+    fecha: document.getElementById('fecha').value,
+    tecnico: document.getElementById('tecnico').value,
+    horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
+    precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
+    estado: document.getElementById('estado').value
+  };
+  await fetch(`${api}/tickets/${id}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(data)
+  });
+  cerrarModal();
+  cargarTickets();
+}
+
+cargarTitulo();
+cargarTecnicos().then(cargarTickets);
+</script>
+
+</body>
+</html>

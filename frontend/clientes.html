@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Clientes</title>
+</head>
+<body>
+<h2>Clientes</h2>
+<form id="clienteForm">
+  <input type="hidden" name="id">
+  <input type="text" name="nombre" placeholder="Nombre" required><br>
+  <input type="text" name="obs" placeholder="Observaciones"><br>
+  <button type="submit">Guardar</button>
+</form>
+<ul id="listaClientes"></ul>
+
+<script>
+const api = "https://sat-idacas.onrender.com/api";
+const token = localStorage.getItem('token');
+
+// 🔒 Redirige si no hay token
+if (!token) {
+  alert("Debes iniciar sesión.");
+  location.href = "login.html";
+}
+
+const lista = document.getElementById('listaClientes');
+const form = document.getElementById('clienteForm');
+
+async function cargar() {
+  lista.innerHTML = '';
+  try {
+    const res = await fetch(`${api}/clientes`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const clientes = await res.json();
+    clientes.forEach(c => {
+      const li = document.createElement('li');
+      li.innerHTML = `${c.nombre} - ${c.obs || ''} ` +
+        `<button onclick="editar(${c.id}, '${c.nombre.replace(/'/g, "\\'")}', '${(c.obs || '').replace(/'/g, "\\'")}')">Editar</button> ` +
+        `<button onclick="borrar(${c.id})">Borrar</button>`;
+      lista.appendChild(li);
+    });
+  } catch (err) {
+    console.error("Error al cargar clientes:", err);
+    alert("Error al cargar clientes.");
+  }
+}
+
+form.onsubmit = async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(form).entries());
+  const metodo = data.id ? 'PUT' : 'POST';
+  const url = data.id ? `${api}/clientes/${data.id}` : `${api}/clientes`;
+
+  try {
+    const res = await fetch(url, {
+      method: metodo,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      console.error("Error al guardar cliente:", result);
+      alert(result.error || result.mensaje || "Error desconocido al guardar.");
+      return;

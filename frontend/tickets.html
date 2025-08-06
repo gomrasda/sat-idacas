@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Crear Ticket</title>
+</head>
+<body>
+<h2>Crear Ticket</h2>
+
+<form id="ticketForm">
+  <input type="hidden" name="aviso_id">
+  <label>Fecha:</label>
+  <input type="date" name="fecha" required><br>
+
+  <label>Técnico:</label>
+  <select name="tecnico" id="tecnicoSelect" required>
+    <option value="">-- Selecciona un técnico --</option>
+  </select><br>
+
+  <label>Horas Totales:</label>
+  <input type="number" name="horas_totales" step="0.1" min="0"><br>
+
+  <label>Precio Materiales:</label>
+  <input type="number" name="precio_materiales" step="0.01" min="0"><br>
+
+  <label>Estado:</label>
+  <select name="estado">
+    <option value="Pausado">Pausado</option>
+    <option value="Cerrado">Cerrado</option>
+    <option value="Facturado">Facturado</option>
+  </select><br><br>
+
+  <button type="submit">Guardar Ticket</button>
+</form>
+
+<script>
+const api = "https://sat-idacas.onrender.com/api";
+const params = new URLSearchParams(window.location.search);
+const avisoId = parseInt(params.get('avisoId') || params.get('aviso_id'), 10);
+
+if (!avisoId) {
+  alert("Error: No se recibió un aviso válido.");
+  throw new Error("Falta aviso_id en la URL");
+}
+
+document.querySelector('input[name=aviso_id]').value = avisoId;
+
+async function cargarTecnicos() {
+  const res = await fetch(`${api}/usuarios`);
+  const usuarios = await res.json();
+  const select = document.getElementById('tecnicoSelect');
+  usuarios
+    .filter(u => u.rol?.toLowerCase() === 'técnico' || u.rol?.toLowerCase() === 'tecnico')
+    .forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.nombre;
+      opt.text = u.nombre_completo || u.nombre;
+      select.appendChild(opt);
+    });
+}
+cargarTecnicos();
+
+document.getElementById('ticketForm').onsubmit = async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  data.aviso_id = avisoId;
+  data.horas_totales = parseFloat(data.horas_totales) || 0;
+  data.precio_materiales = parseFloat(data.precio_materiales) || 0;
+
+  const res = await fetch(`${api}/tickets`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    alert(`Error al crear ticket: ${res.status} - ${err}`);
+    return;
+  }
+
+  alert('Ticket creado correctamente');
+  window.close();
+};
+</script>
+
+</body>
+</html>
