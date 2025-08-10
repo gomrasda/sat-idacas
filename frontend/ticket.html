@@ -88,7 +88,7 @@ async function actualizarCampo(id, campo, valor){
   if (['horas_totales','precio_materiales'].includes(campo)) {
     body[campo] = parseFloat(valor) || 0;
   } else {
-    body[campo] = valor;
+    body[campo] = valor; // descripción u otros campos de texto
   }
   await fetch(`${api}/tickets/${id}`, {
     method: 'PUT',
@@ -107,15 +107,13 @@ async function cargarTickets() {
   body.innerHTML = "";
 
   // Ordenar por fecha (descendente: más nuevos arriba)
-  const sorted = tickets
-    .slice()
-    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  const sorted = tickets.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   sorted
     .filter(t => filtro === "Todos" || t.estado === filtro)
     .forEach(t => {
       const disabledCampos = t.estado === "Cerrado" ? "disabled" : "";
-      const disabledEstado = "";
+      const disabledEstado = ""; // estado siempre editable
 
       // Formato DD/MM/AAAA (locale es-ES)
       const fechaFormateada = t.fecha
@@ -125,17 +123,17 @@ async function cargarTickets() {
       body.innerHTML += `<tr>
         <td>${fechaFormateada}</td>
         <td>${t.tecnico}</td>
-        <td><input type="number" value="${t.horas_totales || 0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}></td>
-        <td><input type="number" value="${t.precio_materiales || 0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}></td>
+        <td><input data-field="horas_totales" type="number" value="${t.horas_totales || 0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}></td>
+        <td><input data-field="precio_materiales" type="number" value="${t.precio_materiales || 0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}></td>
         <td>
-          <select onchange="cambiarEstadoTicket(${t.id}, this.value)" ${disabledEstado}>
+          <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
             <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
             <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
             <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
           </select>
         </td>
         <td>
-          <textarea onchange="actualizarCampo(${t.id},'descripcion',this.value)" ${disabledCampos}>${t.descripcion || ""}</textarea>
+          <textarea data-field="descripcion" onchange="actualizarCampo(${t.id},'descripcion',this.value)" ${disabledCampos}>${t.descripcion || ""}</textarea>
         </td>
         <td>
           <button onclick='editarTicket(${t.id})'>✏️</button>
@@ -144,8 +142,6 @@ async function cargarTickets() {
       </tr>`;
     });
 }
-
-
 
 function abrirModal(){
   const modal = document.getElementById("modal");
@@ -175,15 +171,15 @@ function cerrarModal(){
 }
 
 async function guardarTicket(){
- const data = {
-  aviso_id: avisoId,
-  fecha: document.getElementById('fecha').value,
-  tecnico: document.getElementById('tecnico').value,
-  horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
-  precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
-  estado: document.getElementById('estado').value,
-  descripcion: document.getElementById('descripcion').value
-};
+  const data = {
+    aviso_id: avisoId,
+    fecha: document.getElementById('fecha').value,
+    tecnico: document.getElementById('tecnico').value,
+    horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
+    precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
+    estado: document.getElementById('estado').value,
+    descripcion: document.getElementById('descripcion').value
+  };
 
   await fetch(`${api}/tickets`, {
     method: 'POST',
@@ -201,13 +197,31 @@ async function borrarTicket(id){
   }
 }
 
-async function cambiarEstadoTicket(id, nuevoEstado){
-  await fetch(`${api}/tickets/${id}/estado`, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify({ estado: nuevoEstado })
-  });
-  cargarTickets();
+// ⬇️ Guarda descripción/horas/materiales antes de cambiar a "Cerrado"
+async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
+  try {
+    if (selectEl) {
+      const tr = selectEl.closest('tr');
+      const descEl  = tr.querySelector('[data-field="descripcion"]');
+      const horasEl = tr.querySelector('[data-field="horas_totales"]');
+      const matEl   = tr.querySelector('[data-field="precio_materiales"]');
+
+      if (descEl)  await actualizarCampo(id, 'descripcion', descEl.value);
+      if (horasEl) await actualizarCampo(id, 'horas_totales', horasEl.value);
+      if (matEl)   await actualizarCampo(id, 'precio_materiales', matEl.value);
+    }
+
+    await fetch(`${api}/tickets/${id}/estado`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+  } catch (e) {
+    console.error('Error cambiando estado:', e);
+    alert('No se pudo cambiar el estado. Intenta de nuevo.');
+  } finally {
+    cargarTickets();
+  }
 }
 
 async function editarTicket(id) {
@@ -258,6 +272,7 @@ async function guardarEdicion(id){
 cargarTitulo();
 cargarTecnicos().then(cargarTickets);
 </script>
+
 
 </body>
 </html>
