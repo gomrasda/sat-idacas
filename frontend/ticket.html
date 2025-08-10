@@ -81,18 +81,43 @@ document.getElementById('btnNuevo').addEventListener('click', async () => {
 });
 
 async function actualizarCampo(id, campo, valor){
-  const body = {};
+  // Buscar el ticket actual en memoria
+  const t = ticketsLista.find(x => x.id === id);
+  if (!t) return;
+
+  // Construir payload completo y pisar solo el campo cambiado
+  const payload = {
+    fecha: t.fecha || null,
+    tecnico: t.tecnico || "",
+    horas_totales: Number(t.horas_totales) || 0,
+    precio_materiales: Number(t.precio_materiales) || 0,
+    estado: t.estado || "Pausado",
+    descripcion: t.descripcion || ""
+  };
+
+  // Asignar el nuevo valor con el tipo correcto
   if (['horas_totales','precio_materiales'].includes(campo)) {
-    body[campo] = parseFloat(valor) || 0;
+    payload[campo] = parseFloat(valor) || 0;
   } else {
-    body[campo] = valor; // descripción u otros campos de texto
+    payload[campo] = valor;
   }
-  await fetch(`${api}/tickets/${id}`, {
+
+  // Guardar en servidor
+  const res = await fetch(`${api}/tickets/${id}`, {
     method: 'PUT',
     headers,
-    body: JSON.stringify(body)
+    body: JSON.stringify(payload)
   });
+
+  // Si fue bien, actualizar también la copia local para no perder sincronía
+  if (res.ok) {
+    Object.assign(t, payload);
+  } else {
+    console.error('Error actualizando campo', campo, await res.text());
+    alert('No se pudo guardar el cambio.');
+  }
 }
+
 
 async function cargarTickets() {
   const res = await fetch(`${api}/tickets?aviso_id=${avisoId}`, { headers });
@@ -195,39 +220,79 @@ async function borrarTicket(id){
 }
 
 // ✅ Valida horas>0 antes de poner Cerrado/Facturado y guarda la fila antes de cambiar
+// Guarda descripción/horas/materiales de la fila y luego cambia estado.
+// Además, solo permite Cerrar/Facturar si horas > 0.
+
 async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
   try {
+    const t = ticketsLista.find(x => x.id === id);
+    if (!t) return;
+
+    // Tomar valores visibles en la fila (si existe selectEl)
+    let desc = t.descripcion, horas = t.horas_totales, mats = t.precio_materiales;
     if (selectEl) {
-      const tr = selectEl.closest('tr');
-      const descEl  = tr.querySelector('[data-field="descripcion"]');
-      const horasEl = tr.querySelector('[data-field="horas_totales"]');
-      const matEl   = tr.querySelector('[data-field="precio_materiales"]');
+      const tr     = selectEl.closest('tr');
+      const descEl = tr.querySelector('[data-field="descripcion"]');
+      const hrsEl  = tr.querySelector('[data-field="horas_totales"]');
+      const matEl  = tr.querySelector('[data-field="precio_materiales"]');
 
-      if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') &&
-          (!horasEl || parseFloat(horasEl.value) <= 0)) {
-        alert('No puedes cerrar o facturar un ticket sin horas.');
-        const ticket = ticketsLista.find(t => t.id === id);
-        if (ticket) selectEl.value = ticket.estado; // volver al estado anterior
-        return;
-      }
-
-      if (descEl)  await actualizarCampo(id, 'descripcion', descEl.value);
-      if (horasEl) await actualizarCampo(id, 'horas_totales', horasEl.value);
-      if (matEl)   await actualizarCampo(id, 'precio_materiales', matEl.value);
+      if (descEl) desc  = descEl.value;
+      if (hrsEl)  horas = parseFloat(hrsEl.value) || 0;
+      if (matEl)  mats  = parseFloat(matEl.value) || 0;
     }
 
-    await fetch(`${api}/tickets/${id}/estado`, {
+    // Validación de horas
+    if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') && (!horas || horas <= 0)) {
+      alert('No puedes cerrar o facturar un ticket sin horas.');
+      if (selectEl) selectEl.value = t.estado; // volver al estado anterior visualmente
+      return;
+    }
+
+    // 1) Guardar TODO el ticket (merge completo) para no perder descripción
+    const payload = {
+      fecha: t.fecha || null,
+      tecnico: t.tecnico || "",
+      horas_totales: horas,
+      precio_materiales: mats,
+      estado: t.estado,          // aún el estado anterior
+      descripcion: desc || ""
+    };
+
+    const resSave = await fetch(`${api}/tickets/${id}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(payload)
+    });
+    if (!resSave.ok) {
+      console.error('Error guardando antes de cambiar estado', await resSave.text());
+      alert('No se pudieron guardar los cambios previos.');
+      if (selectEl) selectEl.value = t.estado;
+      return;
+    }
+    // actualizar copia local
+    Object.assign(t, payload);
+
+    // 2) Cambiar el estado en el endpoint específico
+    const resEstado = await fetch(`${api}/tickets/${id}/estado`, {
       method: 'PUT',
       headers,
       body: JSON.stringify({ estado: nuevoEstado })
     });
+    if (!resEstado.ok) {
+      console.error('Error cambiando estado', await resEstado.text());
+      alert('No se pudo cambiar el estado.');
+      if (selectEl) selectEl.value = t.estado;
+      return;
+    }
   } catch (e) {
     console.error('Error cambiando estado:', e);
     alert('No se pudo cambiar el estado. Intenta de nuevo.');
   } finally {
+    // Recargar para aplicar bloqueos visuales y ver la descripción guardada
     cargarTickets();
   }
 }
+
 
 async function editarTicket(id) {
   await cargarTecnicos();
