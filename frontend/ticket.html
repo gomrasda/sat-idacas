@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tickets del Aviso</title>
   <style>
-    :root{ --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7; }
+    :root{
+      --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7;
+      --card-b:#cfd8e6;      /* borde tarjeta */
+      --alt-bg:#f6f8fb;      /* fondo alterno */
+    }
     body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
     .container { max-width: 980px; margin: auto; padding: 16px; }
     h2 { margin-top: 0; text-align: center; }
@@ -23,30 +27,42 @@
     td input, td select, td textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--b);border-radius:8px;background:#fff}
     td textarea{resize:vertical;min-height:56px}
 
-    /* ====== MÓVIL / TABLET: 2 filas por ticket ====== */
+    /* ====== MÓVIL / TABLET: 2 filas por ticket + tarjeta unificada ====== */
     @media (max-width: 1024px){
       .container { max-width: 100%; padding: 12px; }
       thead { display: none; }
 
-      /* cada fila real de la tabla pasa a ser un grid de dos tipos (r1 y r2) */
       #ticketsBody tr { border:0; }
+
+      /* base visual de las filas de la tarjeta */
       #ticketsBody tr.r1,
       #ticketsBody tr.r2{
         display:grid;
         gap:10px;
         padding:12px;
-        margin:8px 0 0 0;
         background:#fff;
-        border:1px solid var(--b);
-        border-radius:12px;
+        border:2px solid var(--card-b);
         box-shadow:0 2px 8px rgba(0,0,0,.06);
       }
 
-      /* Fila 1: Fecha · Técnico · Horas · Materiales */
-      #ticketsBody tr.r1{ grid-template-columns: 1fr 1fr 1fr 1fr; align-items:center; }
+      /* Unimos r1+r2 en una sola tarjeta con bordes */
+      #ticketsBody tr.r1{
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        align-items:center;
+        border-bottom:0;                 /* sin borde abajo para unir */
+        border-radius:12px 12px 0 0;     /* esquinas superiores redondeadas */
+        margin:14px 0 0 0;               /* separación superior entre tarjetas */
+      }
+      #ticketsBody tr.r2{
+        grid-template-columns: 2fr 1fr auto;
+        align-items:start;
+        border-top:0;                    /* sin borde arriba para unir */
+        border-radius:0 0 12px 12px;     /* esquinas inferiores redondeadas */
+        margin:0 0 14px 0;               /* separación inferior entre tarjetas */
+      }
 
-      /* Fila 2: Descripción (2fr) · Estado (1fr) · Acciones (auto) */
-      #ticketsBody tr.r2{ grid-template-columns: 2fr 1fr auto; align-items:start; }
+      /* fondo alterno por tarjeta (aplicar a r1 y r2 del mismo ticket) */
+      #ticketsBody tr.alt { background: var(--alt-bg); }
 
       #ticketsBody td{ display:flex; align-items:center; gap:10px; padding:0; border:0; }
       #ticketsBody td::before{
@@ -55,14 +71,12 @@
         flex:0 0 42%; max-width:42%;
         white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
       }
-      /* chips visuales para valores cortos */
+
       .chip{display:inline-block;background:var(--chip);border:1px solid var(--b);
             padding:6px 10px;border-radius:999px;font-size:13px;color:#374151}
 
-      /* Descripción grande en móvil */
       td.desc textarea{min-height:110px}
 
-      /* Acciones a la derecha */
       td.acciones{justify-content:flex-end; gap:8px}
       td.acciones button{width:38px;height:38px;border:1px solid var(--b);background:#fff;border-radius:10px;cursor:pointer}
     }
@@ -100,8 +114,6 @@
 const api = "https://sat-idacas.onrender.com/api";
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'login.html';
-
-const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 
 const urlParams = new URLSearchParams(window.location.search);
 const avisoId = parseInt(urlParams.get('avisoId'), 10);
@@ -180,7 +192,7 @@ async function cargarTickets() {
   const filtro = document.getElementById('filtroEstado').value;
   body.innerHTML = "";
 
-  // ¿Móvil? (permite forzar con ?mobile=1)
+  // Permite forzar móvil con ?mobile=1
   const forceMobile = new URLSearchParams(location.search).get('mobile') === '1';
   const isMobile = forceMobile || window.matchMedia('(max-width: 1024px)').matches;
 
@@ -189,14 +201,15 @@ async function cargarTickets() {
 
   sorted
     .filter(t => filtro === "Todos" || t.estado === filtro)
-    .forEach(t => {
+    .forEach((t, idx) => {
       const editable = t.estado === "Pausado";
       const disabledCampos = editable ? "" : "disabled";
-      const disabledEstado = ""; // el estado siempre editable
+      const disabledEstado = "";
       const fechaFormateada = t.fecha
         ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
         : "";
       const desc = (t.description ?? t.descripcion ?? "");
+      const alt = (idx % 2 ? ' alt' : '');   // <- fondo alterno
 
       if (!isMobile) {
         // ===== ESCRITORIO: UNA FILA POR TICKET =====
@@ -231,10 +244,10 @@ async function cargarTickets() {
             </td>
           </tr>`;
       } else {
-        // ===== MÓVIL / TABLET: DOS FILAS (r1 y r2) =====
+        // ===== MÓVIL/TABLET: DOS FILAS UNIDAS COMO TARJETA =====
         body.innerHTML += `
-          <!-- Fila 1: Fecha, Técnico, Horas, Materiales -->
-          <tr class="r1">
+          <!-- Fila 1 -->
+          <tr class="r1${alt}">
             <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
             <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
             <td data-label="Horas">
@@ -249,8 +262,8 @@ async function cargarTickets() {
             </td>
           </tr>
 
-          <!-- Fila 2: Descripción (ancha), Estado, Acciones -->
-          <tr class="r2">
+          <!-- Fila 2 -->
+          <tr class="r2${alt}">
             <td class="desc" data-label="Descripción">
               <textarea data-field="description"
                         onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
