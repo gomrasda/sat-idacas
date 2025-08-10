@@ -5,7 +5,15 @@ const router = express.Router();
 // Crear ticket
 router.post('/', async (req, res) => {
   const avisoId = parseInt(req.body.aviso_id, 10);
-  const { fecha, tecnico, estado, horas_totales = 0, precio_materiales = 0 } = req.body;
+  const {
+    fecha,
+    tecnico,
+    estado,
+    horas_totales = 0,
+    precio_materiales = 0,
+    // acepta ambos nombres por compatibilidad
+    description = req.body.descripcion ?? ''
+  } = req.body;
 
   if (isNaN(avisoId)) {
     return res.status(400).json({ error: 'aviso_id inválido' });
@@ -13,9 +21,11 @@ router.post('/', async (req, res) => {
 
   try {
     const result = await db.query(
-      `INSERT INTO tickets (aviso_id, fecha, tecnico, estado, horas_totales, precio_materiales)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-      [avisoId, fecha, tecnico, estado, horas_totales, precio_materiales]
+      `INSERT INTO tickets
+         (aviso_id, fecha, tecnico, estado, horas_totales, precio_materiales, description)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id`,
+      [avisoId, fecha, tecnico, estado, horas_totales, precio_materiales, description]
     );
     res.json({ id: result.rows[0].id });
   } catch (err) {
@@ -23,7 +33,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Obtener tickets por aviso_id (fecha formateada)
+// Obtener tickets por aviso_id (ordenados y con fecha YYYY-MM-DD)
 router.get('/', async (req, res) => {
   const avisoId = parseInt(req.query.aviso_id, 10);
 
@@ -32,7 +42,14 @@ router.get('/', async (req, res) => {
   }
 
   try {
-    const result = await db.query('SELECT * FROM tickets WHERE aviso_id = $1', [avisoId]);
+    const result = await db.query(
+      `SELECT id, aviso_id, fecha, tecnico,
+              horas_totales, precio_materiales, estado, description
+         FROM tickets
+        WHERE aviso_id = $1
+        ORDER BY fecha DESC, id DESC`,
+      [avisoId]
+    );
 
     const formattedRows = result.rows.map(ticket => ({
       ...ticket,
@@ -81,22 +98,32 @@ router.put('/:id/estado', async (req, res) => {
   }
 });
 
-// Modificar ticket parcialmente
+// Modificar ticket parcialmente (incluye description)
 router.put('/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
     return res.status(400).json({ error: 'ID inválido' });
   }
 
-  const { fecha, tecnico, estado, horas_totales, precio_materiales } = req.body;
+  const {
+    fecha,
+    tecnico,
+    estado,
+    horas_totales,
+    precio_materiales,
+    // acepta ambos nombres por compatibilidad
+    description = req.body.descripcion
+  } = req.body;
+
   const campos = [];
   const valores = [];
 
-  if (fecha !== undefined) { campos.push(`fecha = $${valores.length+1}`); valores.push(fecha); }
-  if (tecnico !== undefined) { campos.push(`tecnico = $${valores.length+1}`); valores.push(tecnico); }
-  if (estado !== undefined) { campos.push(`estado = $${valores.length+1}`); valores.push(estado); }
-  if (horas_totales !== undefined) { campos.push(`horas_totales = $${valores.length+1}`); valores.push(horas_totales); }
-  if (precio_materiales !== undefined) { campos.push(`precio_materiales = $${valores.length+1}`); valores.push(precio_materiales); }
+  if (fecha !== undefined)            { campos.push(`fecha = $${valores.length+1}`);            valores.push(fecha); }
+  if (tecnico !== undefined)          { campos.push(`tecnico = $${valores.length+1}`);          valores.push(tecnico); }
+  if (estado !== undefined)           { campos.push(`estado = $${valores.length+1}`);           valores.push(estado); }
+  if (horas_totales !== undefined)    { campos.push(`horas_totales = $${valores.length+1}`);    valores.push(horas_totales); }
+  if (precio_materiales !== undefined){ campos.push(`precio_materiales = $${valores.length+1}`);valores.push(precio_materiales); }
+  if (description !== undefined)      { campos.push(`description = $${valores.length+1}`);      valores.push(description ?? ''); }
 
   if (campos.length === 0) {
     return res.status(400).json({ error: "No se enviaron campos para actualizar" });
@@ -113,7 +140,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Obtener cliente del aviso
+// (Opcional) Obtener cliente del aviso desde aquí
 router.get('/aviso/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) {
