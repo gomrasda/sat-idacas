@@ -14,7 +14,7 @@
     .btn { background: #007bff; color: white; border: none; padding: 10px 16px; margin-top: 10px; cursor: pointer; border-radius: 5px; }
     .btn:hover { background: #0056b3; }
     .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px; z-index: 1000; width: 90%; max-width: 400px; }
-    .modal input, .modal select { width: 100%; margin: 8px 0; padding: 8px; }
+    .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
   </style>
 </head>
 <body>
@@ -56,17 +56,25 @@ const avisoId = parseInt(params.get('avisoId'), 10);
 let tecnicos = [];
 let ticketsLista = [];
 
+// Helper opcional para ver errores de API
+async function apiFetch(url, options){
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    const txt = await res.text().catch(()=> '');
+    console.error('API error', res.status, url, txt);
+    throw new Error(`API ${res.status}: ${url} -> ${txt}`);
+  }
+  try { return await res.json(); } catch { return null; }
+}
+
 async function cargarTecnicos() {
-  const res = await fetch(api + '/usuarios', { headers });
-  const usuarios = await res.json();
-  tecnicos = usuarios.filter(u => u.rol === 'Técnico' || u.rol === 'tecnico');
+  const usuarios = await apiFetch(api + '/usuarios', { headers });
+  tecnicos = (usuarios || []).filter(u => u.rol === 'Técnico' || u.rol === 'tecnico');
 }
 
 async function cargarTitulo(){
   try {
-    const res = await fetch(`${api}/avisos/${avisoId}`, { headers });
-    if (!res.ok) throw new Error(`Error al obtener aviso: ${res.status}`);
-    const aviso = await res.json();
+    const aviso = await apiFetch(`${api}/avisos/${avisoId}`, { headers });
     document.getElementById('tituloCliente').innerText =
       aviso && aviso.cliente ? ("Tickets de " + aviso.cliente) : ("Tickets del Aviso (ID: " + avisoId + ")");
   } catch(e){
@@ -80,63 +88,54 @@ document.getElementById('btnNuevo').addEventListener('click', async () => {
   abrirModal();
 });
 
+// Guarda un campo: siempre envía el payload completo y sincroniza memoria
 async function actualizarCampo(id, campo, valor){
-  // Buscar el ticket actual en memoria
   const t = ticketsLista.find(x => x.id === id);
   if (!t) return;
 
-  // Construir payload completo y pisar solo el campo cambiado
   const payload = {
     fecha: t.fecha || null,
     tecnico: t.tecnico || "",
     horas_totales: Number(t.horas_totales) || 0,
     precio_materiales: Number(t.precio_materiales) || 0,
     estado: t.estado || "Pausado",
-    descripcion: t.descripcion || ""
+    description: t.description ?? t.descripcion ?? ""
   };
 
-  // Asignar el nuevo valor con el tipo correcto
   if (['horas_totales','precio_materiales'].includes(campo)) {
     payload[campo] = parseFloat(valor) || 0;
+  } else if (campo === 'description') {
+    payload.description = (valor ?? "") + "";
   } else {
     payload[campo] = valor;
   }
 
-  // Guardar en servidor
-  const res = await fetch(`${api}/tickets/${id}`, {
+  await apiFetch(`${api}/tickets/${id}`, {
     method: 'PUT',
     headers,
     body: JSON.stringify(payload)
   });
 
-  // Si fue bien, actualizar también la copia local para no perder sincronía
-  if (res.ok) {
-    Object.assign(t, payload);
-  } else {
-    console.error('Error actualizando campo', campo, await res.text());
-    alert('No se pudo guardar el cambio.');
-  }
+  Object.assign(t, payload);
 }
 
-
 async function cargarTickets() {
-  const res = await fetch(`${api}/tickets?aviso_id=${avisoId}`, { headers });
-  const tickets = await res.json();
-  ticketsLista = tickets;
+  const tickets = await apiFetch(`${api}/tickets?aviso_id=${avisoId}`, { headers });
+  ticketsLista = tickets || [];
 
   const body = document.getElementById('ticketsBody');
   const filtro = document.getElementById('filtroEstado').value;
   body.innerHTML = "";
 
   // Ordenar por fecha (descendente)
-  const sorted = tickets.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  const sorted = ticketsLista.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   sorted
     .filter(t => filtro === "Todos" || t.estado === filtro)
     .forEach(t => {
-      // 👇 Solo editable en PAUSADO
+      // Solo editable en PAUSADO
       const disabledCampos = t.estado === "Pausado" ? "" : "disabled";
-      const disabledEstado = ""; // el estado siempre editable
+      const disabledEstado = ""; // estado siempre editable
 
       const fechaFormateada = t.fecha
         ? new Date(t.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -155,7 +154,11 @@ async function cargarTickets() {
           </select>
         </td>
         <td>
-          <textarea data-field="descripcion" onchange="actualizarCampo(${t.id},'descripcion',this.value)" ${disabledCampos}>${t.descripcion || ""}</textarea>
+          <textarea
+            data-field="description"
+            onchange="actualizarCampo(${t.id},'description',this.value)"
+            ${disabledCampos}
+          >${t.description ?? t.descripcion ?? ""}</textarea>
         </td>
         <td>
           <button onclick='editarTicket(${t.id})'>✏️</button>
@@ -200,10 +203,10 @@ async function guardarTicket(){
     horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
     precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
     estado: document.getElementById('estado').value,
-    descripcion: document.getElementById('descripcion').value
+    description: document.getElementById('descripcion').value  // 👈 clave correcta para backend
   };
 
-  await fetch(`${api}/tickets`, {
+  await apiFetch(`${api}/tickets`, {
     method: 'POST',
     headers,
     body: JSON.stringify(data)
@@ -214,85 +217,71 @@ async function guardarTicket(){
 
 async function borrarTicket(id){
   if (confirm("¿Eliminar ticket?")) {
-    await fetch(`${api}/tickets/${id}`, { method: 'DELETE', headers });
+    await apiFetch(`${api}/tickets/${id}`, { method: 'DELETE', headers });
     cargarTickets();
   }
 }
 
-// ✅ Valida horas>0 antes de poner Cerrado/Facturado y guarda la fila antes de cambiar
-// Guarda descripción/horas/materiales de la fila y luego cambia estado.
-// Además, solo permite Cerrar/Facturar si horas > 0.
-
+// Guarda todo antes de cambiar estado y valida horas>0 para Cerrar/Facturar
 async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
   try {
     const t = ticketsLista.find(x => x.id === id);
     if (!t) return;
 
-    // Tomar valores visibles en la fila (si existe selectEl)
-    let desc = t.descripcion, horas = t.horas_totales, mats = t.precio_materiales;
-    if (selectEl) {
-      const tr     = selectEl.closest('tr');
-      const descEl = tr.querySelector('[data-field="descripcion"]');
-      const hrsEl  = tr.querySelector('[data-field="horas_totales"]');
-      const matEl  = tr.querySelector('[data-field="precio_materiales"]');
+    // leer valores visibles en la fila (si están)
+    let desc = t.description ?? t.descripcion ?? "";
+    let horas = t.horas_totales ?? 0;
+    let mats  = t.precio_materiales ?? 0;
 
-      if (descEl) desc  = descEl.value;
-      if (hrsEl)  horas = parseFloat(hrsEl.value) || 0;
-      if (matEl)  mats  = parseFloat(matEl.value) || 0;
+    if (selectEl) {
+      const tr    = selectEl.closest('tr');
+      const dEl   = tr.querySelector('[data-field="description"]');
+      const hEl   = tr.querySelector('[data-field="horas_totales"]');
+      const mEl   = tr.querySelector('[data-field="precio_materiales"]');
+      if (dEl) desc  = dEl.value ?? "";
+      if (hEl) horas = parseFloat(hEl.value) || 0;
+      if (mEl) mats  = parseFloat(mEl.value) || 0;
     }
 
-    // Validación de horas
     if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') && (!horas || horas <= 0)) {
       alert('No puedes cerrar o facturar un ticket sin horas.');
-      if (selectEl) selectEl.value = t.estado; // volver al estado anterior visualmente
+      if (selectEl) selectEl.value = t.estado;
       return;
     }
 
-    // 1) Guardar TODO el ticket (merge completo) para no perder descripción
+    // 1) Guardar TODO antes de cambiar estado (incluida description)
     const payload = {
       fecha: t.fecha || null,
       tecnico: t.tecnico || "",
       horas_totales: horas,
       precio_materiales: mats,
-      estado: t.estado,          // aún el estado anterior
-      descripcion: desc || ""
+      estado: t.estado,       // aún el anterior
+      description: (desc ?? "") + ""
     };
-
-    const resSave = await fetch(`${api}/tickets/${id}`, {
+    await apiFetch(`${api}/tickets/${id}`, {
       method: 'PUT',
       headers,
       body: JSON.stringify(payload)
     });
-    if (!resSave.ok) {
-      console.error('Error guardando antes de cambiar estado', await resSave.text());
-      alert('No se pudieron guardar los cambios previos.');
-      if (selectEl) selectEl.value = t.estado;
-      return;
-    }
-    // actualizar copia local
     Object.assign(t, payload);
 
-    // 2) Cambiar el estado en el endpoint específico
-    const resEstado = await fetch(`${api}/tickets/${id}/estado`, {
+    // 2) Cambiar estado
+    await apiFetch(`${api}/tickets/${id}/estado`, {
       method: 'PUT',
       headers,
       body: JSON.stringify({ estado: nuevoEstado })
     });
-    if (!resEstado.ok) {
-      console.error('Error cambiando estado', await resEstado.text());
-      alert('No se pudo cambiar el estado.');
-      if (selectEl) selectEl.value = t.estado;
-      return;
-    }
+
   } catch (e) {
-    console.error('Error cambiando estado:', e);
-    alert('No se pudo cambiar el estado. Intenta de nuevo.');
+    alert('No se pudo cambiar el estado. Revisa la consola.');
+    if (selectEl) {
+      const t = ticketsLista.find(x => x.id === id);
+      if (t) selectEl.value = t.estado;
+    }
   } finally {
-    // Recargar para aplicar bloqueos visuales y ver la descripción guardada
     cargarTickets();
   }
 }
-
 
 async function editarTicket(id) {
   await cargarTecnicos();
@@ -317,7 +306,7 @@ async function editarTicket(id) {
         <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
         <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
       </select><br><br>
-      <textarea id='descripcion' placeholder='Descripción' rows="3" ${disabledCampos}>${t.descripcion || ""}</textarea><br><br>
+      <textarea id='descripcion' placeholder='Descripción' rows="3" ${disabledCampos}>${t.description ?? t.descripcion ?? ""}</textarea><br><br>
       <button onclick='guardarEdicion(${t.id})' class="btn">Guardar</button>
       <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
     </div>`;
@@ -331,9 +320,9 @@ async function guardarEdicion(id){
     horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
     precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
     estado: document.getElementById('estado').value,
-    descripcion: document.getElementById('descripcion').value
+    description: document.getElementById('descripcion').value
   };
-  await fetch(`${api}/tickets/${id}`, {
+  await apiFetch(`${api}/tickets/${id}`, {
     method: 'PUT',
     headers,
     body: JSON.stringify(data)
@@ -345,8 +334,6 @@ async function guardarEdicion(id){
 cargarTitulo();
 cargarTecnicos().then(cargarTickets);
 </script>
-
-
 
 </body>
 </html>
