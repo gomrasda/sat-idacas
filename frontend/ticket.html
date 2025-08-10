@@ -67,11 +67,8 @@ async function cargarTitulo(){
     const res = await fetch(`${api}/avisos/${avisoId}`, { headers });
     if (!res.ok) throw new Error(`Error al obtener aviso: ${res.status}`);
     const aviso = await res.json();
-    if (aviso && aviso.cliente) {
-      document.getElementById('tituloCliente').innerText = "Tickets de " + aviso.cliente;
-    } else {
-      document.getElementById('tituloCliente').innerText = "Tickets del Aviso (ID: " + avisoId + ")";
-    }
+    document.getElementById('tituloCliente').innerText =
+      aviso && aviso.cliente ? ("Tickets de " + aviso.cliente) : ("Tickets del Aviso (ID: " + avisoId + ")");
   } catch(e){
     console.error("Error cargando título:", e);
     document.getElementById('tituloCliente').innerText = "Tickets del Aviso (ID: "+avisoId+")";
@@ -106,16 +103,16 @@ async function cargarTickets() {
   const filtro = document.getElementById('filtroEstado').value;
   body.innerHTML = "";
 
-  // Ordenar por fecha (descendente: más nuevos arriba)
+  // Ordenar por fecha (descendente)
   const sorted = tickets.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   sorted
     .filter(t => filtro === "Todos" || t.estado === filtro)
     .forEach(t => {
-      const disabledCampos = t.estado === "Cerrado" ? "disabled" : "";
-      const disabledEstado = ""; // estado siempre editable
+      // 👇 Solo editable en PAUSADO
+      const disabledCampos = t.estado === "Pausado" ? "" : "disabled";
+      const disabledEstado = ""; // el estado siempre editable
 
-      // Formato DD/MM/AAAA (locale es-ES)
       const fechaFormateada = t.fecha
         ? new Date(t.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
         : "";
@@ -127,8 +124,8 @@ async function cargarTickets() {
         <td><input data-field="precio_materiales" type="number" value="${t.precio_materiales || 0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}></td>
         <td>
           <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
-            <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-            <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+            <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+            <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
             <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
           </select>
         </td>
@@ -197,7 +194,7 @@ async function borrarTicket(id){
   }
 }
 
-// ⬇️ Guarda descripción/horas/materiales antes de cambiar a "Cerrado"
+// ✅ Valida horas>0 antes de poner Cerrado/Facturado y guarda la fila antes de cambiar
 async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
   try {
     if (selectEl) {
@@ -205,6 +202,14 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
       const descEl  = tr.querySelector('[data-field="descripcion"]');
       const horasEl = tr.querySelector('[data-field="horas_totales"]');
       const matEl   = tr.querySelector('[data-field="precio_materiales"]');
+
+      if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') &&
+          (!horasEl || parseFloat(horasEl.value) <= 0)) {
+        alert('No puedes cerrar o facturar un ticket sin horas.');
+        const ticket = ticketsLista.find(t => t.id === id);
+        if (ticket) selectEl.value = ticket.estado; // volver al estado anterior
+        return;
+      }
 
       if (descEl)  await actualizarCampo(id, 'descripcion', descEl.value);
       if (horasEl) await actualizarCampo(id, 'horas_totales', horasEl.value);
@@ -229,22 +234,25 @@ async function editarTicket(id) {
   const t = ticketsLista.find(ticket => ticket.id === id);
   if (!t) return alert("No se encontró el ticket");
 
+  const esPausado = t.estado === 'Pausado';
+  const disabledCampos = esPausado ? "" : "disabled";
+
   const modal = document.getElementById("modal");
   modal.innerHTML = `
     <div class='modal'>
       <h3>Editar Ticket</h3>
-      <input id='fecha' type='date' value='${t.fecha}'><br>
-      <select id='tecnico'>
+      <input id='fecha' type='date' value='${t.fecha}' ${disabledCampos}><br>
+      <select id='tecnico' ${disabledCampos}>
         ${tecnicos.map(te => `<option value="${te.nombre}" ${te.nombre === t.tecnico ? 'selected' : ''}>${te.nombre}</option>`).join("")}
       </select><br>
-      <input id='horas_totales' type='number' value='${t.horas_totales || 0}' min='0' step='0.1'><br>
-      <input id='precio_materiales' type='number' value='${t.precio_materiales || 0}' min='0' step='0.01'><br>
+      <input id='horas_totales' type='number' value='${t.horas_totales || 0}' min='0' step='0.1' ${disabledCampos}><br>
+      <input id='precio_materiales' type='number' value='${t.precio_materiales || 0}' min='0' step='0.01' ${disabledCampos}><br>
       <select id='estado'>
         <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
         <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
         <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
       </select><br><br>
-      <textarea id='descripcion' placeholder='Descripción' rows="3">${t.descripcion || ""}</textarea><br><br>
+      <textarea id='descripcion' placeholder='Descripción' rows="3" ${disabledCampos}>${t.descripcion || ""}</textarea><br><br>
       <button onclick='guardarEdicion(${t.id})' class="btn">Guardar</button>
       <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
     </div>`;
@@ -272,6 +280,7 @@ async function guardarEdicion(id){
 cargarTitulo();
 cargarTecnicos().then(cargarTickets);
 </script>
+
 
 
 </body>
