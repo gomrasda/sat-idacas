@@ -115,6 +115,10 @@ const api = "https://sat-idacas.onrender.com/api";
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'login.html';
 
+const headers = {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer ' + token
+
 const urlParams = new URLSearchParams(window.location.search);
 const avisoId = parseInt(urlParams.get('avisoId'), 10);
 
