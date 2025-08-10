@@ -106,14 +106,20 @@ async function cargarTickets() {
   const filtro = document.getElementById('filtroEstado').value;
   body.innerHTML = "";
 
-  tickets
+  // 👉 Ordenar por fecha (descendente: más nuevos arriba)
+  const sorted = tickets
+    .slice()
+    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+  sorted
     .filter(t => filtro === "Todos" || t.estado === filtro)
     .forEach(t => {
       const disabledCampos = t.estado === "Cerrado" ? "disabled" : "";
       const disabledEstado = "";
+      const fechaCorta = t.fecha ? String(t.fecha).slice(0, 10) : "";
 
       body.innerHTML += `<tr>
-        <td>${t.fecha}</td>
+        <td>${fechaCorta}</td>
         <td>${t.tecnico}</td>
         <td><input type="number" value="${t.horas_totales || 0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}></td>
         <td><input type="number" value="${t.precio_materiales || 0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}></td>
@@ -134,6 +140,7 @@ async function cargarTickets() {
       </tr>`;
     });
 }
+
 
 function abrirModal(){
   const modal = document.getElementById("modal");
