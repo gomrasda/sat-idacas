@@ -4,67 +4,70 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tickets del Aviso</title>
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
-    .container { max-width: 980px; margin: auto; padding: 16px; }
-    h2 { margin-top: 0; text-align: center; }
-    label, select, input { display: block; width: 100%; margin: 10px 0; }
-    table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-    th { background: #e9ecef; }
-    .btn { background: #007bff; color: white; border: none; padding: 10px 16px; margin-top: 10px; cursor: pointer; border-radius: 5px; }
-    .btn:hover { background: #0056b3; }
-    .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px; z-index: 1000; width: 90%; max-width: 400px; }
-    .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
+<style>
+  :root{ --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7; }
+  body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
+  .container { max-width: 980px; margin: auto; padding: 16px; }
+  h2 { margin-top: 0; text-align: center; }
+  label, select, input { display: block; width: 100%; margin: 10px 0; }
+  table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+  th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+  th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
+  .btn { background: #007bff; color: white; border: none; padding: 10px 16px; margin-top: 10px; cursor: pointer; border-radius: 5px; }
+  .btn:hover { background: #0056b3; }
+  .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px; z-index: 1000; width: 90%; max-width: 400px; }
+  .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
 
-    /* --------- Responsive mejorado --------- */
-    .table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
-    input, select, textarea, button { font-size:16px; } /* evita zoom raro en iOS */
-    textarea { width:100%; min-height:36px; }
+  .table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
+  input, select, textarea, button { font-size:16px; } /* evita zoom raro en iOS */
+  td input, td select, td textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--b);border-radius:8px;background:#fff}
+  td textarea{resize:vertical;min-height:56px}
 
-    @media (max-width: 768px){
-      .container { max-width: 100%; padding: 12px; }
-      .table-wrap { background:transparent; box-shadow:none; }
-      table { border-collapse: separate; border-spacing: 0 10px; background: transparent; }
-      thead { display:none; }
-      tbody tr {
-        display:block;
-        background:#fff;
-        border-radius:12px;
-        box-shadow:0 2px 8px rgba(0,0,0,.08);
-        padding: 8px 10px;
-        border: 1px solid #e9ecef;
-      }
-      tbody td {
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        border:0;
-        border-bottom:1px solid #eef2f6;
-        padding:10px 6px;
-      }
-      tbody td:last-child { border-bottom:0; }
+  /* ====== MÓVIL: 2 filas por ticket ====== */
+  @media (max-width: 768px){
+    .container { max-width: 100%; padding: 12px; }
+    thead { display: none; }
 
-      /* etiqueta de la columna */
-      tbody td::before {
-        content: attr(data-label);
-        font-weight:600;
-        color:#444;
-        flex: 0 0 42%;
-        max-width: 42%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      /* contenido */
-      tbody td > *:not(.btn-group) { flex:1; min-width:0; }
-
-      /* acciones */
-      .btn-group { display:flex; gap:8px; }
-      .icon { height:36px; width:36px; display:inline-grid; place-items:center; border:1px solid #d7deea; border-radius:8px; background:#fff; }
+    /* cada fila real de la tabla pasa a ser un grid de dos tipos (r1 y r2) */
+    #ticketsBody tr { border:0; }
+    #ticketsBody tr.r1,
+    #ticketsBody tr.r2{
+      display:grid;
+      gap:10px;
+      padding:12px;
+      margin:8px 0 0 0;
+      background:#fff;
+      border:1px solid var(--b);
+      border-radius:12px;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);
     }
-  </style>
+
+    /* Fila 1: Fecha · Técnico · Horas · Materiales */
+    #ticketsBody tr.r1{ grid-template-columns: 1fr 1fr 1fr 1fr; align-items:center; }
+
+    /* Fila 2: Descripción (2fr) · Estado (1fr) · Acciones (auto) */
+    #ticketsBody tr.r2{ grid-template-columns: 2fr 1fr auto; align-items:start; }
+
+    #ticketsBody td{ display:flex; align-items:center; gap:10px; padding:0; border:0; }
+    #ticketsBody td::before{
+      content:attr(data-label);
+      font-weight:600; color:#4b5563;
+      flex:0 0 42%; max-width:42%;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    /* chips visuales para valores cortos */
+    .chip{display:inline-block;background:var(--chip);border:1px solid var(--b);
+          padding:6px 10px;border-radius:999px;font-size:13px;color:#374151}
+
+    /* Descripción grande en móvil */
+    td.desc textarea{min-height:110px}
+
+    /* Acciones a la derecha */
+    td.acciones{justify-content:flex-end; gap:8px}
+    td.acciones button{width:38px;height:38px;border:1px solid var(--b);background:#fff;border-radius:10px;cursor:pointer}
+  }
+</style>
+
 </head>
 <body>
 
@@ -178,52 +181,102 @@ async function cargarTickets() {
   const filtro = document.getElementById('filtroEstado').value;
   body.innerHTML = "";
 
-  // Ordenar por fecha (descendente)
+  // ¿Móvil?
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+  // Ordenar por fecha (desc)
   const sorted = ticketsLista.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   sorted
     .filter(t => filtro === "Todos" || t.estado === filtro)
     .forEach(t => {
-      // Solo editable en PAUSADO
-      const disabledCampos = t.estado === "Pausado" ? "" : "disabled";
+      const editable = t.estado === "Pausado";
+      const disabledCampos = editable ? "" : "disabled";
       const disabledEstado = ""; // el estado siempre editable
-
       const fechaFormateada = t.fecha
-        ? new Date(t.fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+        ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
         : "";
+      const desc = (t.description ?? t.descripcion ?? "");
 
-      body.innerHTML += `
-      <tr>
-        <td data-label="Fecha">${fechaFormateada}</td>
-        <td data-label="Técnico">${t.tecnico}</td>
-        <td data-label="Horas">
-          <input data-field="horas_totales" type="number" value="${t.horas_totales || 0}"
-                 onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
-        </td>
-        <td data-label="Materiales">
-          <input data-field="precio_materiales" type="number" value="${t.precio_materiales || 0}"
-                 onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
-        </td>
-        <td data-label="Estado">
-          <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
-            <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-            <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-            <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
-          </select>
-        </td>
-        <td data-label="Descripción">
-          <textarea data-field="description"
-                    onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${t.description ?? t.descripcion ?? ""}</textarea>
-        </td>
-        <td data-label="Acciones">
-          <div class="btn-group">
-            <button class="icon" onclick='editarTicket(${t.id})' title="Editar">✏️</button>
-            <button class="icon" onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
-          </div>
-        </td>
-      </tr>`;
+      if (!isMobile) {
+        // ===== ESCRITORIO: UNA FILA POR TICKET =====
+        body.innerHTML += `
+          <tr>
+            <td>${fechaFormateada}</td>
+            <td>${t.tecnico || ""}</td>
+            <td>
+              <input data-field="horas_totales" type="number"
+                     value="${t.horas_totales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
+            </td>
+            <td>
+              <input data-field="precio_materiales" type="number"
+                     value="${t.precio_materiales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
+            </td>
+            <td>
+              <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
+                <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+                <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+                <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+              </select>
+            </td>
+            <td>
+              <textarea data-field="description"
+                        onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
+            </td>
+            <td>
+              <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
+              <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
+            </td>
+          </tr>`;
+      } else {
+        // ===== MÓVIL: DOS FILAS (r1 y r2) =====
+        body.innerHTML += `
+          <!-- Fila 1: Fecha, Técnico, Horas, Materiales -->
+          <tr class="r1">
+            <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
+            <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
+            <td data-label="Horas">
+              <input data-field="horas_totales" type="number"
+                     value="${t.horas_totales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
+            </td>
+            <td data-label="Materiales">
+              <input data-field="precio_materiales" type="number"
+                     value="${t.precio_materiales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
+            </td>
+          </tr>
+
+          <!-- Fila 2: Descripción (ancha), Estado, Acciones -->
+          <tr class="r2">
+            <td class="desc" data-label="Descripción">
+              <textarea data-field="description"
+                        onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
+            </td>
+            <td data-label="Estado">
+              <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
+                <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+                <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+                <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+              </select>
+            </td>
+            <td class="acciones" data-label="Acciones">
+              <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
+              <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
+            </td>
+          </tr>`;
+      }
     });
 }
+
+// (Opcional) Re-render al cambiar tamaño/orientación para alternar layout
+window.addEventListener('resize', () => {
+  clearTimeout(window._rt);
+  window._rt = setTimeout(cargarTickets, 150);
+});
+
 
 function abrirModal(){
   const modal = document.getElementById("modal");
