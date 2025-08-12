@@ -7,8 +7,8 @@
   <style>
     :root{
       --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7;
-      --card-b:#cfd8e6;      /* borde tarjeta */
-      --alt-bg:#f6f8fb;      /* fondo alterno */
+      --card-b:#cfd8e6;
+      --alt-bg:#f6f8fb;
     }
     body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
     .container { max-width: 980px; margin: auto; padding: 16px; }
@@ -27,16 +27,17 @@
     td input, td select, td textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--b);border-radius:8px;background:#fff}
     td textarea{resize:vertical;min-height:56px}
 
-    /* ====== MÓVIL / TABLET: 2 filas por ticket + tarjeta unificada ====== */
+    /* ====== MÓVIL / TABLET: 3 filas por ticket + tarjeta unificada ====== */
     @media (max-width: 1024px){
       .container { max-width: 100%; padding: 12px; }
       thead { display: none; }
 
       #ticketsBody tr { border:0; }
 
-      /* base visual de las filas de la tarjeta */
+      /* base visual de las filas-tarjeta */
       #ticketsBody tr.r1,
-      #ticketsBody tr.r2{
+      #ticketsBody tr.r2,
+      #ticketsBody tr.r3{
         display:grid;
         gap:10px;
         padding:12px;
@@ -45,23 +46,30 @@
         box-shadow:0 2px 8px rgba(0,0,0,.06);
       }
 
-      /* Unimos r1+r2 en una sola tarjeta con bordes */
+      /* Unimos r1+r2+r3 como una sola tarjeta */
       #ticketsBody tr.r1{
-        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr;       /* Fecha | Técnico */
         align-items:center;
-        border-bottom:0;                 /* sin borde abajo para unir */
-        border-radius:12px 12px 0 0;     /* esquinas superiores redondeadas */
-        margin:14px 0 0 0;               /* separación superior entre tarjetas */
+        border-bottom:0;
+        border-radius:12px 12px 0 0;
+        margin:14px 0 0 0;
       }
       #ticketsBody tr.r2{
-        grid-template-columns: 2fr 1fr auto;
+        grid-template-columns: 1fr;           /* Descripción */
         align-items:start;
-        border-top:0;                    /* sin borde arriba para unir */
-        border-radius:0 0 12px 12px;     /* esquinas inferiores redondeadas */
-        margin:0 0 14px 0;               /* separación inferior entre tarjetas */
+        border-top:0; border-bottom:0;
+        border-radius:0;
+        margin:0;
+      }
+      #ticketsBody tr.r3{
+        grid-template-columns: 1fr auto;      /* Estado | Acciones */
+        align-items:center;
+        border-top:0;
+        border-radius:0 0 12px 12px;
+        margin:0 0 14px 0;
       }
 
-      /* fondo alterno por tarjeta (aplicar a r1 y r2 del mismo ticket) */
+      /* fondo alterno por tarjeta */
       #ticketsBody tr.alt { background: var(--alt-bg); }
 
       #ticketsBody td{ display:flex; align-items:center; gap:10px; padding:0; border:0; }
@@ -72,11 +80,24 @@
         white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
       }
 
-      .chip{display:inline-block;background:var(--chip);border:1px solid var(--b);
-            padding:6px 10px;border-radius:999px;font-size:13px;color:#374151}
+      /* Ocultar etiqueta en primera fila (chips ya tienen contexto) */
+      #ticketsBody tr.r1 td::before{ display:none; }
 
-      td.desc textarea{min-height:110px}
+      .chip{
+        display:inline-block;
+        background:var(--chip);
+        border:1px solid var(--b);
+        padding:6px 10px;
+        border-radius:999px;
+        font-size:13px;
+        color:#374151;
+        white-space:nowrap;
+        max-width:100%;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
 
+      td.desc textarea{min-height:120px;width:100%}
       td.acciones{justify-content:flex-end; gap:8px}
       td.acciones button{width:38px;height:38px;border:1px solid var(--b);background:#fff;border-radius:10px;cursor:pointer}
     }
@@ -136,7 +157,6 @@ async function apiFetch(url, options = {}) {
   }
   try { return await res.json(); } catch { return null; }
 }
-
 
 async function cargarTecnicos() {
   const usuarios = await apiFetch(api + '/usuarios', { headers });
@@ -210,15 +230,15 @@ async function cargarTickets() {
     .forEach((t, idx) => {
       const editable = t.estado === "Pausado";
       const disabledCampos = editable ? "" : "disabled";
-      const disabledEstado = "";
+      const disabledEstado = ""; // siempre permitimos cambiar estado (con validación)
       const fechaFormateada = t.fecha
         ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
         : "";
       const desc = (t.description ?? t.descripcion ?? "");
-      const alt = (idx % 2 ? ' alt' : '');   // <- fondo alterno
+      const alt = (idx % 2 ? ' alt' : '');   // fondo alterno
 
       if (!isMobile) {
-        // ===== ESCRITORIO: UNA FILA POR TICKET =====
+        // ===== ESCRITORIO =====
         body.innerHTML += `
           <tr>
             <td>${fechaFormateada}</td>
@@ -250,30 +270,24 @@ async function cargarTickets() {
             </td>
           </tr>`;
       } else {
-        // ===== MÓVIL/TABLET: DOS FILAS UNIDAS COMO TARJETA =====
+        // ===== MÓVIL/TABLET: TRES FILAS (Fecha+Técnico / Descripción / Estado+Acciones) =====
         body.innerHTML += `
-          <!-- Fila 1 -->
-          <tr class="r1${alt}">
+          <!-- Fila 1: Fecha + Técnico -->
+          <tr class="r1${alt}" data-id="${t.id}">
             <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
             <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
-            <td data-label="Horas">
-              <input data-field="horas_totales" type="number"
-                     value="${t.horas_totales ?? 0}"
-                     onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
-            </td>
-            <td data-label="Materiales">
-              <input data-field="precio_materiales" type="number"
-                     value="${t.precio_materiales ?? 0}"
-                     onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
-            </td>
           </tr>
 
-          <!-- Fila 2 -->
-          <tr class="r2${alt}">
+          <!-- Fila 2: Descripción -->
+          <tr class="r2${alt}" data-id="${t.id}">
             <td class="desc" data-label="Descripción">
               <textarea data-field="description"
                         onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
             </td>
+          </tr>
+
+          <!-- Fila 3: Estado + Acciones -->
+          <tr class="r3${alt}" data-id="${t.id}">
             <td data-label="Estado">
               <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
                 <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
@@ -356,19 +370,31 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
     const t = ticketsLista.find(x => x.id === id);
     if (!t) return;
 
-    // leer valores visibles en la fila (si están)
+    // valores actuales (por si no hay inputs visibles en móvil)
     let desc = t.description ?? t.descripcion ?? "";
     let horas = t.horas_totales ?? 0;
     let mats  = t.precio_materiales ?? 0;
 
     if (selectEl) {
-      const tr    = selectEl.closest('tr');
-      const dEl   = tr.querySelector('[data-field="description"]');
-      const hEl   = tr.querySelector('[data-field="horas_totales"]');
-      const mEl   = tr.querySelector('[data-field="precio_materiales"]');
-      if (dEl) desc  = dEl.value ?? "";
-      if (hEl) horas = parseFloat(hEl.value) || 0;
-      if (mEl) mats  = parseFloat(mEl.value) || 0;
+      // Busca en todas las filas del mismo ticket por data-id
+      const ticketIdAttr = selectEl.closest('tr')?.dataset?.id;
+      if (ticketIdAttr) {
+        const scope = document.querySelectorAll(`#ticketsBody tr[data-id="${ticketIdAttr}"] [data-field]`);
+        scope.forEach(el => {
+          if (el.dataset.field === 'description') desc = el.value ?? desc;
+          if (el.dataset.field === 'horas_totales') horas = parseFloat(el.value) || horas;
+          if (el.dataset.field === 'precio_materiales') mats = parseFloat(el.value) || mats;
+        });
+      } else {
+        // Fallback escritorio: leer en la misma fila
+        const tr  = selectEl.closest('tr');
+        const dEl = tr.querySelector('[data-field="description"]');
+        const hEl = tr.querySelector('[data-field="horas_totales"]');
+        const mEl = tr.querySelector('[data-field="precio_materiales"]');
+        if (dEl) desc  = dEl.value ?? desc;
+        if (hEl) horas = parseFloat(hEl.value) || horas;
+        if (mEl) mats  = parseFloat(mEl.value) || mats;
+      }
     }
 
     if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') && (!horas || horas <= 0)) {
@@ -423,38 +449,60 @@ async function editarTicket(id) {
   modal.innerHTML = `
     <div class='modal'>
       <h3>Editar Ticket</h3>
-      <input id='fecha' type='date' value='${t.fecha}' ${disabledCampos}><br>
+
+      <label>Fecha</label>
+      <input id='fecha' type='date' value='${t.fecha ?? ""}' ${disabledCampos}><br>
+
+      <label>Técnico</label>
       <select id='tecnico' ${disabledCampos}>
         ${tecnicos.map(te => `<option value="${te.nombre}" ${te.nombre === t.tecnico ? 'selected' : ''}>${te.nombre}</option>`).join("")}
       </select><br>
+
+      <label>Horas Totales</label>
       <input id='horas_totales' type='number' value='${t.horas_totales || 0}' min='0' step='0.1' ${disabledCampos}><br>
+
+      <label>Precio Materiales</label>
       <input id='precio_materiales' type='number' value='${t.precio_materiales || 0}' min='0' step='0.01' ${disabledCampos}><br>
+
+      <label>Estado</label>
       <select id='estado'>
         <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
         <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
         <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
       </select><br><br>
+
+      <label>Descripción</label>
       <textarea id='descripcion' placeholder='Descripción' rows="3" ${disabledCampos}>${t.description ?? t.descripcion ?? ""}</textarea><br><br>
-      <button onclick='guardarEdicion(${t.id})' class="btn">Guardar</button>
-      <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
+
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button onclick='guardarEdicion(${t.id})' class="btn">Guardar</button>
+        <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
+      </div>
     </div>`;
   modal.style.display = "block";
 }
 
 async function guardarEdicion(id){
+  const t = ticketsLista.find(x => x.id === id);
+  if (!t) return;
+
   const data = {
-    fecha: document.getElementById('fecha').value,
+    fecha: document.getElementById('fecha').value || null,
     tecnico: document.getElementById('tecnico').value,
     horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
     precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
     estado: document.getElementById('estado').value,
     description: document.getElementById('descripcion').value
   };
+
   await apiFetch(`${api}/tickets/${id}`, {
     method: 'PUT',
     headers,
     body: JSON.stringify(data)
   });
+
+  // Sincroniza en memoria y re-renderiza
+  Object.assign(t, data);
   cerrarModal();
   cargarTickets();
 }
