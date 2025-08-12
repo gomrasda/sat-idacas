@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tickets del Aviso</title>
   <style>
     :root{
@@ -21,7 +21,7 @@
     th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
     th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
 
-    /* inputs base escritorio */
+    /* Base inputs escritorio */
     input, select, textarea, button { font-size:16px; }
     td input, td select, td textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--b);border-radius:8px;background:#fff}
     td textarea{resize:vertical;min-height:56px}
@@ -29,19 +29,18 @@
     .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px; z-index: 1000; width: 90%; max-width: 420px; }
     .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
 
-    /* ===== MÓVIL / TABLET: 4 filas por ticket (r1..r4) ===== */
+    /* ====== MÓVIL/TABLET: 4 filas por ticket ====== */
     @media (max-width: 1024px){
       .container { max-width: 100%; padding: 12px; }
       thead { display: none; }
       #ticketsBody tr { border:0; }
 
-      /* Tarjetas */
+      /* Tarjeta: r1/r2/r3/r4 */
       #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4{
         display:grid; gap:10px; padding:12px;
         background:#fff; border:2px solid var(--card-b);
         box-shadow:0 2px 8px rgba(0,0,0,.06);
       }
-
       /* r1: Fecha | Técnico */
       #ticketsBody tr.r1{
         grid-template-columns: 1fr 1fr;
@@ -50,8 +49,7 @@
         border-radius:12px 12px 0 0;
         margin:14px 0 0 0;
       }
-
-      /* r2: Descripción (ancho completo) */
+      /* r2: Descripción */
       #ticketsBody tr.r2{
         grid-template-columns: 1fr;
         align-items:start;
@@ -59,7 +57,6 @@
         border-radius:0;
         margin:0;
       }
-
       /* r3: Horas | Materiales */
       #ticketsBody tr.r3{
         grid-template-columns: 1fr 1fr;
@@ -68,7 +65,6 @@
         border-radius:0;
         margin:0;
       }
-
       /* r4: Estado | Acciones */
       #ticketsBody tr.r4{
         grid-template-columns: 1fr auto;
@@ -78,10 +74,10 @@
         margin:0 0 14px 0;
       }
 
-      /* alterno */
+      /* Fondo alterno por tarjeta */
       #ticketsBody tr.alt { background: var(--alt-bg); }
 
-      /* Etiquetas arriba */
+      /* Etiquetas arriba en móvil */
       #ticketsBody td{
         display:flex; flex-direction: column; align-items:flex-start;
         gap:4px; padding:0; border:0;
@@ -89,44 +85,63 @@
       #ticketsBody td::before{
         content:attr(data-label);
         font-weight:600; color:#6b7280;
-        font-size:12px; margin-bottom: 2px;
+        font-size:13px; margin-bottom: 2px;
       }
 
-      /* Uniformar tamaño para TODOS los campos en móvil */
+      /* Tamaños UNIFORMES y grandes */
       #ticketsBody td input,
       #ticketsBody td select,
       #ticketsBody td textarea,
       #ticketsBody td .chip {
-        font-size: 16px !important;
+        font-size: 18px !important;
         line-height: 1.4;
-        height: 44px;
         box-sizing: border-box;
       }
-      /* Descripción crece en alto */
-      #ticketsBody td textarea {
-        min-height: 110px;
-        height: auto;
-      }
 
-      .chip{
+      /* Chips Fecha/Técnico grandes */
+      #ticketsBody tr.r1 .chip{
         display:flex; align-items:center;
         background:var(--chip); border:1px solid var(--b);
-        padding:0 12px; border-radius:999px;
+        padding:8px 14px; border-radius:999px;
+        height:48px;
         white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
       }
 
-      /* Inputs de horas/materiales más cómodos */
+      /* Descripción legible */
+      #ticketsBody tr.r2 textarea{
+        min-height:140px;
+        padding:12px 14px;
+      }
+
+      /* Inputs Horas/Materiales cómodos */
       #ticketsBody tr.r3 td input{
         background:var(--chip);
         border:1px solid var(--b);
-        border-radius:8px;
-        padding:10px 14px;
+        border-radius:10px;
+        padding:12px 16px;
+        height:48px;
         text-align:center;
         width:100%;
       }
 
-      td.acciones{flex-direction: row; justify-content:flex-end; gap:8px}
-      td.acciones button{width:38px;height:38px;border:1px solid var(--b);background:#fff;border-radius:10px;cursor:pointer}
+      /* Select Estado grande */
+      #ticketsBody tr.r4 select{
+        height:48px;
+        padding:10px 14px;
+      }
+
+      /* Botones acciones un pelín más grandes */
+      #ticketsBody td.acciones{flex-direction: row; justify-content:flex-end; gap:8px}
+      #ticketsBody td.acciones button{width:42px;height:42px;border:1px solid var(--b);background:#fff;border-radius:12px;cursor:pointer}
+
+      /* Título grande */
+      #tituloCliente{
+        font-size:24px;
+        line-height:1.25;
+        letter-spacing:.2px;
+        margin:6px 0 12px;
+        text-align:center;
+      }
     }
   </style>
 </head>
@@ -159,6 +174,7 @@
 <div id="modal" style="display:none;"></div>
 
 <script>
+/* ================== API / AUTH ================== */
 const api = "https://sat-idacas.onrender.com/api";
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'login.html';
@@ -174,7 +190,7 @@ const avisoId = parseInt(urlParams.get('avisoId'), 10);
 let tecnicos = [];
 let ticketsLista = [];
 
-// Helper fetch con errores visibles en consola
+// fetch con control de errores
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, options);
   if (!res.ok) {
@@ -185,6 +201,7 @@ async function apiFetch(url, options = {}) {
   try { return await res.json(); } catch { return null; }
 }
 
+/* ================== DATOS INICIALES ================== */
 async function cargarTecnicos() {
   const usuarios = await apiFetch(api + '/usuarios', { headers });
   tecnicos = (usuarios || []).filter(u => u.rol === 'Técnico' || u.rol === 'tecnico');
@@ -195,7 +212,8 @@ async function cargarTitulo(){
     const aviso = await apiFetch(`${api}/avisos/${avisoId}`, { headers });
     document.getElementById('tituloCliente').innerText =
       aviso && aviso.cliente ? ("Tickets de " + aviso.cliente) : ("Tickets del Aviso (ID: " + avisoId + ")");
-  } catch {
+  } catch(e){
+    console.error("Error cargando título:", e);
     document.getElementById('tituloCliente').innerText = "Tickets del Aviso (ID: "+avisoId+")";
   }
 }
@@ -205,7 +223,7 @@ document.getElementById('btnNuevo').addEventListener('click', async () => {
   abrirModal();
 });
 
-// Guarda un campo enviando payload completo y sincroniza memoria local
+/* ================== ACTUALIZAR CAMPOS EN LÍNEA ================== */
 async function actualizarCampo(id, campo, valor){
   const t = ticketsLista.find(x => x.id === id);
   if (!t) return;
@@ -236,6 +254,7 @@ async function actualizarCampo(id, campo, valor){
   Object.assign(t, payload);
 }
 
+/* ================== RENDER TICKETS ================== */
 async function cargarTickets() {
   const tickets = await apiFetch(`${api}/tickets?aviso_id=${avisoId}`, { headers });
   ticketsLista = tickets || [];
@@ -248,7 +267,7 @@ async function cargarTickets() {
   const forceMobile = new URLSearchParams(location.search).get('mobile') === '1';
   const isMobile = forceMobile || window.matchMedia('(max-width: 1024px)').matches;
 
-  // Ordenar por fecha desc
+  // Ordenar por fecha (desc)
   const sorted = ticketsLista.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   sorted
@@ -256,15 +275,15 @@ async function cargarTickets() {
     .forEach((t, idx) => {
       const editable = t.estado === "Pausado";
       const disabledCampos = editable ? "" : "disabled";
-      const disabledEstado = ""; // estado siempre cambiable (con validación)
+      const disabledEstado = ""; // siempre permitimos cambiar estado (con validación)
       const fechaFormateada = t.fecha
         ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
         : "";
       const desc = (t.description ?? t.descripcion ?? "");
-      const alt = (idx % 2 ? ' alt' : '');
+      const alt = (idx % 2 ? ' alt' : '');   // fondo alterno
 
       if (!isMobile) {
-        // ===== ESCRITORIO =====
+        // ===== ESCRITORIO: UNA FILA =====
         body.innerHTML += `
           <tr>
             <td>${fechaFormateada}</td>
@@ -296,7 +315,7 @@ async function cargarTickets() {
             </td>
           </tr>`;
       } else {
-        // ===== MÓVIL/TABLET: CUATRO FILAS =====
+        // ===== MÓVIL/TABLET: 4 FILAS =====
         body.innerHTML += `
           <!-- r1: Fecha + Técnico -->
           <tr class="r1${alt}" data-id="${t.id}">
@@ -314,12 +333,12 @@ async function cargarTickets() {
 
           <!-- r3: Horas + Materiales -->
           <tr class="r3${alt}" data-id="${t.id}">
-            <td data-label="Horas">
+            <td class="horas" data-label="Horas">
               <input data-field="horas_totales" type="number" step="0.1" min="0"
                      value="${t.horas_totales ?? 0}"
                      onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
             </td>
-            <td data-label="Materiales">
+            <td class="materiales" data-label="Materiales">
               <input data-field="precio_materiales" type="number" step="0.01" min="0"
                      value="${t.precio_materiales ?? 0}"
                      onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
@@ -328,7 +347,7 @@ async function cargarTickets() {
 
           <!-- r4: Estado + Acciones -->
           <tr class="r4${alt}" data-id="${t.id}">
-            <td data-label="Estado">
+            <td class="estado" data-label="Estado">
               <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
                 <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
                 <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
@@ -350,6 +369,7 @@ window.addEventListener('resize', () => {
   window._rt = setTimeout(cargarTickets, 150);
 });
 
+/* ================== MODAL NUEVO TICKET ================== */
 function abrirModal(){
   const modal = document.getElementById("modal");
   modal.innerHTML = `
@@ -399,6 +419,7 @@ async function guardarTicket(){
   cargarTickets();
 }
 
+/* ================== BORRAR / CAMBIAR ESTADO ================== */
 async function borrarTicket(id){
   if (confirm("¿Eliminar ticket?")) {
     await apiFetch(`${api}/tickets/${id}`, { method: 'DELETE', headers });
@@ -412,7 +433,7 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
     const t = ticketsLista.find(x => x.id === id);
     if (!t) return;
 
-    // valores actuales (por si no hay inputs visibles)
+    // valores actuales (por si no hay inputs visibles en móvil)
     let desc = t.description ?? t.descripcion ?? "";
     let horas = t.horas_totales ?? 0;
     let mats  = t.precio_materiales ?? 0;
@@ -428,7 +449,7 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
           if (el.dataset.field === 'precio_materiales') mats = parseFloat(el.value) || mats;
         });
       } else {
-        // Fallback: misma fila (escritorio)
+        // Fallback escritorio: leer en la misma fila
         const tr  = selectEl.closest('tr');
         const dEl = tr.querySelector('[data-field="description"]');
         const hEl = tr.querySelector('[data-field="horas_totales"]');
@@ -445,7 +466,7 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
       return;
     }
 
-    // 1) Guardar TODO antes de cambiar estado
+    // 1) Guardar TODO antes de cambiar estado (incluida description)
     const payload = {
       fecha: t.fecha || null,
       tecnico: t.tecnico || "",
@@ -479,6 +500,7 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
   }
 }
 
+/* ================== EDITAR TICKET ================== */
 async function editarTicket(id) {
   await cargarTecnicos();
   const t = ticketsLista.find(ticket => ticket.id === id);
@@ -543,11 +565,13 @@ async function guardarEdicion(id){
     body: JSON.stringify(data)
   });
 
+  // Sincroniza en memoria y re-renderiza
   Object.assign(t, data);
   cerrarModal();
   cargarTickets();
 }
 
+/* ================== INICIO ================== */
 cargarTitulo();
 cargarTecnicos().then(cargarTickets);
 </script>
