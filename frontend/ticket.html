@@ -35,7 +35,7 @@
       thead { display: none; }
       #ticketsBody tr { border:0; }
 
-      /* Tarjeta: r1/r2/r3/r4 */
+      /* Tarjeta por ticket: r1/r2/r3/r4 */
       #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4{
         display:grid; gap:10px; padding:12px;
         background:#fff; border:2px solid var(--card-b);
@@ -49,7 +49,7 @@
         border-radius:12px 12px 0 0;
         margin:14px 0 0 0;
       }
-      /* r2: Descripción */
+      /* r2: Descripción (ancho completo) */
       #ticketsBody tr.r2{
         grid-template-columns: 1fr;
         align-items:start;
@@ -65,9 +65,9 @@
         border-radius:0;
         margin:0;
       }
-      /* r4: Estado | Acciones */
+      /* r4: Estado (estrecho) | Acciones (derecha) */
       #ticketsBody tr.r4{
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 0.6fr auto;  /* Estado más estrecho */
         align-items:center;
         border-top:0;
         border-radius:0 0 12px 12px;
@@ -88,7 +88,7 @@
         font-size:13px; margin-bottom: 2px;
       }
 
-      /* Tamaños UNIFORMES y grandes */
+      /* Tamaños UNIFORMES y cómodos */
       #ticketsBody td input,
       #ticketsBody td select,
       #ticketsBody td textarea,
@@ -124,17 +124,28 @@
         width:100%;
       }
 
-      /* Select Estado grande */
+      /* Select Estado cómodo */
       #ticketsBody tr.r4 select{
         height:48px;
         padding:10px 14px;
+        width:100%;
       }
 
-      /* Botones acciones un pelín más grandes */
-      #ticketsBody td.acciones{flex-direction: row; justify-content:flex-end; gap:8px}
-      #ticketsBody td.acciones button{width:42px;height:42px;border:1px solid var(--b);background:#fff;border-radius:12px;cursor:pointer}
+      /* Acciones a la derecha (no centradas) */
+      #ticketsBody td.acciones{
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        gap:10px;
+      }
+      #ticketsBody td.acciones button{
+        width:44px; height:44px;
+        font-size:20px;
+        display:inline-flex; align-items:center; justify-content:center;
+        border:1px solid var(--b); background:#fff; border-radius:12px; cursor:pointer;
+      }
 
-      /* Título grande */
+      /* Título grande en móvil */
       #tituloCliente{
         font-size:24px;
         line-height:1.25;
@@ -275,15 +286,15 @@ async function cargarTickets() {
     .forEach((t, idx) => {
       const editable = t.estado === "Pausado";
       const disabledCampos = editable ? "" : "disabled";
-      const disabledEstado = ""; // siempre permitimos cambiar estado (con validación)
+      const disabledEstado = ""; // estado siempre cambiable (con validación)
       const fechaFormateada = t.fecha
         ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
         : "";
       const desc = (t.description ?? t.descripcion ?? "");
-      const alt = (idx % 2 ? ' alt' : '');   // fondo alterno
+      const alt = (idx % 2 ? ' alt' : '');
 
       if (!isMobile) {
-        // ===== ESCRITORIO: UNA FILA =====
+        // ===== ESCRITORIO =====
         body.innerHTML += `
           <tr>
             <td>${fechaFormateada}</td>
@@ -345,7 +356,7 @@ async function cargarTickets() {
             </td>
           </tr>
 
-          <!-- r4: Estado + Acciones -->
+          <!-- r4: Estado (estrecho) + Acciones (derecha) -->
           <tr class="r4${alt}" data-id="${t.id}">
             <td class="estado" data-label="Estado">
               <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
