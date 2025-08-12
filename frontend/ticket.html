@@ -7,8 +7,7 @@
   <style>
     :root{
       --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7;
-      --card-b:#cfd8e6;
-      --alt-bg:#f6f8fb;
+      --card-b:#cfd8e6; --alt-bg:#f6f8fb;
     }
     body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
     .container { max-width: 980px; margin: auto; padding: 16px; }
@@ -23,84 +22,80 @@
     .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
 
     .table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
-    input, select, textarea, button { font-size:16px; } /* evita zoom raro en iOS */
+    input, select, textarea, button { font-size:16px; }
     td input, td select, td textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--b);border-radius:8px;background:#fff}
     td textarea{resize:vertical;min-height:56px}
 
-    /* ====== MÓVIL / TABLET: 3 filas por ticket + tarjeta unificada ====== */
-@media (max-width: 1024px){
-  .container { max-width: 100%; padding: 12px; }
-  thead { display: none; }
-  #ticketsBody tr { border:0; }
-  
-  /* Filas en tarjeta */
-  #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3{
-    display:grid; gap:10px; padding:12px;
-    background:#fff; border:2px solid var(--card-b);
-    box-shadow:0 2px 8px rgba(0,0,0,.06);
-  }
-  #ticketsBody tr.r1{
-    grid-template-columns: 1fr 1fr;
-    align-items:center;
-    border-bottom:0;
-    border-radius:12px 12px 0 0;
-    margin:14px 0 0 0;
-  }
-  #ticketsBody tr.r2{
-    grid-template-columns: 1fr;
-    align-items:start;
-    border-top:0; border-bottom:0;
-    border-radius:0;
-    margin:0;
-  }
-  #ticketsBody tr.r3{
-    grid-template-columns: 1fr auto;
-    align-items:center;
-    border-top:0;
-    border-radius:0 0 12px 12px;
-    margin:0 0 14px 0;
-  }
-  
-  #ticketsBody tr.alt { background: var(--alt-bg); }
+    /* ====== MÓVIL / TABLET: 4 filas por ticket ====== */
+    @media (max-width: 1024px){
+      .container { max-width: 100%; padding: 12px; }
+      thead { display: none; }
+      #ticketsBody tr { border:0; }
 
-  /* Etiquetas en móvil */
-/* Etiquetas en móvil */
-#ticketsBody td{
-  display:flex;
-  flex-direction: column;
-  align-items:flex-start;
-  gap:4px;
-  padding:0;
-  border:0;
-}
-#ticketsBody td::before{
-  content:attr(data-label);
-  font-weight:600;
-  color:#6b7280;
-  font-size:12px;
-  margin-bottom: 2px; /* separación entre label y chip */
-}
+      /* Tarjetas (r1..r4) */
+      #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4{
+        display:grid; gap:10px; padding:12px;
+        background:#fff; border:2px solid var(--card-b);
+        box-shadow:0 2px 8px rgba(0,0,0,.06);
+      }
+      /* r1: Fecha | Técnico */
+      #ticketsBody tr.r1{
+        grid-template-columns: 1fr 1fr;
+        align-items:center;
+        border-bottom:0;
+        border-radius:12px 12px 0 0;
+        margin:14px 0 0 0;
+      }
+      /* r2: Descripción */
+      #ticketsBody tr.r2{
+        grid-template-columns: 1fr;
+        align-items:start;
+        border-top:0; border-bottom:0;
+        border-radius:0;
+        margin:0;
+      }
+      /* r3: Horas | Materiales */
+      #ticketsBody tr.r3{
+        grid-template-columns: 1fr 1fr;
+        align-items:center;
+        border-top:0; border-bottom:0;
+        border-radius:0;
+        margin:0;
+      }
+      /* r4: Estado | Acciones */
+      #ticketsBody tr.r4{
+        grid-template-columns: 1fr auto;
+        align-items:center;
+        border-top:0;
+        border-radius:0 0 12px 12px;
+        margin:0 0 14px 0;
+      }
 
-.chip{
-  display:inline-block;
-  background:var(--chip);
-  border:1px solid var(--b);
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:13px;
-  color:#374151;
-  white-space:nowrap;
-  max-width:100%;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
+      #ticketsBody tr.alt { background: var(--alt-bg); }
 
+      /* Etiquetas arriba */
+      #ticketsBody td{
+        display:flex; flex-direction: column;
+        align-items:flex-start;
+        gap:4px;
+        padding:0; border:0;
+      }
+      #ticketsBody td::before{
+        content:attr(data-label);
+        font-weight:600; color:#6b7280;
+        font-size:12px; margin-bottom: 2px;
+      }
 
-  td.desc textarea{min-height:120px;width:100%}
-  td.acciones{flex-direction: row; justify-content:flex-end; gap:8px}
-  td.acciones button{width:38px;height:38px;border:1px solid var(--b);background:#fff;border-radius:10px;cursor:pointer}
-}
+      .chip{
+        display:inline-block; background:var(--chip); border:1px solid var(--b);
+        padding:6px 10px; border-radius:999px; font-size:13px; color:#374151;
+        white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
+      }
 
+      td.desc textarea{min-height:120px;width:100%}
+      td.acciones{flex-direction: row; justify-content:flex-end; gap:8px}
+      td.acciones button{width:38px;height:38px;border:1px solid var(--b);background:#fff;border-radius:10px;cursor:pointer}
+    }
   </style>
 </head>
 <body>
@@ -147,7 +142,7 @@ const avisoId = parseInt(urlParams.get('avisoId'), 10);
 let tecnicos = [];
 let ticketsLista = [];
 
-// Helper para ver errores de API
+// Helper de fetch con manejo de error
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, options);
   if (!res.ok) {
@@ -230,12 +225,12 @@ async function cargarTickets() {
     .forEach((t, idx) => {
       const editable = t.estado === "Pausado";
       const disabledCampos = editable ? "" : "disabled";
-      const disabledEstado = ""; // siempre permitimos cambiar estado (con validación)
+      const disabledEstado = "";
       const fechaFormateada = t.fecha
         ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
         : "";
       const desc = (t.description ?? t.descripcion ?? "");
-      const alt = (idx % 2 ? ' alt' : '');   // fondo alterno
+      const alt = (idx % 2 ? ' alt' : '');
 
       if (!isMobile) {
         // ===== ESCRITORIO =====
@@ -270,43 +265,54 @@ async function cargarTickets() {
             </td>
           </tr>`;
       } else {
-        // ===== MÓVIL/TABLET: TRES FILAS (Fecha+Técnico / Descripción / Estado+Acciones) =====
-// ===== MÓVIL/TABLET =====
-body.innerHTML += `
-  <!-- Fila 1: Fecha + Técnico -->
-  <tr class="r1${alt}" data-id="${t.id}">
-    <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
-    <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
-  </tr>
+        // ===== MÓVIL/TABLET: CUATRO FILAS =====
+        body.innerHTML += `
+          <!-- Fila 1: Fecha + Técnico -->
+          <tr class="r1${alt}" data-id="${t.id}">
+            <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
+            <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
+          </tr>
 
-  <!-- Fila 2: Descripción -->
-  <tr class="r2${alt}" data-id="${t.id}">
-    <td class="desc" data-label="Descripción">
-      <textarea data-field="description"
-                onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
-    </td>
-  </tr>
+          <!-- Fila 2: Descripción -->
+          <tr class="r2${alt}" data-id="${t.id}">
+            <td class="desc" data-label="Descripción">
+              <textarea data-field="description"
+                        onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
+            </td>
+          </tr>
 
-  <!-- Fila 3: Estado + Acciones -->
-  <tr class="r3${alt}" data-id="${t.id}">
-    <td data-label="Estado">
-      <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
-        <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-        <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-        <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
-      </select>
-    </td>
-    <td class="acciones" data-label="Acciones">
-      <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
-      <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
-    </td>
-  </tr>`;
+          <!-- Fila 3: Horas + Materiales -->
+          <tr class="r3${alt}" data-id="${t.id}">
+            <td data-label="Horas">
+              <input data-field="horas_totales" type="number" step="0.1" min="0"
+                     value="${t.horas_totales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
+            </td>
+            <td data-label="Materiales">
+              <input data-field="precio_materiales" type="number" step="0.01" min="0"
+                     value="${t.precio_materiales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
+            </td>
+          </tr>
 
+          <!-- Fila 4: Estado + Acciones -->
+          <tr class="r4${alt}" data-id="${t.id}">
+            <td data-label="Estado">
+              <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
+                <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+                <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+                <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+              </select>
+            </td>
+            <td class="acciones" data-label="Acciones">
+              <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
+              <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
+            </td>
+          </tr>`;
       }
     });
 }
 
-// Re-render al cambiar tamaño/orientación para alternar layout
 window.addEventListener('resize', () => {
   clearTimeout(window._rt);
   window._rt = setTimeout(cargarTickets, 150);
@@ -329,8 +335,10 @@ function abrirModal(){
         <option value="Facturado">Facturado</option>
       </select><br><br>
       <textarea id='descripcion' placeholder='Descripción' rows="3"></textarea><br><br>
-      <button onclick='guardarTicket()' class="btn">Guardar</button>
-      <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button onclick='guardarTicket()' class="btn">Guardar</button>
+        <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
+      </div>
     </div>`;
   modal.style.display = "block";
 }
@@ -372,13 +380,13 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
     const t = ticketsLista.find(x => x.id === id);
     if (!t) return;
 
-    // valores actuales (por si no hay inputs visibles en móvil)
+    // valores actuales por si no hay inputs visibles
     let desc = t.description ?? t.descripcion ?? "";
     let horas = t.horas_totales ?? 0;
     let mats  = t.precio_materiales ?? 0;
 
     if (selectEl) {
-      // Busca en todas las filas del mismo ticket por data-id
+      // Lee todos los campos del mismo ticket (todas las filas con el mismo data-id)
       const ticketIdAttr = selectEl.closest('tr')?.dataset?.id;
       if (ticketIdAttr) {
         const scope = document.querySelectorAll(`#ticketsBody tr[data-id="${ticketIdAttr}"] [data-field]`);
@@ -388,7 +396,7 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
           if (el.dataset.field === 'precio_materiales') mats = parseFloat(el.value) || mats;
         });
       } else {
-        // Fallback escritorio: leer en la misma fila
+        // Fallback: misma fila
         const tr  = selectEl.closest('tr');
         const dEl = tr.querySelector('[data-field="description"]');
         const hEl = tr.querySelector('[data-field="horas_totales"]');
@@ -405,13 +413,13 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
       return;
     }
 
-    // 1) Guardar TODO antes de cambiar estado (incluida description)
+    // 1) Guardar TODO antes de cambiar estado
     const payload = {
       fecha: t.fecha || null,
       tecnico: t.tecnico || "",
       horas_totales: horas,
       precio_materiales: mats,
-      estado: t.estado,       // aún el anterior
+      estado: t.estado,
       description: (desc ?? "") + ""
     };
     await apiFetch(`${api}/tickets/${id}`, {
@@ -503,7 +511,6 @@ async function guardarEdicion(id){
     body: JSON.stringify(data)
   });
 
-  // Sincroniza en memoria y re-renderiza
   Object.assign(t, data);
   cerrarModal();
   cargarTickets();
