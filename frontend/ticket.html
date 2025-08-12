@@ -28,79 +28,79 @@
     td textarea{resize:vertical;min-height:56px}
 
     /* ====== MÓVIL / TABLET: 3 filas por ticket + tarjeta unificada ====== */
-    @media (max-width: 1024px){
-      .container { max-width: 100%; padding: 12px; }
-      thead { display: none; }
+@media (max-width: 1024px){
+  .container { max-width: 100%; padding: 12px; }
+  thead { display: none; }
+  #ticketsBody tr { border:0; }
+  
+  /* Filas en tarjeta */
+  #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3{
+    display:grid; gap:10px; padding:12px;
+    background:#fff; border:2px solid var(--card-b);
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
+  }
+  #ticketsBody tr.r1{
+    grid-template-columns: 1fr 1fr;
+    align-items:center;
+    border-bottom:0;
+    border-radius:12px 12px 0 0;
+    margin:14px 0 0 0;
+  }
+  #ticketsBody tr.r2{
+    grid-template-columns: 1fr;
+    align-items:start;
+    border-top:0; border-bottom:0;
+    border-radius:0;
+    margin:0;
+  }
+  #ticketsBody tr.r3{
+    grid-template-columns: 1fr auto;
+    align-items:center;
+    border-top:0;
+    border-radius:0 0 12px 12px;
+    margin:0 0 14px 0;
+  }
+  
+  #ticketsBody tr.alt { background: var(--alt-bg); }
 
-      #ticketsBody tr { border:0; }
+  /* Etiquetas en móvil */
+/* Etiquetas en móvil */
+#ticketsBody td{
+  display:flex;
+  flex-direction: column;
+  align-items:flex-start;
+  gap:4px;
+  padding:0;
+  border:0;
+}
+#ticketsBody td::before{
+  content:attr(data-label);
+  font-weight:600;
+  color:#6b7280;
+  font-size:12px;
+  margin-bottom: 2px; /* separación entre label y chip */
+}
 
-      /* base visual de las filas-tarjeta */
-      #ticketsBody tr.r1,
-      #ticketsBody tr.r2,
-      #ticketsBody tr.r3{
-        display:grid;
-        gap:10px;
-        padding:12px;
-        background:#fff;
-        border:2px solid var(--card-b);
-        box-shadow:0 2px 8px rgba(0,0,0,.06);
-      }
+.chip{
+  display:inline-block;
+  background:var(--chip);
+  border:1px solid var(--b);
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:13px;
+  color:#374151;
+  white-space:nowrap;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 
-      /* Unimos r1+r2+r3 como una sola tarjeta */
-      #ticketsBody tr.r1{
-        grid-template-columns: 1fr 1fr;       /* Fecha | Técnico */
-        align-items:center;
-        border-bottom:0;
-        border-radius:12px 12px 0 0;
-        margin:14px 0 0 0;
-      }
-      #ticketsBody tr.r2{
-        grid-template-columns: 1fr;           /* Descripción */
-        align-items:start;
-        border-top:0; border-bottom:0;
-        border-radius:0;
-        margin:0;
-      }
-      #ticketsBody tr.r3{
-        grid-template-columns: 1fr auto;      /* Estado | Acciones */
-        align-items:center;
-        border-top:0;
-        border-radius:0 0 12px 12px;
-        margin:0 0 14px 0;
-      }
 
-      /* fondo alterno por tarjeta */
-      #ticketsBody tr.alt { background: var(--alt-bg); }
+  td.desc textarea{min-height:120px;width:100%}
+  td.acciones{flex-direction: row; justify-content:flex-end; gap:8px}
+  td.acciones button{width:38px;height:38px;border:1px solid var(--b);background:#fff;border-radius:10px;cursor:pointer}
+}
 
-      #ticketsBody td{ display:flex; align-items:center; gap:10px; padding:0; border:0; }
-      #ticketsBody td::before{
-        content:attr(data-label);
-        font-weight:600; color:#4b5563;
-        flex:0 0 42%; max-width:42%;
-        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      }
-
-      /* Ocultar etiqueta en primera fila (chips ya tienen contexto) */
-      #ticketsBody tr.r1 td::before{ display:none; }
-
-      .chip{
-        display:inline-block;
-        background:var(--chip);
-        border:1px solid var(--b);
-        padding:6px 10px;
-        border-radius:999px;
-        font-size:13px;
-        color:#374151;
-        white-space:nowrap;
-        max-width:100%;
-        overflow:hidden;
-        text-overflow:ellipsis;
-      }
-
-      td.desc textarea{min-height:120px;width:100%}
-      td.acciones{justify-content:flex-end; gap:8px}
-      td.acciones button{width:38px;height:38px;border:1px solid var(--b);background:#fff;border-radius:10px;cursor:pointer}
-    }
   </style>
 </head>
 <body>
@@ -271,35 +271,37 @@ async function cargarTickets() {
           </tr>`;
       } else {
         // ===== MÓVIL/TABLET: TRES FILAS (Fecha+Técnico / Descripción / Estado+Acciones) =====
-        body.innerHTML += `
-          <!-- Fila 1: Fecha + Técnico -->
-          <tr class="r1${alt}" data-id="${t.id}">
-            <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
-            <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
-          </tr>
+// ===== MÓVIL/TABLET =====
+body.innerHTML += `
+  <!-- Fila 1: Fecha + Técnico -->
+  <tr class="r1${alt}" data-id="${t.id}">
+    <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
+    <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
+  </tr>
 
-          <!-- Fila 2: Descripción -->
-          <tr class="r2${alt}" data-id="${t.id}">
-            <td class="desc" data-label="Descripción">
-              <textarea data-field="description"
-                        onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
-            </td>
-          </tr>
+  <!-- Fila 2: Descripción -->
+  <tr class="r2${alt}" data-id="${t.id}">
+    <td class="desc" data-label="Descripción">
+      <textarea data-field="description"
+                onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
+    </td>
+  </tr>
 
-          <!-- Fila 3: Estado + Acciones -->
-          <tr class="r3${alt}" data-id="${t.id}">
-            <td data-label="Estado">
-              <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
-                <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-                <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-                <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
-              </select>
-            </td>
-            <td class="acciones" data-label="Acciones">
-              <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
-              <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
-            </td>
-          </tr>`;
+  <!-- Fila 3: Estado + Acciones -->
+  <tr class="r3${alt}" data-id="${t.id}">
+    <td data-label="Estado">
+      <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
+        <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+        <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+        <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+      </select>
+    </td>
+    <td class="acciones" data-label="Acciones">
+      <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
+      <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
+    </td>
+  </tr>`;
+
       }
     });
 }
