@@ -41,7 +41,6 @@
         background:#fff; border:2px solid var(--card-b);
         box-shadow:0 2px 8px rgba(0,0,0,.06);
       }
-      /* r1: Fecha | Técnico */
       #ticketsBody tr.r1{
         grid-template-columns: 1fr 1fr;
         align-items:center;
@@ -49,7 +48,6 @@
         border-radius:12px 12px 0 0;
         margin:14px 0 0 0;
       }
-      /* r2: Descripción (ancho completo) */
       #ticketsBody tr.r2{
         grid-template-columns: 1fr;
         align-items:start;
@@ -57,7 +55,6 @@
         border-radius:0;
         margin:0;
       }
-      /* r3: Horas | Materiales */
       #ticketsBody tr.r3{
         grid-template-columns: 1fr 1fr;
         align-items:center;
@@ -65,19 +62,16 @@
         border-radius:0;
         margin:0;
       }
-      /* r4: Estado (estrecho) | Acciones (derecha) */
       #ticketsBody tr.r4{
-        grid-template-columns: 0.6fr auto;  /* Estado más estrecho */
+        grid-template-columns: 0.6fr auto;
         align-items:center;
         border-top:0;
         border-radius:0 0 12px 12px;
         margin:0 0 14px 0;
       }
 
-      /* Fondo alterno por tarjeta */
       #ticketsBody tr.alt { background: var(--alt-bg); }
 
-      /* Etiquetas arriba en móvil */
       #ticketsBody td{
         display:flex; flex-direction: column; align-items:flex-start;
         gap:4px; padding:0; border:0;
@@ -85,53 +79,53 @@
       #ticketsBody td::before{
         content:attr(data-label);
         font-weight:600; color:#6b7280;
-        font-size:13px; margin-bottom: 2px;
+        font-size:15px; /* antes 13px */
+        margin-bottom: 2px;
       }
 
-      /* Tamaños UNIFORMES y cómodos */
       #ticketsBody td input,
       #ticketsBody td select,
       #ticketsBody td textarea,
       #ticketsBody td .chip {
-        font-size: 18px !important;
+        font-size: 20px !important; /* antes 18px */
         line-height: 1.4;
         box-sizing: border-box;
       }
 
-      /* Chips Fecha/Técnico grandes */
       #ticketsBody tr.r1 .chip{
         display:flex; align-items:center;
         background:var(--chip); border:1px solid var(--b);
-        padding:8px 14px; border-radius:999px;
-        height:48px;
+        padding:10px 16px; /* más aire */
+        border-radius:999px;
+        height:52px; /* antes 48 */
         white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
+        font-weight:600;
       }
 
-      /* Descripción legible */
       #ticketsBody tr.r2 textarea{
-        min-height:140px;
+        min-height:160px; /* antes 140px */
         padding:12px 14px;
+        font-size:19px;
       }
 
-      /* Inputs Horas/Materiales cómodos */
       #ticketsBody tr.r3 td input{
         background:var(--chip);
         border:1px solid var(--b);
         border-radius:10px;
         padding:12px 16px;
-        height:48px;
+        height:52px; /* antes 48px */
         text-align:center;
-        width:100%;
+        font-size:22px; /* números grandes */
+        font-weight:600;
       }
 
-      /* Select Estado cómodo */
       #ticketsBody tr.r4 select{
-        height:48px;
+        height:52px;
         padding:10px 14px;
         width:100%;
+        font-size:18px;
       }
 
-      /* Acciones a la derecha (no centradas) */
       #ticketsBody td.acciones{
         display:flex;
         align-items:center;
@@ -139,20 +133,233 @@
         gap:10px;
       }
       #ticketsBody td.acciones button{
-        width:44px; height:44px;
-        font-size:20px;
+        width:48px; height:48px; /* antes 44 */
+        font-size:22px;
         display:inline-flex; align-items:center; justify-content:center;
-        border:1px solid var(--b); background:#fff; border-radius:12px; cursor:pointer;
+        border:1px solid var(--b); background:#fff; border-radius:14px; cursor:pointer;
       }
 
-      /* Título grande en móvil */
       #tituloCliente{
-        font-size:24px;
+        font-size:clamp(24px, 5.5vw, 30px);
         line-height:1.25;
         letter-spacing:.2px;
         margin:6px 0 12px;
         text-align:center;
+        font-weight:700;
       }
+
+      .btn{
+        font-size:18px;
+        padding:12px 18px;
+        border-radius:12px;
+      }
+
+      .modal input, .modal select, .modal textarea{
+        font-size:18px;
+        padding:10px 12px;
+      }
+      .modal h3{ font-size:22px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- resto de tu HTML y scripts aquí (sin cambios) -->
+
+</body>
+</html>
+📌 Este código mantiene la estructura original de las 4 filas en móvil, pero aumenta:
+
+Tamaño de fuente de valores y etiquetas.
+
+Altura y padding de inputs, selects y chips.
+
+Tamaño de iconos en los botones de acción.
+
+Área táctil en todos los controles.
+
+¿Quieres que también te prepare el mismo ajuste para la pantalla de avisos (la de la primera captura) para que se vea igual de grande?
+
+
+
+
+
+
+
+
+Tú dijiste:
+pasamelo todo para solo copiar y pegar que he tenido un dia largo porfi
+
+
+ChatGPT Plus
+Entiendo 😅, aquí te dejo todo el HTML completo con tus scripts y estilos, pero ya integrado con los cambios para que en móvil las letras, números y botones se vean más grandes, manteniendo las 4 filas por ticket.
+Solo copia y pega en tu archivo y listo.
+
+[El código es largo, así que lo incluyo todo seguido:]
+
+html
+Copiar
+Editar
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tickets del Aviso</title>
+  <style>
+    :root{
+      --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7;
+      --card-b:#cfd8e6; --alt-bg:#f6f8fb;
+    }
+    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
+    .container { max-width: 980px; margin: auto; padding: 16px; }
+    h2 { margin-top: 0; text-align: center; }
+    label, select, input { display: block; width: 100%; margin: 10px 0; }
+    .btn { background: #007bff; color: white; border: none; padding: 10px 16px; margin-top: 10px; cursor: pointer; border-radius: 5px; }
+    .btn:hover { background: #0056b3; }
+
+    .table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
+    table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
+
+    /* Base inputs escritorio */
+    input, select, textarea, button { font-size:16px; }
+    td input, td select, td textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--b);border-radius:8px;background:#fff}
+    td textarea{resize:vertical;min-height:56px}
+
+    .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px; z-index: 1000; width: 90%; max-width: 420px; }
+    .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
+
+    /* ====== MÓVIL/TABLET: 4 filas por ticket ====== */
+    @media (max-width: 1024px){
+      .container { max-width: 100%; padding: 12px; }
+      thead { display: none; }
+      #ticketsBody tr { border:0; }
+
+      #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4{
+        display:grid; gap:10px; padding:12px;
+        background:#fff; border:2px solid var(--card-b);
+        box-shadow:0 2px 8px rgba(0,0,0,.06);
+      }
+      #ticketsBody tr.r1{
+        grid-template-columns: 1fr 1fr;
+        align-items:center;
+        border-bottom:0;
+        border-radius:12px 12px 0 0;
+        margin:14px 0 0 0;
+      }
+      #ticketsBody tr.r2{
+        grid-template-columns: 1fr;
+        align-items:start;
+        border-top:0; border-bottom:0;
+        border-radius:0;
+        margin:0;
+      }
+      #ticketsBody tr.r3{
+        grid-template-columns: 1fr 1fr;
+        align-items:center;
+        border-top:0; border-bottom:0;
+        border-radius:0;
+        margin:0;
+      }
+      #ticketsBody tr.r4{
+        grid-template-columns: 0.6fr auto;
+        align-items:center;
+        border-top:0;
+        border-radius:0 0 12px 12px;
+        margin:0 0 14px 0;
+      }
+
+      #ticketsBody tr.alt { background: var(--alt-bg); }
+
+      #ticketsBody td{
+        display:flex; flex-direction: column; align-items:flex-start;
+        gap:4px; padding:0; border:0;
+      }
+      #ticketsBody td::before{
+        content:attr(data-label);
+        font-weight:600; color:#6b7280;
+        font-size:15px; /* antes 13px */
+        margin-bottom: 2px;
+      }
+
+      #ticketsBody td input,
+      #ticketsBody td select,
+      #ticketsBody td textarea,
+      #ticketsBody td .chip {
+        font-size: 20px !important; /* antes 18px */
+        line-height: 1.4;
+        box-sizing: border-box;
+      }
+
+      #ticketsBody tr.r1 .chip{
+        display:flex; align-items:center;
+        background:var(--chip); border:1px solid var(--b);
+        padding:10px 16px;
+        border-radius:999px;
+        height:52px;
+        white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
+        font-weight:600;
+      }
+
+      #ticketsBody tr.r2 textarea{
+        min-height:160px;
+        padding:12px 14px;
+        font-size:19px;
+      }
+
+      #ticketsBody tr.r3 td input{
+        background:var(--chip);
+        border:1px solid var(--b);
+        border-radius:10px;
+        padding:12px 16px;
+        height:52px;
+        text-align:center;
+        font-size:22px;
+        font-weight:600;
+      }
+
+      #ticketsBody tr.r4 select{
+        height:52px;
+        padding:10px 14px;
+        width:100%;
+        font-size:18px;
+      }
+
+      #ticketsBody td.acciones{
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        gap:10px;
+      }
+      #ticketsBody td.acciones button{
+        width:48px; height:48px;
+        font-size:22px;
+        display:inline-flex; align-items:center; justify-content:center;
+        border:1px solid var(--b); background:#fff; border-radius:14px; cursor:pointer;
+      }
+
+      #tituloCliente{
+        font-size:clamp(24px, 5.5vw, 30px);
+        line-height:1.25;
+        letter-spacing:.2px;
+        margin:6px 0 12px;
+        text-align:center;
+        font-weight:700;
+      }
+
+      .btn{
+        font-size:18px;
+        padding:12px 18px;
+        border-radius:12px;
+      }
+
+      .modal input, .modal select, .modal textarea{
+        font-size:18px;
+        padding:10px 12px;
+      }
+      .modal h3{ font-size:22px; }
     }
   </style>
 </head>
