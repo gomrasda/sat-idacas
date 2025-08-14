@@ -77,7 +77,7 @@
 
   #ticketsBody tr.r2 textarea,
   #ticketsBody tr.r2 textarea:disabled {
-    min-height:160px;
+    min-height:220px;
     padding:14px 16px;
     font-size: 35px;
     line-height: 1.4;
@@ -98,12 +98,13 @@
     font-weight: 600;
   }
 
-  #ticketsBody tr.r4 select{
+#ticketsBody tr.r4 select {
     font-size: 40px !important;
-    height:54px;
-    padding:12px 16px;
-    width:100%;
-  }
+    min-height: 70px; /* más alto para que quepa el texto */
+    padding: 16px 18px; /* más espacio interior */
+    width: 100%;
+    line-height: 1.4; /* más aire para el texto */
+}
 
   #ticketsBody td.acciones{
     display:flex;
