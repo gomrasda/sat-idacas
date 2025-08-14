@@ -21,112 +21,140 @@
     th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
     th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
 
+    /* Base inputs escritorio */
     input, select, textarea, button { font-size:16px; }
-    td input, td select, td textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--b);border-radius:8px;background:#fff}
-    td textarea{resize:vertical;min-height:56px}
+    td input, td select, td textarea{
+      width:100%; font:inherit; padding:8px; border:1px solid var(--b); border-radius:8px; background:#fff
+    }
+    td textarea{ resize:vertical; min-height:56px }
 
-    .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px; z-index: 1000; width: 90%; max-width: 420px; }
+    .modal {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px;
+      z-index: 1000; width: 90%; max-width: 420px;
+    }
     .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
 
-@media (max-width: 1024px){
-  .container { max-width: 100%; padding: 12px; }
-  thead { display: none; }
-  #ticketsBody tr { border:0; }
+    /* ====== MÓVIL/TABLET ====== */
+    @media (max-width: 1024px){
+      .container { max-width: 100%; padding: 12px; }
+      thead { display: none; }
+      #ticketsBody tr { border:0; }
 
-  #tituloCliente{
-    font-size: 48px !important;
-    line-height: 1.25;
-    letter-spacing: .2px;
-    margin: 6px 0 20px;
-    text-align: center;
-    font-weight: 700;
-  }
+      /* Título MUY grande */
+      #tituloCliente{
+        font-size: 54px !important;
+        line-height: 1.2;
+        margin: 8px 0 22px;
+        text-align: center;
+        font-weight: 800;
+      }
 
-  #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4{
-    display:grid; gap:10px; padding:12px;
-    background:#fff; border:2px solid var(--card-b);
-    box-shadow:0 2px 8px rgba(0,0,0,.06);
-  }
+      /* Label y select del FILTRO grandes */
+      .container > label { font-size: 32px; font-weight: 600; color: var(--muted); }
+      #filtroEstado{
+        font-size: 40px !important;
+        height: 64px;
+        padding: 10px 16px;
+        border-radius: 12px;
+      }
 
-  #ticketsBody tr.r1{ grid-template-columns: 1fr 1fr; border-bottom:0; border-radius:12px 12px 0 0; }
-  #ticketsBody tr.r2{ grid-template-columns: 1fr; border-top:0; border-bottom:0; }
-  #ticketsBody tr.r3{ grid-template-columns: 1fr 1fr; border-top:0; border-bottom:0; }
-  #ticketsBody tr.r4{ grid-template-columns: 0.6fr auto; border-top:0; border-radius:0 0 12px 12px; }
+      /* Botón Crear Ticket grande sin tocar los demás .btn */
+      #btnNuevo{
+        font-size: 40px !important;
+        padding: 14px 28px;
+        border-radius: 12px;
+      }
 
-  #ticketsBody td{
-    display:flex; flex-direction: column; align-items:flex-start;
-    gap:4px; padding:0; border:0;
-  }
-  #ticketsBody td::before{
-    content:attr(data-label);
-    font-weight:600; color:#6b7280;
-    font-size:40px;
-    margin-bottom: 2px;
-  }
+      /* Tarjeta por ticket en 4 filas */
+      #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4{
+        display:grid; gap:10px; padding:12px;
+        background:#fff; border:2px solid var(--card-b);
+        box-shadow:0 2px 8px rgba(0,0,0,.06);
+      }
+      #ticketsBody tr.r1{ grid-template-columns: 1fr 1fr; border-bottom:0; border-radius:12px 12px 0 0; margin-top:14px; }
+      #ticketsBody tr.r2{ grid-template-columns: 1fr; border-top:0; border-bottom:0; }
+      #ticketsBody tr.r3{ grid-template-columns: 1fr 1fr; border-top:0; border-bottom:0; }
+      #ticketsBody tr.r4{ grid-template-columns: 0.6fr auto; border-top:0; border-radius:0 0 12px 12px; margin-bottom:14px; }
+      #ticketsBody tr.alt { background: var(--alt-bg); }
 
-  #ticketsBody tr.r1 .chip{
-    font-size: 40px !important;
-    padding: 10px 16px;
-    height: 52px;
-  }
-  #ticketsBody tr.r1 select {
-    font-size: 40px !important;
-    height: 52px;
-    padding: 10px 16px;
-  }
+      #ticketsBody td{
+        display:flex; flex-direction: column; align-items:flex-start;
+        gap:4px; padding:0; border:0;
+      }
+      /* Etiquetas (Fecha, Técnico, Horas, Materiales, Estado, Acciones) */
+      #ticketsBody td::before{
+        content:attr(data-label);
+        font-weight:600; color:#6b7280;
+        font-size:40px;
+        margin-bottom: 2px;
+      }
 
-  #ticketsBody tr.r2 textarea,
-  #ticketsBody tr.r2 textarea:disabled {
-    min-height:220px;
-    padding:14px 16px;
-    font-size: 35px;
-    line-height: 1.4;
-    color: var(--ink);
-    background-color: #fff;
-    opacity: 1;
-  }
+      /* Chips Fecha/Técnico (cuando no es editable) */
+      #ticketsBody tr.r1 .chip{
+        display:flex; align-items:center;
+        background:var(--chip); border:1px solid var(--b);
+        padding:10px 16px; border-radius:999px;
+        height:52px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
+        font-size: 40px !important;
+      }
+      /* Select Técnico en r1 (cuando es editable) */
+      #ticketsBody tr.r1 select {
+        font-size: 40px !important;
+        height: 52px;
+        padding: 10px 16px;
+      }
 
-  #ticketsBody tr.r3 td input{
-    font-size: 40px !important;
-    background:var(--chip);
-    border:1px solid var(--b);
-    border-radius:10px;
-    padding:14px 16px;
-    height:54px;
-    text-align:center;
-    width:100%;
-    font-weight: 600;
-  }
+      /* Descripción editable y deshabilitada IGUAL y más alta */
+      #ticketsBody tr.r2 textarea,
+      #ticketsBody tr.r2 textarea:disabled {
+        min-height: 220px;
+        padding: 14px 16px;
+        font-size: 35px !important;
+        line-height: 1.4;
+        font-family: inherit !important;
+        font-weight: inherit !important;
+        color: var(--ink);
+        background-color: #fff;
+        opacity: 1;
+      }
 
-#ticketsBody tr.r4 select {
-    font-size: 40px !important;
-    min-height: 70px; /* más alto para que quepa el texto */
-    padding: 16px 18px; /* más espacio interior */
-    width: 100%;
-    line-height: 1.4; /* más aire para el texto */
-}
+      /* Horas / Materiales */
+      #ticketsBody tr.r3 td input{
+        background:var(--chip);
+        border:1px solid var(--b);
+        border-radius:10px;
+        padding:14px 16px;
+        height:54px;
+        text-align:center;
+        width:100%;
+        font-size: 40px !important;
+        font-weight: 600;
+      }
 
-  #ticketsBody td.acciones{
-    display:flex;
-    flex-direction: row;
-    align-items:center;
-    justify-content:flex-end;
-    gap:10px;
-  }
-  #ticketsBody td.acciones button{
-    width:52px; height:52px;
-    font-size: 40px;
-    display:inline-flex; align-items:center; justify-content:center;
-    border:1px solid var(--b);
-    background:#fff;
-    border-radius:14px;
-    cursor:pointer;
-  }
-}
+      /* Estado: más alto para que no corte texto */
+      #ticketsBody tr.r4 select{
+        font-size: 40px !important;
+        min-height: 70px;
+        padding: 16px 18px;
+        width:100%;
+        line-height: 1.4;
+        border-radius: 12px;
+      }
+
+      /* Acciones en fila y grandes */
+      #ticketsBody td.acciones{
+        display:flex; flex-direction: row; align-items:center; justify-content:flex-end; gap:10px;
+      }
+      #ticketsBody td.acciones button{
+        width:52px; height:52px; font-size: 40px;
+        display:inline-flex; align-items:center; justify-content:center;
+        border:1px solid var(--b); background:#fff; border-radius:14px; cursor:pointer;
+      }
+    }
   </style>
 </head>
 <body>
-
 
 <div class="container">
   <button onclick="window.location.href='index.html#avisos'" class="btn" style="background:#6c757d;">🔙 Volver a Avisos</button>
@@ -546,7 +574,6 @@ async function guardarEdicion(id){
     body: JSON.stringify(data)
   });
 
-  // Sincroniza en memoria y re-renderiza
   Object.assign(t, data);
   cerrarModal();
   cargarTickets();
