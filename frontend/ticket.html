@@ -1,207 +1,240 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tickets del Aviso</title>
-<style>
-:root {
-  --b: #e9eef6;
-  --bg: #f5f7fb;
-  --ink: #1f2937;
-  --muted: #6b7280;
-  --chip: #eef2f7;
-  --card-b: #cfd8e6;
-  --alt-bg: #f6f8fb;
-}
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: var(--bg);
-  color: var(--ink);
-}
-.container {
-  max-width: 980px;
-  margin: auto;
-  padding: 16px;
-}
-h2 {
-  margin: 6px 0 12px;
-  text-align: center;
-  font-size: 48px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.btn {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 16px 20px;
-  cursor: pointer;
-  border-radius: 8px;
-  font-size: 24px;
-}
-.btn:hover {
-  background: #0056b3;
-}
-.table-wrap {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.05);
-  overflow-x: auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-}
-th, td {
-  padding: 10px;
-  border: 1px solid #ccc;
-}
-th {
-  background: #f7f9fc;
-  font-weight: 600;
-}
-td input, td select, td textarea {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid var(--b);
-  border-radius: 8px;
-}
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 20px;
-  border-radius: 10px;
-  z-index: 1000;
-  width: 95%;
-  max-width: 600px;
-}
-@media (max-width: 1024px) {
-  thead { display: none; }
-  #ticketsBody tr { border: 0; }
-  #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4 {
-    display: grid;
-    gap: 10px;
-    padding: 12px;
-    background: #fff;
-    border: 2px solid var(--card-b);
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  }
-  #ticketsBody tr.r1 { grid-template-columns: 1fr 1fr; }
-  #ticketsBody tr.r2 { grid-template-columns: 1fr; }
-  #ticketsBody tr.r3 { grid-template-columns: 1fr 1fr; }
-  #ticketsBody tr.r4 { grid-template-columns: 0.6fr auto; }
-  #ticketsBody td { display: flex; flex-direction: column; gap: 4px; border: 0; }
-  #ticketsBody td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    font-size: 40px;
-  }
-  #ticketsBody td input,
-  #ticketsBody td select,
-  #ticketsBody td textarea,
-  #ticketsBody td .chip {
-    font-size: 40px !important;
-  }
-  #ticketsBody tr.r1 .chip { font-size: 40px; }
-  #ticketsBody tr.r2 textarea,
-  #ticketsBody tr.r2 textarea:disabled {
-    min-height: 240px;
-    font-size: 35px;
-  }
-  #ticketsBody tr.r3 td input {
-    font-size: 40px;
-    font-weight: 600;
-  }
-  #ticketsBody tr.r4 select {
-    min-height: 70px;
-    font-size: 40px;
-  }
-  #ticketsBody td.acciones {
-    flex-direction: row;
-    gap: 10px;
-  }
-  #ticketsBody td.acciones button {
-    width: 52px;
-    height: 52px;
-    font-size: 40px;
-  }
-  .modal {
-    width: 96%;
-    max-width: none;
-    font-size: 40px;
-  }
-  .modal input,
-  .modal select,
-  .modal textarea {
-    font-size: 40px;
-    padding: 14px;
-  }
-  .modal textarea { min-height: 200px; }
-  .modal button {
-    font-size: 40px;
-    padding: 14px 28px;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tickets del Aviso</title>
+  <style>
+    :root{
+      --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7;
+      --card-b:#cfd8e6; --alt-bg:#f6f8fb;
+    }
+    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
+    .container { max-width: 980px; margin: auto; padding: 16px; }
+    h2 { margin-top: 0; text-align: center; }
+    label, select, input { display: block; width: 100%; margin: 10px 0; }
+    .btn { background: #007bff; color: white; border: none; padding: 10px 16px; margin-top: 10px; cursor: pointer; border-radius: 5px; }
+    .btn:hover { background: #0056b3; }
+
+    .table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
+    table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
+
+    /* Base inputs escritorio */
+    input, select, textarea, button { font-size:16px; }
+    td input, td select, td textarea{
+      width:100%; font:inherit; padding:8px; border:1px solid var(--b); border-radius:8px; background:#fff
+    }
+    td textarea{ resize:vertical; min-height:56px }
+
+    .modal {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px;
+      z-index: 1000; width: 90%; max-width: 420px;
+    }
+    .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
+
+    /* ====== MÓVIL/TABLET ====== */
+    @media (max-width: 1024px){
+      .container { max-width: 100%; padding: 12px; }
+      thead { display: none; }
+      #ticketsBody tr { border:0; }
+
+      /* Título MUY grande */
+      #tituloCliente{
+        font-size: 54px !important;
+        line-height: 1.2;
+        margin: 8px 0 22px;
+        text-align: center;
+        font-weight: 800;
+      }
+
+      /* Fila de botones (Crear y Volver) */
+      .actions-row{
+        display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; margin: 8px 0 14px;
+      }
+      #btnNuevo, #btnVolver{
+        flex:1 1 48%;
+        font-size: 40px !important;
+        padding: 14px 28px;
+        border-radius: 12px;
+      }
+      #btnVolver{ background:#6c757d; }
+
+      /* Label y select del FILTRO grandes */
+      .container > label { font-size: 32px; font-weight: 600; color: var(--muted); margin-bottom:6px; }
+      #filtroEstado{
+        font-size: 40px !important;
+        height: 64px;
+        padding: 10px 16px;
+        border-radius: 12px;
+      }
+
+      /* Tarjeta por ticket en 4 filas */
+      #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4{
+        display:grid; gap:10px; padding:12px;
+        background:#fff; border:2px solid var(--card-b);
+        box-shadow:0 2px 8px rgba(0,0,0,.06);
+      }
+      #ticketsBody tr.r1{ grid-template-columns: 1fr 1fr; border-bottom:0; border-radius:12px 12px 0 0; margin-top:14px; }
+      #ticketsBody tr.r2{ grid-template-columns: 1fr; border-top:0; border-bottom:0; }
+      #ticketsBody tr.r3{ grid-template-columns: 1fr 1fr; border-top:0; border-bottom:0; }
+      #ticketsBody tr.r4{ grid-template-columns: 0.6fr auto; border-top:0; border-radius:0 0 12px 12px; margin-bottom:14px; }
+      #ticketsBody tr.alt { background: var(--alt-bg); }
+
+      #ticketsBody td{
+        display:flex; flex-direction: column; align-items:flex-start;
+        gap:4px; padding:0; border:0;
+      }
+      /* Etiquetas (Fecha, Técnico, Horas, Materiales, Estado, Acciones) */
+      #ticketsBody td::before{
+        content:attr(data-label);
+        font-weight:600; color:#6b7280;
+        font-size:40px;
+        margin-bottom: 2px;
+      }
+
+      /* Chips Fecha/Técnico (cuando no es editable) */
+      #ticketsBody tr.r1 .chip{
+        display:flex; align-items:center;
+        background:var(--chip); border:1px solid var(--b);
+        padding:10px 16px; border-radius:999px;
+        height:52px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
+        font-size: 40px !important;
+      }
+      /* Select Técnico en r1 (cuando es editable) */
+      #ticketsBody tr.r1 select {
+        font-size: 40px !important;
+        height: 52px;
+        padding: 10px 16px;
+      }
+
+      /* Descripción editable y deshabilitada IGUAL y más alta */
+      #ticketsBody tr.r2 textarea,
+      #ticketsBody tr.r2 textarea:disabled {
+        min-height: 220px;
+        padding: 14px 16px;
+        font-size: 35px !important;
+        line-height: 1.4;
+        font-family: inherit !important;
+        font-weight: inherit !important;
+        color: var(--ink);
+        background-color: #fff;
+        opacity: 1;
+      }
+
+      /* Horas / Materiales */
+      #ticketsBody tr.r3 td input{
+        background:var(--chip);
+        border:1px solid var(--b);
+        border-radius:10px;
+        padding:14px 16px;
+        height:54px;
+        text-align:center;
+        width:100%;
+        font-size: 40px !important;
+        font-weight: 600;
+      }
+
+      /* Estado: más alto para que no corte texto */
+      #ticketsBody tr.r4 select{
+        font-size: 40px !important;
+        min-height: 70px;
+        padding: 16px 18px;
+        width:100%;
+        line-height: 1.4;
+        border-radius: 12px;
+      }
+
+      /* Acciones en fila y grandes */
+      #ticketsBody td.acciones{
+        display:flex; flex-direction: row; align-items:center; justify-content:flex-end; gap:10px;
+      }
+      #ticketsBody td.acciones button{
+        width:52px; height:52px; font-size: 40px;
+        display:inline-flex; align-items:center; justify-content:center;
+        border:1px solid var(--b); background:#fff; border-radius:14px; cursor:pointer;
+      }
+    }
+  </style>
 </head>
 <body>
+
 <div class="container">
-  <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; margin-bottom:12px;">
-    <button class="btn" id="btnNuevo" style="flex:1;">➕ Crear Ticket</button>
-    <button class="btn" id="btnVolver" style="flex:1; background:#6c757d;">🔙 Volver a Avisos</button>
-  </div>
   <h2 id="tituloCliente">Tickets del Aviso</h2>
+
   <label>Filtrar por Estado:</label>
-  <select id="filtroEstado">
+  <select id="filtroEstado" onchange="cargarTickets()">
     <option value="Todos">Todos</option>
     <option value="Pausado">Pausado</option>
     <option value="Cerrado">Cerrado</option>
     <option value="Facturado">Facturado</option>
   </select>
+
+  <!-- Botones: Crear y Volver en la misma fila -->
+  <div class="actions-row">
+    <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
+    <button class="btn" id="btnVolver">🔙 Volver a Avisos</button>
+  </div>
+
   <div class="table-wrap">
     <table>
+      <thead>
+        <tr><th>Fecha</th><th>Técnico</th><th>Horas</th><th>Materiales</th><th>Estado</th><th>Descripción</th><th>Acciones</th></tr>
+      </thead>
       <tbody id="ticketsBody"></tbody>
     </table>
   </div>
 </div>
+
 <div id="modal" style="display:none;"></div>
+
 <script>
+/* ================== API / AUTH ================== */
 const api = "https://sat-idacas.onrender.com/api";
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'login.html';
+
 const headers = {
   'Content-Type': 'application/json',
   'Authorization': 'Bearer ' + token
 };
+
 const urlParams = new URLSearchParams(window.location.search);
 const avisoId = parseInt(urlParams.get('avisoId'), 10);
+
 let tecnicos = [];
 let ticketsLista = [];
+
+// fetch con control de errores
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, options);
-  if (!res.ok) throw new Error(`API ${res.status}`);
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    console.error('API error', res.status, url, txt);
+    throw new Error(`API ${res.status}: ${url} -> ${txt}`);
+  }
   try { return await res.json(); } catch { return null; }
 }
+
+/* ================== DATOS INICIALES ================== */
 async function cargarTecnicos() {
   const usuarios = await apiFetch(api + '/usuarios', { headers });
-  tecnicos = (usuarios || []).filter(u => u.rol.toLowerCase() === 'técnico' || u.rol.toLowerCase() === 'tecnico');
+  tecnicos = (usuarios || []).filter(u => u.rol === 'Técnico' || u.rol === 'tecnico');
 }
+
 async function cargarTitulo(){
   try {
     const aviso = await apiFetch(`${api}/avisos/${avisoId}`, { headers });
-    let titulo = aviso && aviso.cliente ? "Tickets de " + aviso.cliente : "Tickets del Aviso (ID: " + avisoId + ")";
-    document.getElementById('tituloCliente').innerText = titulo.toUpperCase();
-  } catch {
-    document.getElementById('tituloCliente').innerText = ("Tickets del Aviso (ID: "+avisoId+")").toUpperCase();
+    document.getElementById('tituloCliente').innerText =
+      aviso && aviso.cliente ? ("Tickets de " + aviso.cliente) : ("Tickets del Aviso (ID: " + avisoId + ")");
+  } catch(e){
+    console.error("Error cargando título:", e);
+    document.getElementById('tituloCliente').innerText = "Tickets del Aviso (ID: "+avisoId+")";
   }
 }
+
 document.getElementById('btnNuevo').addEventListener('click', async () => {
   await cargarTecnicos();
   abrirModal();
@@ -209,79 +242,183 @@ document.getElementById('btnNuevo').addEventListener('click', async () => {
 document.getElementById('btnVolver').addEventListener('click', () => {
   window.location.href = 'index.html#avisos';
 });
+
+/* ================== ACTUALIZAR CAMPOS EN LÍNEA ================== */
 async function actualizarCampo(id, campo, valor){
   const t = ticketsLista.find(x => x.id === id);
   if (!t) return;
-  const payload = { ...t };
-  payload[campo] = valor;
+
+  const payload = {
+    fecha: t.fecha || null,
+    tecnico: t.tecnico || "",
+    horas_totales: Number(t.horas_totales) || 0,
+    precio_materiales: Number(t.precio_materiales) || 0,
+    estado: t.estado || "Pausado",
+    description: t.description ?? t.descripcion ?? ""
+  };
+
+  if (['horas_totales','precio_materiales'].includes(campo)) {
+    payload[campo] = parseFloat(valor) || 0;
+  } else if (campo === 'description') {
+    payload.description = (valor ?? "") + "";
+  } else {
+    payload[campo] = valor;
+  }
+
   await apiFetch(`${api}/tickets/${id}`, {
-    method: 'PUT', headers, body: JSON.stringify(payload)
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(payload)
   });
+
   Object.assign(t, payload);
 }
+
+/* ================== RENDER TICKETS ================== */
 async function cargarTickets() {
   const tickets = await apiFetch(`${api}/tickets?aviso_id=${avisoId}`, { headers });
   ticketsLista = tickets || [];
+
   const body = document.getElementById('ticketsBody');
   const filtro = document.getElementById('filtroEstado').value;
   body.innerHTML = "";
+
+  // Permite forzar móvil con ?mobile=1
   const forceMobile = new URLSearchParams(location.search).get('mobile') === '1';
   const isMobile = forceMobile || window.matchMedia('(max-width: 1024px)').matches;
+
+  // Ordenar por fecha (desc)
   const sorted = ticketsLista.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-  sorted.filter(t => filtro === "Todos" || t.estado === filtro)
+
+  sorted
+    .filter(t => filtro === "Todos" || t.estado === filtro)
     .forEach((t, idx) => {
       const editable = t.estado === "Pausado";
       const disabledCampos = editable ? "" : "disabled";
-      const fechaFormateada = t.fecha ? new Date(t.fecha).toLocaleDateString('es-ES') : "";
-      const desc = (t.description ?? "");
+      const disabledEstado = ""; // estado siempre cambiable (con validación)
+      const fechaFormateada = t.fecha
+        ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
+        : "";
+      const desc = (t.description ?? t.descripcion ?? "");
       const alt = (idx % 2 ? ' alt' : '');
+
       if (!isMobile) {
-        body.innerHTML += `<tr>
-          <td>${fechaFormateada}</td>
-          <td>${t.tecnico || ""}</td>
-          <td><input type="number" value="${t.horas_totales||0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}></td>
-          <td><input type="number" value="${t.precio_materiales||0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}></td>
-          <td><select onchange="cambiarEstadoTicket(${t.id},this.value,this)">
-            <option ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-            <option ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-            <option ${t.estado==="Facturado"?"selected":""}>Facturado</option>
-          </select></td>
-          <td><textarea onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea></td>
-          <td><button onclick='editarTicket(${t.id})'>✏️</button><button onclick="borrarTicket(${t.id})">🗑️</button></td>
-        </tr>`;
-      } else {
+        // ===== ESCRITORIO =====
         body.innerHTML += `
-        <tr class="r1${alt}"><td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
-        <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td></tr>
-        <tr class="r2${alt}"><td data-label="Descripción"><textarea onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea></td></tr>
-        <tr class="r3${alt}"><td data-label="Horas"><input type="number" value="${t.horas_totales||0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}></td>
-        <td data-label="Materiales"><input type="number" value="${t.precio_materiales||0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}></td></tr>
-        <tr class="r4${alt}"><td data-label="Estado"><select onchange="cambiarEstadoTicket(${t.id},this.value,this)">
-          <option ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-          <option ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-          <option ${t.estado==="Facturado"?"selected":""}>Facturado</option>
-        </select></td>
-        <td class="acciones"><button onclick='editarTicket(${t.id})'>✏️</button><button onclick="borrarTicket(${t.id})">🗑️</button></td></tr>`;
+          <tr>
+            <td>${fechaFormateada}</td>
+            <td>${t.tecnico || ""}</td>
+            <td>
+              <input data-field="horas_totales" type="number"
+                     value="${t.horas_totales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
+            </td>
+            <td>
+              <input data-field="precio_materiales" type="number"
+                     value="${t.precio_materiales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
+            </td>
+            <td>
+              <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
+                <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+                <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+                <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+              </select>
+            </td>
+            <td>
+              <textarea data-field="description"
+                        onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
+            </td>
+            <td>
+              <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
+              <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
+            </td>
+          </tr>`;
+      } else {
+        // ===== MÓVIL/TABLET: 4 FILAS =====
+        body.innerHTML += `
+          <!-- r1: Fecha + Técnico -->
+          <tr class="r1${alt}" data-id="${t.id}">
+            <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
+            <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
+          </tr>
+
+          <!-- r2: Descripción -->
+          <tr class="r2${alt}" data-id="${t.id}">
+            <td class="desc" data-label="Descripción">
+              <textarea data-field="description"
+                        onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
+            </td>
+          </tr>
+
+          <!-- r3: Horas + Materiales -->
+          <tr class="r3${alt}" data-id="${t.id}">
+            <td class="horas" data-label="Horas">
+              <input data-field="horas_totales" type="number" step="0.1" min="0"
+                     value="${t.horas_totales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
+            </td>
+            <td class="materiales" data-label="Materiales">
+              <input data-field="precio_materiales" type="number" step="0.01" min="0"
+                     value="${t.precio_materiales ?? 0}"
+                     onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
+            </td>
+          </tr>
+
+          <!-- r4: Estado (estrecho) + Acciones (derecha) -->
+          <tr class="r4${alt}" data-id="${t.id}">
+            <td class="estado" data-label="Estado">
+              <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
+                <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+                <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+                <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+              </select>
+            </td>
+            <td class="acciones" data-label="Acciones">
+              <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
+              <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
+            </td>
+          </tr>`;
       }
     });
 }
-window.addEventListener('resize', () => { clearTimeout(window._rt); window._rt = setTimeout(cargarTickets,150); });
+
+// Re-render al cambiar tamaño/orientación
+window.addEventListener('resize', () => {
+  clearTimeout(window._rt);
+  window._rt = setTimeout(cargarTickets, 150);
+});
+
+/* ================== MODAL NUEVO TICKET ================== */
 function abrirModal(){
   const modal = document.getElementById("modal");
-  modal.innerHTML = `<div class='modal'>
-    <h3>Nuevo Ticket</h3>
-    <input id='fecha' type='date'><br>
-    <select id='tecnico'>${tecnicos.map(t => `<option>${t.nombre}</option>`).join("")}</select><br>
-    <input id='horas_totales' type='number'><br>
-    <input id='precio_materiales' type='number'><br>
-    <select id='estado'><option>Pausado</option><option>Cerrado</option><option>Facturado</option></select><br>
-    <textarea id='descripcion'></textarea><br>
-    <button onclick='guardarTicket()'>Guardar</button>
-    <button onclick='cerrarModal()'>Cancelar</button>
-  </div>`;
+  modal.innerHTML = `
+    <div class='modal'>
+      <h3>Nuevo Ticket</h3>
+      <input id='fecha' type='date' required><br>
+      <select id='tecnico'>
+        ${tecnicos.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join("")}
+      </select><br>
+      <input id='horas_totales' type='number' placeholder='Horas Totales' min='0' step='0.1'><br>
+      <input id='precio_materiales' type='number' placeholder='Precio Materiales' min='0' step='0.01'><br>
+      <select id='estado'>
+        <option value="Pausado">Pausado</option>
+        <option value="Cerrado">Cerrado</option>
+        <option value="Facturado">Facturado</option>
+      </select><br><br>
+      <textarea id='descripcion' placeholder='Descripción' rows="3"></textarea><br><br>
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button onclick='guardarTicket()' class="btn">Guardar</button>
+        <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
+      </div>
+    </div>`;
   modal.style.display = "block";
 }
-function cerrarModal(){ document.getElementById("modal").style.display = "none"; }
+
+function cerrarModal(){
+  document.getElementById("modal").style.display = "none";
+}
+
 async function guardarTicket(){
   const data = {
     aviso_id: avisoId,
@@ -292,59 +429,161 @@ async function guardarTicket(){
     estado: document.getElementById('estado').value,
     description: document.getElementById('descripcion').value
   };
-  await apiFetch(`${api}/tickets`, { method: 'POST', headers, body: JSON.stringify(data) });
-  cerrarModal(); cargarTickets();
+
+  await apiFetch(`${api}/tickets`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(data)
+  });
+  cerrarModal();
+  cargarTickets();
 }
+
+/* ================== BORRAR / CAMBIAR ESTADO ================== */
 async function borrarTicket(id){
   if (confirm("¿Eliminar ticket?")) {
     await apiFetch(`${api}/tickets/${id}`, { method: 'DELETE', headers });
     cargarTickets();
   }
 }
+
 async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
-  const t = ticketsLista.find(x => x.id === id);
-  if (!t) return;
-  if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') && (!t.horas_totales || t.horas_totales <= 0)) {
-    alert('No puedes cerrar o facturar un ticket sin horas.');
-    if (selectEl) selectEl.value = t.estado;
-    return;
+  try {
+    const t = ticketsLista.find(x => x.id === id);
+    if (!t) return;
+
+    let desc = t.description ?? t.descripcion ?? "";
+    let horas = t.horas_totales ?? 0;
+    let mats  = t.precio_materiales ?? 0;
+
+    if (selectEl) {
+      const ticketIdAttr = selectEl.closest('tr')?.dataset?.id;
+      if (ticketIdAttr) {
+        const scope = document.querySelectorAll(`#ticketsBody tr[data-id="${ticketIdAttr}"] [data-field]`);
+        scope.forEach(el => {
+          if (el.dataset.field === 'description') desc = el.value ?? desc;
+          if (el.dataset.field === 'horas_totales') horas = parseFloat(el.value) || horas;
+          if (el.dataset.field === 'precio_materiales') mats = parseFloat(el.value) || mats;
+        });
+      } else {
+        const tr  = selectEl.closest('tr');
+        const dEl = tr.querySelector('[data-field="description"]');
+        const hEl = tr.querySelector('[data-field="horas_totales"]');
+        const mEl = tr.querySelector('[data-field="precio_materiales"]');
+        if (dEl) desc  = dEl.value ?? desc;
+        if (hEl) horas = parseFloat(hEl.value) || horas;
+        if (mEl) mats  = parseFloat(mEl.value) || mats;
+      }
+    }
+
+    if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') && (!horas || horas <= 0)) {
+      alert('No puedes cerrar o facturar un ticket sin horas.');
+      if (selectEl) selectEl.value = t.estado;
+      return;
+    }
+
+    const payload = {
+      fecha: t.fecha || null,
+      tecnico: t.tecnico || "",
+      horas_totales: horas,
+      precio_materiales: mats,
+      estado: t.estado,
+      description: (desc ?? "") + ""
+    };
+    await apiFetch(`${api}/tickets/${id}`, { method: 'PUT', headers, body: JSON.stringify(payload) });
+    Object.assign(t, payload);
+
+    await apiFetch(`${api}/tickets/${id}/estado`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+
+  } catch (e) {
+    alert('No se pudo cambiar el estado. Revisa la consola.');
+    if (selectEl) {
+      const t = ticketsLista.find(x => x.id === id);
+      if (t) selectEl.value = t.estado;
+    }
+  } finally {
+    cargarTickets();
   }
-  await apiFetch(`${api}/tickets/${id}/estado`, { method: 'PUT', headers, body: JSON.stringify({ estado: nuevoEstado }) });
-  t.estado = nuevoEstado;
-  cargarTickets();
 }
-async function editarTicket(id){
+
+/* ================== EDITAR TICKET ================== */
+async function editarTicket(id) {
   await cargarTecnicos();
   const t = ticketsLista.find(ticket => ticket.id === id);
-  if (!t) return;
+  if (!t) return alert("No se encontró el ticket");
+
+  const esPausado = t.estado === 'Pausado';
+  const disabledCampos = esPausado ? "" : "disabled";
+
   const modal = document.getElementById("modal");
-  modal.innerHTML = `<div class='modal'>
-    <h3>Editar Ticket</h3>
-    <input id='fecha' type='date' value='${t.fecha || ""}'><br>
-    <select id='tecnico'>${tecnicos.map(te => `<option ${te.nombre === t.tecnico ? 'selected' : ''}>${te.nombre}</option>`).join("")}</select><br>
-    <input id='horas_totales' type='number' value='${t.horas_totales || 0}'><br>
-    <input id='precio_materiales' type='number' value='${t.precio_materiales || 0}'><br>
-    <select id='estado'><option ${t.estado==="Pausado"?"selected":""}>Pausado</option><option ${t.estado==="Cerrado"?"selected":""}>Cerrado</option><option ${t.estado==="Facturado"?"selected":""}>Facturado</option></select><br>
-    <textarea id='descripcion'>${t.description || ""}</textarea><br>
-    <button onclick='guardarEdicion(${t.id})'>Guardar</button>
-    <button onclick='cerrarModal()'>Cancelar</button>
-  </div>`;
+  modal.innerHTML = `
+    <div class='modal'>
+      <h3>Editar Ticket</h3>
+
+      <label>Fecha</label>
+      <input id='fecha' type='date' value='${t.fecha ?? ""}' ${disabledCampos}><br>
+
+      <label>Técnico</label>
+      <select id='tecnico' ${disabledCampos}>
+        ${tecnicos.map(te => `<option value="${te.nombre}" ${te.nombre === t.tecnico ? 'selected' : ''}>${te.nombre}</option>`).join("")}
+      </select><br>
+
+      <label>Horas Totales</label>
+      <input id='horas_totales' type='number' value='${t.horas_totales || 0}' min='0' step='0.1' ${disabledCampos}><br>
+
+      <label>Precio Materiales</label>
+      <input id='precio_materiales' type='number' value='${t.precio_materiales || 0}' min='0' step='0.01' ${disabledCampos}><br>
+
+      <label>Estado</label>
+      <select id='estado'>
+        <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+        <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+        <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+      </select><br><br>
+
+      <label>Descripción</label>
+      <textarea id='descripcion' placeholder='Descripción' rows="3" ${disabledCampos}>${t.description ?? t.descripcion ?? ""}</textarea><br><br>
+
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button onclick='guardarEdicion(${t.id})' class="btn">Guardar</button>
+        <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
+      </div>
+    </div>`;
   modal.style.display = "block";
 }
+
 async function guardarEdicion(id){
+  const t = ticketsLista.find(x => x.id === id);
+  if (!t) return;
+
   const data = {
-    fecha: document.getElementById('fecha').value,
+    fecha: document.getElementById('fecha').value || null,
     tecnico: document.getElementById('tecnico').value,
     horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
     precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
     estado: document.getElementById('estado').value,
     description: document.getElementById('descripcion').value
   };
-  await apiFetch(`${api}/tickets/${id}`, { method: 'PUT', headers, body: JSON.stringify(data) });
-  cerrarModal(); cargarTickets();
+
+  await apiFetch(`${api}/tickets/${id}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(data)
+  });
+
+  Object.assign(t, data);
+  cerrarModal();
+  cargarTickets();
 }
+
+/* ================== INICIO ================== */
 cargarTitulo();
 cargarTecnicos().then(cargarTickets);
 </script>
+
 </body>
 </html>
