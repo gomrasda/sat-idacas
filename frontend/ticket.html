@@ -29,7 +29,7 @@
     .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px; z-index: 1000; width: 90%; max-width: 420px; }
     .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
 
-    /* ====== MÓVIL/TABLET: 4 filas por ticket ====== */
+/* ====== MÓVIL/TABLET: 4 filas por ticket ====== */
 @media (max-width: 1024px){
   .container { max-width: 100%; padding: 12px; }
   thead { display: none; }
@@ -78,7 +78,7 @@
   #ticketsBody td::before{
     content:attr(data-label);
     font-weight:600; color:#6b7280;
-    font-size:16px; /* antes 13px */
+    font-size:16px;
     margin-bottom: 2px;
   }
 
@@ -87,7 +87,7 @@
   #ticketsBody td select,
   #ticketsBody td textarea,
   #ticketsBody td .chip {
-    font-size: 20px !important; /* antes 18px */
+    font-size: 20px !important;
     line-height: 1.4;
     box-sizing: border-box;
   }
@@ -100,14 +100,19 @@
     border-radius:999px;
     height:52px;
     white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
-    font-size: 20px; /* antes herencia */
+    font-size: 20px;
   }
 
-  /* Descripción */
-  #ticketsBody tr.r2 textarea{
+  /* Descripción (editable o deshabilitada) */
+  #ticketsBody tr.r2 textarea,
+  #ticketsBody tr.r2 textarea:disabled {
     min-height:160px;
     padding:14px 16px;
     font-size: 20px;
+    line-height: 1.4;
+    color: var(--ink);
+    background-color: #fff;
+    opacity: 1;
   }
 
   /* Horas / Materiales */
@@ -131,28 +136,23 @@
     font-size: 20px;
   }
 
-/* Acciones */
-#ticketsBody td.acciones {
-  display: flex;
-  flex-direction: row; /* Horizontal en móvil */
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-#ticketsBody td.acciones button {
-  width: 52px;
-  height: 52px;
-  font-size: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--b);
-  background: #fff;
-  border-radius: 14px;
-  cursor: pointer;
-}
-
+  /* Acciones en fila */
+  #ticketsBody td.acciones{
+    display:flex;
+    flex-direction: row;
+    align-items:center;
+    justify-content:flex-end;
+    gap:10px;
+  }
+  #ticketsBody td.acciones button{
+    width:52px; height:52px;
+    font-size: 24px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1px solid var(--b);
+    background:#fff;
+    border-radius:14px;
+    cursor:pointer;
+  }
 
   /* Título */
   #tituloCliente{
@@ -164,6 +164,7 @@
     font-weight:700;
   }
 }
+
 
   </style>
 </head>
