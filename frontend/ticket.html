@@ -50,19 +50,24 @@
         font-weight: 800;
       }
 
+      /* Fila de botones (Crear y Volver) */
+      .actions-row{
+        display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; margin: 8px 0 14px;
+      }
+      #btnNuevo, #btnVolver{
+        flex:1 1 48%;
+        font-size: 40px !important;
+        padding: 14px 28px;
+        border-radius: 12px;
+      }
+      #btnVolver{ background:#6c757d; }
+
       /* Label y select del FILTRO grandes */
-      .container > label { font-size: 32px; font-weight: 600; color: var(--muted); }
+      .container > label { font-size: 32px; font-weight: 600; color: var(--muted); margin-bottom:6px; }
       #filtroEstado{
         font-size: 40px !important;
         height: 64px;
         padding: 10px 16px;
-        border-radius: 12px;
-      }
-
-      /* Botón Crear Ticket grande sin tocar los demás .btn */
-      #btnNuevo{
-        font-size: 40px !important;
-        padding: 14px 28px;
         border-radius: 12px;
       }
 
@@ -157,7 +162,6 @@
 <body>
 
 <div class="container">
-  <button onclick="window.location.href='index.html#avisos'" class="btn" style="background:#6c757d;">🔙 Volver a Avisos</button>
   <h2 id="tituloCliente">Tickets del Aviso</h2>
 
   <label>Filtrar por Estado:</label>
@@ -168,7 +172,11 @@
     <option value="Facturado">Facturado</option>
   </select>
 
-  <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
+  <!-- Botones: Crear y Volver en la misma fila -->
+  <div class="actions-row">
+    <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
+    <button class="btn" id="btnVolver">🔙 Volver a Avisos</button>
+  </div>
 
   <div class="table-wrap">
     <table>
@@ -230,6 +238,9 @@ async function cargarTitulo(){
 document.getElementById('btnNuevo').addEventListener('click', async () => {
   await cargarTecnicos();
   abrirModal();
+});
+document.getElementById('btnVolver').addEventListener('click', () => {
+  window.location.href = 'index.html#avisos';
 });
 
 /* ================== ACTUALIZAR CAMPOS EN LÍNEA ================== */
@@ -436,19 +447,16 @@ async function borrarTicket(id){
   }
 }
 
-// Guarda todo antes de cambiar estado y valida horas>0 para Cerrar/Facturar
 async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
   try {
     const t = ticketsLista.find(x => x.id === id);
     if (!t) return;
 
-    // valores actuales (por si no hay inputs visibles en móvil)
     let desc = t.description ?? t.descripcion ?? "";
     let horas = t.horas_totales ?? 0;
     let mats  = t.precio_materiales ?? 0;
 
     if (selectEl) {
-      // Busca en todas las filas del mismo ticket por data-id
       const ticketIdAttr = selectEl.closest('tr')?.dataset?.id;
       if (ticketIdAttr) {
         const scope = document.querySelectorAll(`#ticketsBody tr[data-id="${ticketIdAttr}"] [data-field]`);
@@ -458,7 +466,6 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
           if (el.dataset.field === 'precio_materiales') mats = parseFloat(el.value) || mats;
         });
       } else {
-        // Fallback escritorio: leer en la misma fila
         const tr  = selectEl.closest('tr');
         const dEl = tr.querySelector('[data-field="description"]');
         const hEl = tr.querySelector('[data-field="horas_totales"]');
@@ -475,23 +482,17 @@ async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
       return;
     }
 
-    // 1) Guardar TODO antes de cambiar estado (incluida description)
     const payload = {
       fecha: t.fecha || null,
       tecnico: t.tecnico || "",
       horas_totales: horas,
       precio_materiales: mats,
-      estado: t.estado,       // aún el anterior
+      estado: t.estado,
       description: (desc ?? "") + ""
     };
-    await apiFetch(`${api}/tickets/${id}`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(payload)
-    });
+    await apiFetch(`${api}/tickets/${id}`, { method: 'PUT', headers, body: JSON.stringify(payload) });
     Object.assign(t, payload);
 
-    // 2) Cambiar estado
     await apiFetch(`${api}/tickets/${id}/estado`, {
       method: 'PUT',
       headers,
