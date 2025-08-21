@@ -40,9 +40,7 @@
       transition: left 0.3s ease;
       z-index: 1001;
     }
-    .sidebar.active {
-      left: 0;
-    }
+    .sidebar.active { left: 0; }
     .sidebar button {
       display: block;
       width: 100%;
@@ -74,17 +72,9 @@
       display: none;
       z-index: 1000;
     }
-    .overlay.active {
-      display: block;
-    }
-    .main {
-      padding: 16px 16px 16px 24px;
-      margin-top: 60px;
-    }
-    .main h2,
-    .main button {
-      margin-left: 8px;
-    }
+    .overlay.active { display: block; }
+    .main { padding: 16px 16px 16px 24px; margin-top: 60px; }
+    .main h2, .main button { margin-left: 8px; }
     table {
       border-collapse: collapse;
       width: 100%;
@@ -95,9 +85,7 @@
       padding: 8px;
       text-align: left;
     }
-    th {
-      background: #eee;
-    }
+    th { background: #eee; }
     .modal {
       position: fixed;
       top: 50%; left: 50%;
@@ -116,6 +104,56 @@
       margin: 5px 0;
       border: 1px solid #ccc;
       border-radius: 5px;
+    }
+
+    /* ==== Tarjetas de AVISOS estilo "tickets" ==== */
+    #avisosCards .aviso-card{
+      background:#fff;
+      border:2px solid #cfd8e6;
+      border-radius:12px;
+      padding:16px;
+      width:100%;
+      max-width:700px;
+      margin:14px 0;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);
+      line-height:1.5;
+      font-size:18px;
+    }
+    #avisosCards .cliente{ font-size:24px; font-weight:800; margin:0 0 6px; }
+    #avisosCards .obs{ font-size:20px; font-weight:600; color:#333; margin:0 0 8px; }
+    #avisosCards .meta{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:8px;
+      margin-top:6px;
+    }
+    #avisosCards .meta > span{
+      display:block;
+      background:#eef2f7;
+      border:1px solid #e9eef6;
+      border-radius:10px;
+      padding:8px 10px;
+    }
+    #avisosCards .acciones{
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      margin-top:12px;
+    }
+    #avisosCards .acciones button{
+      font-size:16px;
+      padding:8px 12px;
+      border-radius:10px;
+      border:1px solid #e9eef6;
+      background:#fff;
+      cursor:pointer;
+    }
+    #avisosCards .acciones button:hover{ background:#f1f5fb }
+    @media (max-width:1024px){
+      #avisosCards .aviso-card{ padding:14px; font-size:20px }
+      #avisosCards .cliente{ font-size:26px }
+      #avisosCards .obs{ font-size:22px }
+      #avisosCards .acciones button{ font-size:18px; padding:10px 14px }
     }
   </style>
 </head>
@@ -138,38 +176,38 @@
 
   <div class="main">
 
-  <div id="inicio" style="text-align:center; margin-top: 80px;">
-  <img src="logo.jpg" alt="Logo de la empresa" style="max-width: 200px;">
-  <h2>Bienvenido a SAT Control</h2>
-  </div>
-
+    <div id="inicio" style="text-align:center; margin-top: 80px;">
+      <img src="logo.jpg" alt="Logo de la empresa" style="max-width: 200px;">
+      <h2>Bienvenido a SAT Control</h2>
+    </div>
 
     <div id="usuarios" style="display:none;">
       <h2>Usuarios</h2>
       <button onclick="nuevoUsuario()">➕ Nuevo Usuario</button>
-      <table><thead><tr><th>Nombre</th><th>Usuario</th><th>Email</th><th>Rol</th><th>Acciones</th></tr></thead><tbody id="usuariosBody"></tbody></table>
+      <table>
+        <thead><tr><th>Nombre</th><th>Usuario</th><th>Email</th><th>Rol</th><th>Acciones</th></tr></thead>
+        <tbody id="usuariosBody"></tbody>
+      </table>
     </div>
 
     <div id="clientes" style="display:none;">
-       <h2>Clientes</h2>
-       <button onclick="nuevoCliente()">➕ Nuevo Cliente</button>
-       <div id="clientesCards" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;"></div>
+      <h2>Clientes</h2>
+      <button onclick="nuevoCliente()">➕ Nuevo Cliente</button>
+      <div id="clientesCards" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;"></div>
     </div>
 
+    <div id="avisos" style="display:none;">
+      <select id="filtroEstado" onchange="filtrarAvisos()" style="margin-left: 8px; padding: 6px;">
+        <option value="todos">Todos</option>
+        <option value="Pendiente">Pendientes</option>
+        <option value="Cerrado">Cerrados</option>
+      </select>
+      <button onclick="nuevoAviso()">➕ Nuevo Aviso</button>
+      <div id="avisosCards" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;"></div>
+    </div>
 
-   <div id="avisos" style="display:none;">
-   <select id="filtroEstado" onchange="filtrarAvisos()" style="margin-left: 8px; padding: 6px;">
-    <option value="todos">Todos</option>
-    <option value="Pendiente">Pendientes</option>
-    <option value="Cerrado">Cerrados</option>
-  </select>
-
-  <button onclick="nuevoAviso()">➕ Nuevo Aviso</button>
-  <div id="avisosCards" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;"></div>
+    <div id="modal" style="display:none;"></div>
   </div>
-
-
-  <div id="modal" style="display:none;"></div>
 
   <script>
     const token = localStorage.getItem('token');
@@ -179,10 +217,8 @@
     const rol = payload.rol;
 
     const api = "https://sat-idacas.onrender.com/api";
-
-
-
     let clientes = [], tecnicos = [];
+
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + token
@@ -202,45 +238,47 @@
       document.getElementById("btnUsuarios").style.display = "none";
     }
 
-  function mostrar(seccion) {
-  document.getElementById('inicio').style.display = 'none'; // Ocultar el logo
-  document.getElementById('usuarios').style.display = 'none';
-  document.getElementById('clientes').style.display = 'none';
-  document.getElementById('avisos').style.display = 'none';
-  document.getElementById(seccion).style.display = 'block';
+    function mostrar(seccion) {
+      document.getElementById('inicio').style.display = 'none';
+      document.getElementById('usuarios').style.display = 'none';
+      document.getElementById('clientes').style.display = 'none';
+      document.getElementById('avisos').style.display = 'none';
+      document.getElementById(seccion).style.display = 'block';
 
-  document.getElementById('sidebar').classList.remove('active');
-  document.getElementById('overlay').classList.remove('active');
+      document.getElementById('sidebar').classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
 
-  if (seccion === 'usuarios') cargarUsuarios();
-  if (seccion === 'clientes') cargarClientes();
-  if (seccion === 'avisos') {
-  cargarClientes();
-  cargarTecnicos();
-  const filtro = document.getElementById('filtroEstado').value;
-  cargarAvisos(filtro);
-}
-
-}
-
+      if (seccion === 'usuarios') cargarUsuarios();
+      if (seccion === 'clientes') cargarClientes();
+      if (seccion === 'avisos') {
+        cargarClientes();
+        cargarTecnicos();
+        const filtro = document.getElementById('filtroEstado').value;
+        cargarAvisos(filtro);
+      }
+    }
 
     async function cargarUsuarios() {
       const res = await fetch(api + "/usuarios", { headers });
       const data = await res.json();
-      const body = document.getElementById("usuariosBody"); body.innerHTML = "";
+      const body = document.getElementById("usuariosBody");
+      body.innerHTML = "";
       data.forEach(u => {
-        body.innerHTML += `<tr><td>${u.nombre}</td><td>${u.usuario}</td><td>${u.email}</td><td>${u.rol}</td>
-        <td><button onclick='editarUsuario(${JSON.stringify(u)})'>✏️</button><button onclick='borrar("usuarios",${u.id})'>🗑️</button></td></tr>`;
+        body.innerHTML += `<tr>
+          <td>${u.nombre}</td>
+          <td>${u.usuario}</td>
+          <td>${u.email}</td>
+          <td>${u.rol}</td>
+          <td>
+            <button onclick='editarUsuario(${JSON.stringify(u)})'>✏️</button>
+            <button onclick='borrar("usuarios",${u.id})'>🗑️</button>
+          </td>
+        </tr>`;
       });
     }
 
-    function nuevoUsuario() {
-      abrirUsuario({ id: 0, nombre: "", usuario: "", email: "", rol: "Gestor" }, false);
-    }
-
-    function editarUsuario(u) {
-      abrirUsuario(u, true);
-    }
+    function nuevoUsuario() { abrirUsuario({ id: 0, nombre: "", usuario: "", email: "", rol: "Gestor" }, false); }
+    function editarUsuario(u) { abrirUsuario(u, true); }
 
     function abrirUsuario(u, ed) {
       const modal = document.getElementById("modal");
@@ -277,14 +315,8 @@
       const method = ed ? "PUT" : "POST";
 
       try {
-        const res = await fetch(url, {
-          method,
-          headers,
-          body: JSON.stringify(d)
-        });
-
+        const res = await fetch(url, { method, headers, body: JSON.stringify(d) });
         if (!res.ok) throw new Error(await res.text());
-
         cerrarModal();
         cargarUsuarios();
       } catch (err) {
@@ -293,35 +325,34 @@
     }
 
     async function cargarClientes() {
-  const res = await fetch(api + "/clientes", { headers });
-  clientes = await res.json();
+      const res = await fetch(api + "/clientes", { headers });
+      clientes = await res.json();
 
-  const contenedor = document.getElementById("clientesCards");
-  contenedor.innerHTML = "";
+      const contenedor = document.getElementById("clientesCards");
+      contenedor.innerHTML = "";
 
-  clientes.forEach(c => {
-    const card = document.createElement("div");
-    card.style = `
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 12px;
-      width: 100%;
-      max-width: 700px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    `;
+      clientes.forEach(c => {
+        const card = document.createElement("div");
+        card.style = `
+          background: white;
+          border: 1px solid #ccc;
+          border-radius: 10px;
+          padding: 12px;
+          width: 100%;
+          max-width: 700px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        `;
 
-    card.innerHTML = `
-      <strong>Nombre:</strong> ${c.nombre}<br>
-      <strong>Observaciones:</strong> ${c.obs}<br><br>
-      <button onclick='editarCliente(${JSON.stringify(c)})'>✏️ Editar</button>
-      <button onclick='borrar("clientes", ${c.id})'>🗑️ Borrar</button>
-    `;
+        card.innerHTML = `
+          <strong>Nombre:</strong> ${c.nombre}<br>
+          <strong>Observaciones:</strong> ${c.obs}<br><br>
+          <button onclick='editarCliente(${JSON.stringify(c)})'>✏️ Editar</button>
+          <button onclick='borrar("clientes", ${c.id})'>🗑️ Borrar</button>
+        `;
 
-    contenedor.appendChild(card);
-  });
-}
-
+        contenedor.appendChild(card);
+      });
+    }
 
     async function cargarTecnicos() {
       const res = await fetch(api + "/usuarios", { headers });
@@ -329,66 +360,59 @@
       tecnicos = data.filter(t => t.rol === "Técnico");
     }
 
-async function cargarAvisos(filtro = "todos") {
-  const res = await fetch(api + "/avisos", { headers });
-  const data = await res.json();
-  const contenedor = document.getElementById("avisosCards");
-  contenedor.innerHTML = "";
+    async function cargarAvisos(filtro = "todos") {
+      const res = await fetch(api + "/avisos", { headers });
+      const data = await res.json();
+      const contenedor = document.getElementById("avisosCards");
+      contenedor.innerHTML = "";
 
-  const avisosFiltrados = filtro === "todos"
-    ? data
-    : data.filter(a => a.estado === filtro);
+      const avisosFiltrados = filtro === "todos" ? data : data.filter(a => a.estado === filtro);
 
-  avisosFiltrados.forEach(a => {
-    const card = document.createElement("div");
-    card.style = `
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 12px;
-      width: 100%;
-      max-width: 700px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    `;
+      avisosFiltrados.forEach(a => {
+        const card = document.createElement("div");
+        card.className = "aviso-card";
 
-    card.innerHTML = `
-      <strong>Cliente:</strong> ${a.cliente}<br>
-      <strong>Observaciones:</strong> ${a.tarea}<br>
-      <strong>Fecha:</strong> ${a.fecha_programada}<br>
-      <strong>Técnico:</strong> ${a.tecnico}<br>
-      <strong>Estado:</strong> 
-      <select onchange="cambiarEstado(${a.id}, this.value)">
-        <option value="Pendiente" ${a.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
-        <option value="Cerrado" ${a.estado === "Cerrado" ? "selected" : ""}>Cerrado</option>
-      </select>
-      <br><br>
-      <button onclick='editarAviso(${JSON.stringify(a)})'>✏️ Editar</button>
-      <button onclick='borrarAviso(${a.id})'>🗑️ Borrar</button>
-      <button onclick='abrirTicket(${a.id})'>🎫 Ticket</button>
-    `;
+        card.innerHTML = `
+          <div class="cliente">Cliente: ${a.cliente}</div>
+          <div class="obs">Observaciones: ${a.tarea}</div>
 
-    contenedor.appendChild(card);
-  });
-}
+          <div class="meta">
+            <span><strong>Fecha:</strong> ${a.fecha_programada}</span>
+            <span><strong>Técnico:</strong> ${a.tecnico}</span>
+          </div>
 
+          <div style="margin-top:8px;">
+            <strong>Estado:</strong>
+            <select onchange="cambiarEstado(${a.id}, this.value)">
+              <option value="Pendiente" ${a.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
+              <option value="Cerrado" ${a.estado === "Cerrado" ? "selected" : ""}>Cerrado</option>
+            </select>
+          </div>
 
+          <div class="acciones">
+            <button onclick='editarAviso(${JSON.stringify(a)})'>✏️ Editar</button>
+            <button onclick='borrarAviso(${a.id})'>🗑️ Borrar</button>
+            <button onclick='abrirTicket(${a.id})'>🎫 Ticket</button>
+          </div>
+        `;
 
+        contenedor.appendChild(card);
+      });
+    }
 
     async function cambiarEstado(id, nuevoEstado) {
-  const res = await fetch(api + "/avisos/" + id, { headers });
-  const aviso = await res.json();
-  const data = { ...aviso, estado: nuevoEstado };
-  await fetch(api + "/avisos/" + id, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify(data)
-  });
+      const res = await fetch(api + "/avisos/" + id, { headers });
+      const aviso = await res.json();
+      const data = { ...aviso, estado: nuevoEstado };
+      await fetch(api + "/avisos/" + id, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(data)
+      });
 
-  // Recargar respetando el filtro actual
-  const filtro = document.getElementById('filtroEstado').value;
-  cargarAvisos(filtro);
-}
-
+      const filtro = document.getElementById('filtroEstado').value;
+      cargarAvisos(filtro);
+    }
 
     function nuevoCliente() {
       abrirCliente({ nombre: "", obs: "" }, false);
@@ -426,46 +450,45 @@ async function cargarAvisos(filtro = "todos") {
       abrirAviso(a, true);
     }
 
-function abrirAviso(a, ed) {
-  const modal = document.getElementById("modal");
-  const fecha = a.fecha_programada ? a.fecha_programada.substring(0, 10) : "";
+    function abrirAviso(a, ed) {
+      const modal = document.getElementById("modal");
+      const fecha = a.fecha_programada ? a.fecha_programada.substring(0, 10) : "";
 
-  modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Aviso</h3>
-    <select id='cl'>
-      ${clientes.map(c => `<option value="${c.id}" ${c.id === a.cliente_id ? 'selected' : ''}>${c.nombre}</option>`).join("")}
-    </select>
+      modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Aviso</h3>
+        <select id='cl'>
+          ${clientes.map(c => `<option value="${c.id}" ${c.id === a.cliente_id ? 'selected' : ''}>${c.nombre}</option>`).join("")}
+        </select>
 
-    <input id='ta' placeholder='Observaciones' value='${a.tarea || ""}'>
-    <input id='fe' type='date' value='${fecha}'>
-    <select id='te'>
-      ${tecnicos.map(t => `<option ${t.nombre === a.tecnico ? 'selected' : ""}>${t.nombre}</option>`).join("")}
-    </select>
-    <select id='es'>
-      <option ${a.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
-      <option ${a.estado === "Cerrado" ? "selected" : ""}>Cerrado</option>
-    </select><br><br>
-    <button onclick='guardarAviso(${JSON.stringify(a)},${ed})'>Guardar</button>
-    <button onclick='cerrarModal()'>Cancelar</button>
-  </div>`;
-  
-  modal.style.display = "block";
-}
+        <input id='ta' placeholder='Observaciones' value='${a.tarea || ""}'>
+        <input id='fe' type='date' value='${fecha}'>
+        <select id='te'>
+          ${tecnicos.map(t => `<option ${t.nombre === a.tecnico ? 'selected' : ""}>${t.nombre}</option>`).join("")}
+        </select>
+        <select id='es'>
+          <option ${a.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
+          <option ${a.estado === "Cerrado" ? "selected" : ""}>Cerrado</option>
+        </select><br><br>
+        <button onclick='guardarAviso(${JSON.stringify(a)},${ed})'>Guardar</button>
+        <button onclick='cerrarModal()'>Cancelar</button>
+      </div>`;
 
-async function guardarAviso(a, ed) {
-  const data = {
-    cliente: parseInt(document.getElementById('cl').value, 10), // siempre número
-    tarea: document.getElementById('ta').value,
-    fecha_programada: document.getElementById('fe').value,
-    tecnico: document.getElementById('te').value,
-    estado: document.getElementById('es').value
-  };
-  const method = ed ? "PUT" : "POST";
-  const url = ed ? `${api}/avisos/${a.id}` : `${api}/avisos`;
-  await fetch(url, { method, headers, body: JSON.stringify(data) });
-  cerrarModal();
-  cargarAvisos();
-}
+      modal.style.display = "block";
+    }
 
+    async function guardarAviso(a, ed) {
+      const data = {
+        cliente: parseInt(document.getElementById('cl').value, 10),
+        tarea: document.getElementById('ta').value,
+        fecha_programada: document.getElementById('fe').value,
+        tecnico: document.getElementById('te').value,
+        estado: document.getElementById('es').value
+      };
+      const method = ed ? "PUT" : "POST";
+      const url = ed ? `${api}/avisos/${a.id}` : `${api}/avisos`;
+      await fetch(url, { method, headers, body: JSON.stringify(data) });
+      cerrarModal();
+      cargarAvisos();
+    }
 
     async function borrar(tipo, id) {
       if (confirm("¿Seguro?")) {
@@ -487,28 +510,24 @@ async function guardarAviso(a, ed) {
       window.open('ticket.html?avisoId=' + avisoId, '_blank');
     }
 
-
     function cerrarModal() {
       document.getElementById("modal").style.display = "none";
     }
 
     function filtrarAvisos() {
-  const estado = document.getElementById('filtroEstado').value;
-  cargarAvisos(estado);
-}
+      const estado = document.getElementById('filtroEstado').value;
+      cargarAvisos(estado);
+    }
 
-
-window.addEventListener('load', () => {
-  const hash = window.location.hash.substring(1);
-  if (hash) {
-    mostrar(hash);
-  } else {
-    document.getElementById('inicio').style.display = 'block';
-  }
-});
-
-</script>
-
+    window.addEventListener('load', () => {
+      const hash = window.location.hash.substring(1);
+      if (hash) {
+        mostrar(hash);
+      } else {
+        document.getElementById('inicio').style.display = 'block';
+      }
+    });
+  </script>
 
 </body>
 </html>
