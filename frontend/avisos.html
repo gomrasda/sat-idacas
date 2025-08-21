@@ -1,22 +1,88 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Avisos</title>
+  <style>
+    :root{
+      --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7;
+      --card-b:#cfd8e6; --alt-bg:#f6f8fb; --primary:#007bff; --secondary:#6c757d;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink)}
+    .container{max-width:980px; margin:auto; padding:16px}
+    h2{margin:8px 0 16px; text-align:center; font-size:28px}
+
+    /* Form básico */
+    #avisoForm{
+      background:#fff; border:1px solid var(--card-b); border-radius:12px; padding:12px; margin-bottom:16px;
+      display:grid; grid-template-columns: repeat(2,1fr); gap:10px;
+      box-shadow:0 2px 8px rgba(0,0,0,.05);
+    }
+    #avisoForm input, #avisoForm select, #avisoForm button{
+      width:100%; padding:10px 12px; border:1px solid var(--b); border-radius:10px; font:inherit;
+    }
+    #avisoForm button{ background:var(--primary); color:#fff; cursor:pointer }
+    #avisoForm button:hover{ background:#0056b3 }
+    #avisoForm input[type="hidden"]{display:none}
+    #avisoForm button[type="submit"]{ grid-column: 1 / -1 }
+
+    /* Lista de avisos con tarjetas */
+    #listaAvisos{list-style:none; padding:0; margin:0}
+    .aviso-card{
+      background:#fff; border:2px solid var(--card-b); border-radius:12px; padding:16px; margin:14px 0;
+      box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5;
+    }
+    .aviso-top{margin-bottom:10px}
+    .aviso-cliente{
+      font-size:24px; font-weight:800; margin:0 0 6px;
+    }
+    .aviso-obs{
+      font-size:18px; font-weight:600; color:#333; margin:0 0 8px;
+    }
+    .aviso-meta{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; font-size:16px; color:#444}
+    .aviso-meta span{display:block; background:var(--chip); border:1px solid var(--b); border-radius:10px; padding:8px 10px}
+
+    .acciones{
+      display:flex; gap:8px; justify-content:flex-end; margin-top:12px;
+    }
+    .btn{ border:1px solid var(--b); background:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:16px }
+    .btn:hover{ background:#f1f5fb }
+    .btn-danger{ border-color:#e5a3a3; background:#fff3f3 }
+    .btn-primary{ background:var(--primary); color:#fff; border-color:transparent }
+    .btn-primary:hover{ background:#0056b3 }
+    .btn-warning{ background:#fff7e6; border-color:#ffe0a3 }
+
+    /* Móvil / tablet: textos grandes como en tickets */
+    @media (max-width:1024px){
+      h2{font-size:34px; font-weight:800}
+      #avisoForm{grid-template-columns:1fr}
+      #avisoForm button[type="submit"]{font-size:20px; padding:14px}
+
+      .aviso-card{padding:14px}
+      .aviso-cliente{font-size:26px}
+      .aviso-obs{font-size:20px}
+      .aviso-meta{grid-template-columns:1fr; font-size:18px}
+      .btn{font-size:18px; padding:10px 14px}
+    }
+  </style>
 </head>
 <body>
-  <h2>Avisos</h2>
+  <div class="container">
+    <h2>Avisos</h2>
 
-  <form id="avisoForm">
-    <input type="hidden" name="id">
-    <select name="cliente" id="clientes" required></select><br>
-    <input type="text" name="tarea" placeholder="Tarea" required><br>
-    <input type="date" name="fecha_programada" required><br>
-    <select name="tecnico" id="tecnicos" required></select><br>
-    <button type="submit">Guardar</button>
-  </form>
+    <form id="avisoForm">
+      <input type="hidden" name="id" />
+      <select name="cliente" id="clientes" required></select>
+      <input type="text" name="tarea" placeholder="Tarea" required />
+      <input type="date" name="fecha_programada" required />
+      <select name="tecnico" id="tecnicos" required></select>
+      <button type="submit">Guardar</button>
+    </form>
 
-  <ul id="listaAvisos"></ul>
+    <ul id="listaAvisos"></ul>
+  </div>
 
   <script>
     const api = "https://sat-idacas.onrender.com/api";
@@ -24,49 +90,71 @@
     const lista = document.getElementById('listaAvisos');
     const form = document.getElementById('avisoForm');
 
+    // Escapar texto para innerHTML seguro
+    const esc = s => String(s ?? "")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+
     async function cargarClientes() {
-      const res = await fetch(`${api}/clientes`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetch(`${api}/clientes`, { headers: { 'Authorization': 'Bearer ' + token }});
       const clientes = await res.json();
       const sel = document.getElementById('clientes');
       sel.innerHTML = '';
       clientes.forEach(c => {
         const opt = document.createElement('option');
-        opt.value = c.id; // ID numérico
+        opt.value = c.id;
         opt.text = c.nombre;
         sel.appendChild(opt);
       });
     }
 
     async function cargarTecnicos() {
-      const res = await fetch(`${api}/usuarios`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetch(`${api}/usuarios`, { headers: { 'Authorization': 'Bearer ' + token }});
       const usuarios = await res.json();
       const select = document.getElementById('tecnicos');
       select.innerHTML = '';
       usuarios
-        .filter(u => u.rol === 'tecnico' || u.rol === 'gestor')
+        .filter(u => u.rol === 'tecnico' || u.rol === 'gestor' || u.rol === 'Técnico')
         .forEach(u => {
+          const nombre = u.nombre_completo || u.nombre;
           const opt = document.createElement('option');
-          opt.value = u.nombre_completo || u.nombre;
-          opt.text = u.nombre_completo || u.nombre;
+          opt.value = nombre;
+          opt.text = nombre;
           select.appendChild(opt);
         });
     }
 
     async function cargarAvisos() {
       lista.innerHTML = '';
-      const res = await fetch(`${api}/avisos`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+      const res = await fetch(`${api}/avisos`, { headers: { 'Authorization': 'Bearer ' + token }});
       const avisos = await res.json();
+
       avisos.forEach(a => {
         const li = document.createElement('li');
-        li.innerHTML = `${a.cliente} - ${a.tarea} - ${a.tecnico} - ${a.fecha_programada} ` +
-          `<button onclick="editar(${a.id}, ${a.cliente_id}, '${a.tarea}', '${a.fecha_programada}', '${a.tecnico}')">Editar</button> ` +
-          `<button onclick="borrar(${a.id})">Borrar</button>`;
+        li.className = "aviso-card";
+
+        const cliente = esc(a.cliente || "");
+        const tarea = esc(a.tarea || "");
+        const tecnico = esc(a.tecnico || "");
+        const fecha = esc(a.fecha_programada || "");
+
+        li.innerHTML = `
+          <div class="aviso-top">
+            <p class="aviso-cliente">Cliente: ${cliente}</p>
+            <p class="aviso-obs">Observaciones: ${tarea}</p>
+          </div>
+
+          <div class="aviso-meta">
+            <span><strong>Fecha:</strong> ${fecha}</span>
+            <span><strong>Técnico:</strong> ${tecnico}</span>
+          </div>
+
+          <div class="acciones">
+            <button class="btn btn-warning" onclick="editar(${a.id}, ${a.cliente_id}, '${esc(a.tarea)}', '${esc(a.fecha_programada)}', '${esc(a.tecnico)}')">✏️ Editar</button>
+            <button class="btn btn-danger" onclick="borrar(${a.id})">🗑️ Borrar</button>
+            <button class="btn btn-primary" onclick="location.href='ticket.html?avisoId=${a.id}'">🎫 Ticket</button>
+          </div>
+        `;
         lista.appendChild(li);
       });
     }
@@ -76,13 +164,10 @@
       const data = Object.fromEntries(new FormData(form).entries());
       const metodo = data.id ? 'PUT' : 'POST';
       const url = data.id ? `${api}/avisos/${data.id}` : `${api}/avisos`;
-      data.cliente = parseInt(data.cliente, 10); // aseguramos número
+      data.cliente = parseInt(data.cliente, 10);
       await fetch(url, {
         method: metodo,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
+        headers: {'Content-Type':'application/json','Authorization':'Bearer ' + token},
         body: JSON.stringify(data)
       });
       form.reset();
@@ -91,10 +176,11 @@
 
     function editar(id, clienteId, tarea, fecha, tecnico) {
       form.id.value = id;
-      form.cliente.value = clienteId; // usar ID real
+      form.cliente.value = clienteId;
       form.tarea.value = tarea;
       form.fecha_programada.value = fecha;
       form.tecnico.value = tecnico;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function borrar(id) {
@@ -107,12 +193,11 @@
       }
     }
 
-    async function init() {
+    (async function init(){
       await cargarClientes();
       await cargarTecnicos();
       await cargarAvisos();
-    }
-    init();
+    })();
   </script>
 </body>
 </html>
