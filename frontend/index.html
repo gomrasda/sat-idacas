@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>SAT CRUD Completo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       margin: 0;
@@ -75,17 +76,11 @@
     .overlay.active { display: block; }
     .main { padding: 16px 16px 16px 24px; margin-top: 60px; }
     .main h2, .main button { margin-left: 8px; }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      background: white;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: left;
-    }
+
+    table { border-collapse: collapse; width: 100%; background: white; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     th { background: #eee; }
+
     .modal {
       position: fixed;
       top: 50%; left: 50%;
@@ -149,11 +144,52 @@
       cursor:pointer;
     }
     #avisosCards .acciones button:hover{ background:#f1f5fb }
+
+    /* ===== Acciones superiores (filtro + nuevo) estilo tickets ===== */
+    .avisos-actions{
+      display:flex; gap:12px; flex-wrap:wrap;
+      justify-content:space-between; align-items:center;
+      margin:8px 0 14px;
+    }
+    #filtroEstado{
+      font-size:16px; height:40px; padding:8px 12px;
+      border-radius:10px; border:1px solid #e9eef6; background:#fff;
+    }
+    #btnNuevoAviso{
+      font-size:16px; padding:8px 16px;
+      border-radius:10px; border:none; cursor:pointer;
+      background:#007bff; color:#fff;
+    }
+    #btnNuevoAviso:hover{ background:#0056b3; }
+
+    /* ===== Estado dentro de cada tarjeta ===== */
+    #avisosCards .estado{
+      display:flex; align-items:center; gap:10px; margin-top:8px;
+    }
+    #avisosCards .estado strong{ font-size:18px; }
+    #avisosCards .estado select{
+      font-size:18px; min-height:46px; padding:10px 14px;
+      border-radius:12px; border:1px solid #e9eef6; background:#eef2f7;
+    }
+
+    /* Móvil / tablet grande */
     @media (max-width:1024px){
       #avisosCards .aviso-card{ padding:14px; font-size:20px }
       #avisosCards .cliente{ font-size:26px }
       #avisosCards .obs{ font-size:22px }
       #avisosCards .acciones button{ font-size:18px; padding:10px 14px }
+
+      .avisos-actions{ margin:8px 0 14px; }
+      #filtroEstado{
+        font-size:20px; height:56px; padding:12px 16px; border-radius:12px;
+      }
+      #btnNuevoAviso{
+        font-size:20px; padding:14px 22px; border-radius:12px;
+      }
+      #avisosCards .estado strong{ font-size:22px; }
+      #avisosCards .estado select{
+        font-size:20px; min-height:64px; padding:12px 18px;
+      }
     }
   </style>
 </head>
@@ -197,12 +233,15 @@
     </div>
 
     <div id="avisos" style="display:none;">
-      <select id="filtroEstado" onchange="filtrarAvisos()" style="margin-left: 8px; padding: 6px;">
-        <option value="todos">Todos</option>
-        <option value="Pendiente">Pendientes</option>
-        <option value="Cerrado">Cerrados</option>
-      </select>
-      <button onclick="nuevoAviso()">➕ Nuevo Aviso</button>
+      <div class="avisos-actions">
+        <select id="filtroEstado" onchange="filtrarAvisos()">
+          <option value="todos">Todos</option>
+          <option value="Pendiente">Pendientes</option>
+          <option value="Cerrado">Cerrados</option>
+        </select>
+        <button id="btnNuevoAviso" onclick="nuevoAviso()">➕ Nuevo Aviso</button>
+      </div>
+
       <div id="avisosCards" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;"></div>
     </div>
 
@@ -381,7 +420,7 @@
             <span><strong>Técnico:</strong> ${a.tecnico}</span>
           </div>
 
-          <div style="margin-top:8px;">
+          <div class="estado">
             <strong>Estado:</strong>
             <select onchange="cambiarEstado(${a.id}, this.value)">
               <option value="Pendiente" ${a.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
