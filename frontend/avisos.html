@@ -11,8 +11,11 @@
     }
     *{box-sizing:border-box}
     body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink)}
-    .container{max-width:980px; margin:auto; padding:16px}
-    h2{margin:8px 0 16px; text-align:center; font-size:28px; letter-spacing:.3px}
+
+    /* contenedor a ancho completo */
+    .container{max-width:none; width:100%; margin:0; padding:12px}
+
+    h2{margin:8px 0 16px; text-align:center; font-size:28px; letter-spacing:.3px; text-transform:uppercase}
 
     /* ===== formulario ===== */
     #avisoForm{
@@ -32,8 +35,10 @@
     /* ===== tarjetas de aviso ===== */
     #listaAvisos{list-style:none; padding:0; margin:0}
     .aviso-card{
-      background:#fff; border:2px solid var(--card-b); border-radius:12px; padding:16px; margin:14px 0;
+      background:#fff; border:2px solid var(--card-b); padding:16px; margin:14px 0;
       box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5;
+      width:100%;
+      border-left:none; border-right:none; border-radius:0;
     }
     .aviso-top{margin-bottom:10px}
     .aviso-cliente{font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase}
@@ -57,15 +62,12 @@
 
     /* ====== MÓVIL/TABLET: igual que TICKETS ====== */
     @media (max-width:1024px){
-      .container{ max-width:100%; padding:12px; }
-
       h2{
         font-size:54px !important;
         line-height:1.2;
         margin:8px 0 22px;
         text-align:center;
         font-weight:800;
-        text-transform:uppercase;
       }
 
       /* formulario 1 columna + tamaños XL */
@@ -80,13 +82,13 @@
       }
       #avisoForm button[type="submit"]{ padding:14px 28px; }
 
-      /* tarjeta grande */
+      /* tarjeta grande ancho completo */
       .aviso-card{
         padding:14px;
         border:2px solid var(--card-b);
-        box-shadow:0 2px 8px rgba(0,0,0,.06);
         margin:14px 0;
-        border-radius:12px;
+        border-radius:0;
+        width:100%;
       }
 
       .aviso-cliente{ font-size:54px !important; font-weight:800; margin:0 0 6px; }
@@ -134,7 +136,6 @@
     const lista = document.getElementById('listaAvisos');
     const form  = document.getElementById('avisoForm');
 
-    // Escapar texto para innerHTML seguro
     const esc = s => String(s ?? "")
       .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
       .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
