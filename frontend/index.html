@@ -89,6 +89,21 @@
     }
     #avisosCards .acciones button:hover{ background:#f1f5fb }
 
+    /* ====== Iconos más grandes (Opción A) ====== */
+    #avisosCards .acciones .ico{
+      font-size: 1.7em;     /* tamaño del icono respecto al texto del botón */
+      line-height: 1;
+      display: inline-block;
+      vertical-align: -2px; /* alineación vertical más fina */
+      margin-right: 8px;    /* separación icono-texto */
+    }
+    /* En móvil, un poco más grandes */
+    @media (max-width:1024px){
+      #avisosCards .acciones .ico{ font-size: 2em; }
+    }
+    /* Un pelín más de área clicable para los botones */
+    #avisosCards .acciones button{ padding: 10px 14px; }
+
     /* Fila superior (filtro + nuevo) */
     .avisos-actions{
       display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; align-items:center; margin:8px 0 14px;
@@ -332,7 +347,7 @@
       modal.style.display = "block";
     }
     async function guardarCliente(id, ed){
-      const data = { nombre: cn.value, obs: co.value };
+      const data = { nombre: document.getElementById('cn').value, obs: document.getElementById('co').value };
       const url = ed ? `${api}/clientes/${parseInt(id,10)}` : `${api}/clientes`;
       const method = ed ? "PUT" : "POST";
       const res = await fetch(url, { method, headers, body: JSON.stringify(data) });
@@ -372,9 +387,15 @@
             </select>
           </div>
           <div class="acciones">
-            <button class="btn-ticket" onclick='abrirTicket(${a.id})'>🎫 Ticket</button>
-            <button onclick='editarAviso(${JSON.stringify(a)})'>✏️ Editar</button>
-            <button onclick='borrarAviso(${a.id})'>🗑️ Borrar</button>
+            <button class="btn-ticket" onclick='abrirTicket(${a.id})'>
+              <span class="ico" aria-hidden="true">🎫</span>Ticket
+            </button>
+            <button onclick='editarAviso(${JSON.stringify(a)})'>
+              <span class="ico" aria-hidden="true">✏️</span>Editar
+            </button>
+            <button onclick='borrarAviso(${a.id})'>
+              <span class="ico" aria-hidden="true">🗑️</span>Borrar
+            </button>
           </div>`;
         contenedor.appendChild(card);
       });
