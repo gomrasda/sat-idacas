@@ -89,26 +89,52 @@
     }
     #avisosCards .acciones button:hover{ background:#f1f5fb }
 
-    /* ====== Iconos más grandes (Opción A) ====== */
-    #avisosCards .acciones .ico{
-      font-size: 1.7em;     /* tamaño del icono relativo al texto */
+    /* ====== CLIENTES: MISMO FORMATO QUE AVISOS ====== */
+    .clientes-actions{
+      display:flex; flex-wrap:wrap; justify-content:flex-start; gap:16px; align-items:center; margin:8px 0 14px;
+    }
+    /* buscador + botón (ESCRITORIO) */
+    #filtroCliente{
+      min-width:380px; font-size:20px; height:52px; padding:12px 16px;
+      border-radius:12px; border:1px solid #e9eef6; background:#fff;
+    }
+    #btnNuevoCliente{
+      font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px;
+      border:none; cursor:pointer; background:#007bff; color:#fff;
+    }
+    #btnNuevoCliente:hover{ background:#0056b3; }
+
+    #clientesCards .cliente-card{
+      background:#fff; border:2px solid #cfd8e6; border-radius:0; padding:16px;
+      width:100%; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5; font-size:18px;
+    }
+    #clientesCards .nombre{ font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
+    #clientesCards .obs{ font-size:20px; font-weight:600; color:#333; margin:0 0 8px; }
+    #clientesCards .acciones{
+      display:flex; gap:8px; justify-content:flex-end; margin-top:12px; align-items:center;
+    }
+    #clientesCards .acciones button{
+      font-size:16px; padding:8px 12px; border-radius:10px; border:1px solid #e9eef6; background:#fff; cursor:pointer;
+    }
+    #clientesCards .acciones button:hover{ background:#f1f5fb }
+
+    /* ====== Iconos grandes para ambos (Avisos/Clientes) ====== */
+    #avisosCards .acciones .ico,
+    #clientesCards .acciones .ico{
+      font-size: 1.7em;
       line-height: 1;
       display: inline-block;
-      vertical-align: -2px; /* ajuste fino vertical */
-      margin-right: 8px;    /* separación icono-texto */
+      vertical-align: -2px;
+      margin-right: 8px;
     }
     /* Un pelín más de área clicable */
-    #avisosCards .acciones button{ padding: 10px 14px; }
+    #avisosCards .acciones button,
+    #clientesCards .acciones button{ padding: 10px 14px; }
 
-    /* ====== Fila superior (filtro + nuevo) ====== */
+    /* ====== Fila superior de AVISOS ====== */
     .avisos-actions{
-      display:flex; flex-wrap:wrap;
-      justify-content:flex-start; /* izquierda */
-      gap:16px;
-      align-items:center;
-      margin:8px 0 14px;
+      display:flex; flex-wrap:wrap; justify-content:flex-start; gap:16px; align-items:center; margin:8px 0 14px;
     }
-    /* Más grande en escritorio */
     #filtroEstado{
       min-width:380px; font-size:20px; height:52px; padding:12px 16px;
       border-radius:12px; border:1px solid #e9eef6; background:#fff;
@@ -119,46 +145,36 @@
     }
     #btnNuevoAviso:hover{ background:#0056b3; }
 
-    /* ====== CLIENTES (tarjeta simple) ====== */
-    #clientesCards .cliente-card {
-      background:#fff; border:1px solid #ccc; border-radius:10px; padding:12px;
-      width: 100%; max-width: 700px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-
     /* ====== Responsive ====== */
     @media (max-width:1024px){
-      /* Iconos un poco más grandes en móvil */
-      #avisosCards .acciones .ico{ font-size: 2em; }
+      #avisosCards .acciones .ico, #clientesCards .acciones .ico{ font-size: 2em; }
 
-      #avisosCards .aviso-card{ padding:14px; font-size:20px; border-radius:0; max-width:none !important; width:100% !important; }
-      #avisosCards .cliente{ font-size:26px }
-      #avisosCards .obs{ font-size:22px }
-      #avisosCards .acciones button{ font-size:18px; padding:10px 14px }
+      #avisosCards .aviso-card, #clientesCards .cliente-card{
+        padding:14px; font-size:20px; border-radius:0; max-width:none !important; width:100% !important;
+      }
+      #avisosCards .cliente, #clientesCards .nombre{ font-size:26px }
+      #avisosCards .obs, #clientesCards .obs{ font-size:22px }
+      #avisosCards .acciones button, #clientesCards .acciones button{ font-size:18px; padding:10px 14px }
 
-      /* Móvil/Tablet: filtro + botón en UNA sola línea 50/50 */
+      /* AVISOS: filtro+botón 50/50 en una línea */
       .avisos-actions{
-        display: grid !important;
-        grid-template-columns: 1fr 1fr; /* 50% + 50% */
-        gap: 14px;
-        align-items: stretch;
-        justify-content: stretch;
+        display:grid !important; grid-template-columns: 1fr 1fr; gap:14px; align-items:stretch; justify-content:stretch;
       }
-      .avisos-actions #filtroEstado,
-      .avisos-actions #btnNuevoAviso{
-        width: 100%;
-        min-width: 0; /* anula min-width del select */
+      .avisos-actions #filtroEstado, .avisos-actions #btnNuevoAviso{
+        width:100%; min-width:0;
       }
 
-      /* Aun grandes en móvil/tablet */
-      #filtroEstado{
-        font-size:26px; height:64px; padding:16px 18px; border-radius:14px;
+      /* CLIENTES: buscador+botón 50/50 en una línea */
+      .clientes-actions{
+        display:grid !important; grid-template-columns: 1fr 1fr; gap:14px; align-items:stretch; justify-content:stretch;
       }
-      #btnNuevoAviso{
-        font-size:26px; padding:16px 24px; min-height:64px; border-radius:14px;
+      .clientes-actions #filtroCliente, .clientes-actions #btnNuevoCliente{
+        width:100%; min-width:0;
       }
 
-      #avisosCards .estado strong{ font-size:22px; }
-      #avisosCards .estado select{ font-size:20px; min-height:64px; padding:12px 18px; }
+      /* Campos más grandes en móvil */
+      #filtroEstado, #filtroCliente{ font-size:26px; height:64px; padding:16px 18px; border-radius:14px; }
+      #btnNuevoAviso, #btnNuevoCliente{ font-size:26px; padding:16px 24px; min-height:64px; border-radius:14px; }
     }
   </style>
 </head>
@@ -200,10 +216,12 @@
       </table>
     </div>
 
-    <!-- === CLIENTES === -->
+    <!-- === CLIENTES (mismo formato) === -->
     <div id="clientes" style="display:none;">
-      <h2>Clientes</h2>
-      <button onclick="nuevoCliente()">➕ Nuevo Cliente</button>
+      <div class="clientes-actions">
+        <input id="filtroCliente" placeholder="Buscar cliente..." oninput="filtrarClientes()">
+        <button id="btnNuevoCliente" onclick="nuevoCliente()">➕ Nuevo Cliente</button>
+      </div>
       <div id="clientesCards" style="display:flex; flex-direction:column; gap:16px; margin-top:16px;"></div>
     </div>
 
@@ -335,48 +353,71 @@
       cerrarModal(); cargarUsuarios();
     }
 
-    /* ================== CLIENTES ================== */
-    async function cargarClientes(){
+    /* ================== CLIENTES (mismo formato) ================== */
+    async function cargarClientes() {
       const res = await fetch(api + "/clientes", { headers });
       clientes = await res.json();
+      filtrarClientes(); // pinta con el filtro actual (si hay)
+    }
 
-      const cont = document.getElementById("clientesCards");
-      if (!cont) return;
-      cont.innerHTML = "";
-      clientes.forEach(c=>{
+    function renderClientes(lista) {
+      const contenedor = document.getElementById("clientesCards");
+      if (!contenedor) return;
+      contenedor.innerHTML = "";
+
+      (lista || []).forEach(c => {
         const card = document.createElement("div");
         card.className = "cliente-card";
         card.innerHTML = `
-          <strong>Nombre:</strong> ${c.nombre}<br>
-          <strong>Observaciones:</strong> ${c.obs||""}<br><br>
-          <button onclick='editarCliente(${JSON.stringify(c)})'>✏️ Editar</button>
-          <button onclick='borrar("clientes", ${c.id})'>🗑️ Borrar</button>`;
-        cont.appendChild(card);
+          <div class="nombre">Cliente: ${c.nombre || ""}</div>
+          <div class="obs">Observaciones: ${c.obs || ""}</div>
+          <div class="acciones">
+            <button onclick='editarCliente(${JSON.stringify(c)})'>
+              <span class="ico" aria-hidden="true">✏️</span>Editar
+            </button>
+            <button onclick='borrar("clientes", ${c.id})'>
+              <span class="ico" aria-hidden="true">🗑️</span>Borrar
+            </button>
+          </div>
+        `;
+        contenedor.appendChild(card);
       });
     }
-    function nuevoCliente(){ abrirCliente({ id:0, nombre:"", obs:"" }, false); }
-    function editarCliente(c){ abrirCliente(c, true); }
-    function abrirCliente(c, ed){
-      const modal = document.getElementById('modal');
-      modal.innerHTML = `
-        <div class="modal">
-          <h3>${ed ? "Editar" : "Nuevo"} Cliente</h3>
-          <input id="cn" value="${c.nombre||""}" placeholder="Nombre">
-          <textarea id="co" rows="3" placeholder="Observaciones">${c.obs||""}</textarea>
-          <div style="display:flex; gap:8px; justify-content:flex-end;">
-            <button onclick='guardarCliente(${c.id||0}, ${ed})'>Guardar</button>
-            <button onclick='cerrarModal()'>Cancelar</button>
-          </div>
-        </div>`;
+
+    function filtrarClientes(){
+      const q = (document.getElementById('filtroCliente')?.value || "").toLowerCase().trim();
+      if (!q) { renderClientes(clientes); return; }
+      const lista = clientes.filter(c =>
+        (c.nombre || "").toLowerCase().includes(q) ||
+        (c.obs || "").toLowerCase().includes(q)
+      );
+      renderClientes(lista);
+    }
+
+    function nuevoCliente() { abrirCliente({ id: 0, nombre: "", obs: "" }, false); }
+    function editarCliente(c) { abrirCliente(c, true); }
+
+    function abrirCliente(c, ed) {
+      const modal = document.getElementById("modal");
+      modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Cliente</h3>
+        <input id='cn' value='${c.nombre || ""}' placeholder='Nombre'>
+        <textarea id='co' placeholder='Observaciones' rows="3">${c.obs || ""}</textarea><br>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button onclick='guardarCliente(${c.id || 0},${ed})'>Guardar</button>
+          <button onclick='cerrarModal()'>Cancelar</button>
+        </div>
+      </div>`;
       modal.style.display = "block";
     }
-    async function guardarCliente(id, ed){
+
+    async function guardarCliente(id, ed) {
       const data = { nombre: document.getElementById('cn').value, obs: document.getElementById('co').value };
-      const url = ed ? `${api}/clientes/${parseInt(id,10)}` : `${api}/clientes`;
       const method = ed ? "PUT" : "POST";
+      const url = ed ? `${api}/clientes/${parseInt(id, 10)}` : `${api}/clientes`;
       const res = await fetch(url, { method, headers, body: JSON.stringify(data) });
       if (!res.ok) alert("Error al guardar cliente");
-      cerrarModal(); cargarClientes();
+      cerrarModal();
+      cargarClientes();
     }
 
     /* ================== AVISOS ================== */
