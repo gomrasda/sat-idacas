@@ -105,16 +105,15 @@
     #avisosCards .aviso-card{
       background:#fff;
       border:2px solid #cfd8e6;
-      border-radius:12px;
+      border-radius:0;
       padding:16px;
       width:100%;
-      max-width:700px;
       margin:14px 0;
       box-shadow:0 2px 8px rgba(0,0,0,.06);
       line-height:1.5;
       font-size:18px;
     }
-    #avisosCards .cliente{ font-size:24px; font-weight:800; margin:0 0 6px; }
+    #avisosCards .cliente{ font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
     #avisosCards .obs{ font-size:20px; font-weight:600; color:#333; margin:0 0 8px; }
     #avisosCards .meta{
       display:grid;
@@ -126,7 +125,7 @@
       display:block;
       background:#eef2f7;
       border:1px solid #e9eef6;
-      border-radius:10px;
+      border-radius:999px;
       padding:8px 10px;
     }
     #avisosCards .acciones{
@@ -174,7 +173,13 @@
 
     /* Móvil / tablet grande */
     @media (max-width:1024px){
-      #avisosCards .aviso-card{ padding:14px; font-size:20px }
+      #avisosCards .aviso-card{
+        padding:14px;
+        font-size:20px;
+        border-radius:0;
+        max-width:none !important;
+        width:100% !important;
+      }
       #avisosCards .cliente{ font-size:26px }
       #avisosCards .obs{ font-size:22px }
       #avisosCards .acciones button{ font-size:18px; padding:10px 14px }
