@@ -6,11 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
-      --bg:#f6f8fb; --card:#ffffff; --b:#e5e7eb; --ink:#1f2937;
+      --bg:#f6f8fb; --card:#ffffff; --b:#e5e7eb; --ink:#111827;
       --primary:#1677ff; --primary-h:#0f5fd1;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
+    /* evita que algunos móviles reduzcan el texto */
+    html{-webkit-text-size-adjust:100%}
     body{
       margin:0; background:var(--bg); color:var(--ink);
       display:flex; align-items:center; justify-content:center;
@@ -18,104 +20,125 @@
       font-family:Arial,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     }
 
-    .wrap{ width:100%; max-width:560px; }
+    .wrap{ width:100%; max-width:640px; }
 
     .logo{
-      display:block; margin:0 auto 14px;
-      width:220px; max-width:80%; height:auto; object-fit:contain;
+      display:block; margin:0 auto 16px;
+      width:240px; max-width:85%; height:auto; object-fit:contain;
     }
 
-    form{
+    .card{
       background:var(--card);
-      padding:28px;
+      padding:30px;
       border-radius:16px;
       border:1px solid var(--b);
       box-shadow:0 10px 30px rgba(0,0,0,.06);
     }
-    h2{margin:0 0 18px; text-align:center; font-size:24px; letter-spacing:.2px}
+
+    h2{
+      margin:0 0 20px;
+      text-align:center;
+      font-size:28px;
+      letter-spacing:.2px;
+      font-weight:700;
+    }
 
     input{
       width:100%;
-      margin:10px 0;
-      height:56px;                /* más altos */
-      font-size:18px;
-      padding:12px 14px;
+      margin:12px 0;
+      height:58px;
+      font-size:20px;
+      padding:14px 16px;
       border:1px solid var(--b);
       border-radius:12px;
       outline:0;
       background:#fff;
     }
+    input::placeholder{font-size:inherit; color:#9aa3af}
     input:focus{border-color:#b6c3ff; box-shadow:0 0 0 4px rgba(22,119,255,.12)}
 
     button{
       width:100%;
-      height:58px;               /* más alto */
-      margin-top:6px;
-      font-size:18px;
+      height:60px;
+      margin-top:8px;
+      font-size:20px;
       border:none; border-radius:12px;
       background:var(--primary); color:#fff;
       cursor:pointer;
+      font-weight:600;
     }
     button:hover{ background:var(--primary-h) }
 
-    .msg{margin-top:10px; text-align:center; color:#e11d48; min-height:20px}
+    .msg{margin-top:12px; text-align:center; color:#e11d48; min-height:22px; font-size:16px}
 
-    @media (max-width:480px){
-      form{padding:24px}
-      h2{font-size:26px}
-      input{height:60px; font-size:20px}
-      button{height:62px; font-size:20px}
-      .logo{width:240px}
+    /* ====== MÓVIL XXL ====== */
+    @media (max-width: 768px){
+      .logo{ width:300px }
+      .card{ padding:28px }
+      h2{ font-size:32px }
+      input{ height:66px; font-size:22px; padding:16px 18px }
+      button{ height:68px; font-size:22px }
+      .msg{ font-size:18px }
+    }
+
+    /* móviles muy pequeños */
+    @media (max-width: 360px){
+      .logo{ width:240px }
+      h2{ font-size:28px }
+      input{ height:62px; font-size:20px }
+      button{ height:64px; font-size:20px }
     }
   </style>
 </head>
 <body>
 
-<div class="wrap">
-  <!-- Cambia la ruta si tu logo se llama distinto -->
-  <img class="logo" src="logo.jpg" alt="Logo de la empresa" onerror="this.style.display='none'">
+  <div class="wrap">
+    <!-- Cambia la ruta si tu logo tiene otro nombre -->
+    <img class="logo" src="logo.jpg" alt="Logo de la empresa" onerror="this.style.display='none'">
+    <div class="card">
+      <h2>Inicio de sesión</h2>
 
-  <form id="loginForm">
-    <h2>Inicio de sesión</h2>
-    <input type="text"     name="usuario"  placeholder="Usuario"     autocomplete="username"        required>
-    <input type="password" name="password" placeholder="Contraseña"  autocomplete="current-password" required>
-    <button type="submit">Entrar</button>
-    <div id="msg" class="msg"></div>
-  </form>
-</div>
+      <form id="loginForm">
+        <input type="text"     name="usuario"  placeholder="Usuario"     autocomplete="username" required>
+        <input type="password" name="password" placeholder="Contraseña"  autocomplete="current-password" required>
+        <button type="submit">Entrar</button>
+        <div id="msg" class="msg"></div>
+      </form>
+    </div>
+  </div>
 
-<script>
-  const api = "https://sat-idacas.onrender.com/api";
+  <script>
+    const api = "https://sat-idacas.onrender.com/api";
 
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const msg = document.getElementById('msg');
-    msg.textContent = "";
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      msg.textContent = "";
 
-    const data = {
-      usuario:  e.target.usuario.value.trim(),
-      password: e.target.password.value
-    };
+      const data = {
+        usuario:  e.target.usuario.value.trim(),
+        password: e.target.password.value
+      };
 
-    try {
-      const res = await fetch(api + '/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const result = await res.json();
+      try {
+        const res = await fetch(api + '/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
 
-      if (res.ok && result.token) {
-        localStorage.setItem('token', result.token);
-        location.href = 'index.html';
-      } else {
-        msg.textContent = result.mensaje || result.error || 'Usuario o contraseña incorrectos';
+        if (res.ok && result.token) {
+          localStorage.setItem('token', result.token);
+          location.href = 'index.html';
+        } else {
+          msg.textContent = result.mensaje || result.error || 'Usuario o contraseña incorrectos';
+        }
+      } catch {
+        msg.textContent = 'No se pudo conectar con el servidor';
       }
-    } catch (err) {
-      msg.textContent = 'No se pudo conectar con el servidor';
-    }
-  });
-</script>
+    });
+  </script>
 
 </body>
 </html>
