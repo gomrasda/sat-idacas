@@ -93,7 +93,7 @@
       width: 90%;
       max-width: 400px;
     }
-    .modal input, .modal select {
+    .modal input, .modal select, .modal textarea {
       width: 100%;
       padding: 8px;
       margin: 5px 0;
@@ -128,10 +128,18 @@
       border-radius:999px;
       padding:8px 10px;
     }
+    #avisosCards .estado{
+      display:flex; align-items:center; gap:10px; margin-top:8px;
+    }
+    #avisosCards .estado strong{ font-size:18px; }
+    #avisosCards .estado select{
+      font-size:18px; min-height:46px; padding:10px 14px;
+      border-radius:12px; border:1px solid #e9eef6; background:#eef2f7;
+    }
     #avisosCards .acciones{
       display:flex;
+      justify-content: space-between; /* 🎫 a la izq, otros a la dcha */
       gap:8px;
-      justify-content:flex-end;
       margin-top:12px;
     }
     #avisosCards .acciones button{
@@ -144,15 +152,26 @@
     }
     #avisosCards .acciones button:hover{ background:#f1f5fb }
 
+    /* Botón Ticket especial */
+    .btn-ticket {
+      margin-right: auto; /* empuja editar/borrar a la derecha */
+    }
+
     /* ===== Acciones superiores (filtro + nuevo) estilo tickets ===== */
     .avisos-actions{
       display:flex; gap:12px; flex-wrap:wrap;
       justify-content:space-between; align-items:center;
       margin:8px 0 14px;
     }
+    /* Filtro más largo y cómodo */
     #filtroEstado{
-      font-size:16px; height:40px; padding:8px 12px;
-      border-radius:10px; border:1px solid #e9eef6; background:#fff;
+      min-width:220px;   /* más largo */
+      font-size:18px;
+      height:44px;
+      padding:10px 14px;
+      border-radius:10px; 
+      border:1px solid #e9eef6; 
+      background:#fff;
     }
     #btnNuevoAviso{
       font-size:16px; padding:8px 16px;
@@ -161,14 +180,15 @@
     }
     #btnNuevoAviso:hover{ background:#0056b3; }
 
-    /* ===== Estado dentro de cada tarjeta ===== */
-    #avisosCards .estado{
-      display:flex; align-items:center; gap:10px; margin-top:8px;
-    }
-    #avisosCards .estado strong{ font-size:18px; }
-    #avisosCards .estado select{
-      font-size:18px; min-height:46px; padding:10px 14px;
-      border-radius:12px; border:1px solid #e9eef6; background:#eef2f7;
+    /* ==== Tarjetas de CLIENTES (sin cambio de ancho) ==== */
+    #clientesCards .cliente-card {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 12px;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
     /* Móvil / tablet grande */
@@ -222,6 +242,7 @@
       <h2>Bienvenido a SAT Control</h2>
     </div>
 
+    <!-- === USUARIOS === -->
     <div id="usuarios" style="display:none;">
       <h2>Usuarios</h2>
       <button onclick="nuevoUsuario()">➕ Nuevo Usuario</button>
@@ -231,12 +252,14 @@
       </table>
     </div>
 
+    <!-- === CLIENTES === -->
     <div id="clientes" style="display:none;">
       <h2>Clientes</h2>
       <button onclick="nuevoCliente()">➕ Nuevo Cliente</button>
       <div id="clientesCards" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;"></div>
     </div>
 
+    <!-- === AVISOS === -->
     <div id="avisos" style="display:none;">
       <div class="avisos-actions">
         <select id="filtroEstado" onchange="filtrarAvisos()">
@@ -302,6 +325,7 @@
       }
     }
 
+    /* ====== USUARIOS ====== */
     async function cargarUsuarios() {
       const res = await fetch(api + "/usuarios", { headers });
       const data = await res.json();
@@ -327,16 +351,18 @@
     function abrirUsuario(u, ed) {
       const modal = document.getElementById("modal");
       modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Usuario</h3>
-        <input id='n' value='${u.nombre}' placeholder='Nombre'>
-        <input id='u' value='${u.usuario}' placeholder='Usuario'>
-        <input id='e' value='${u.email}' placeholder='Email'>
+        <input id='n' value='${u.nombre || ""}' placeholder='Nombre'>
+        <input id='u' value='${u.usuario || ""}' placeholder='Usuario'>
+        <input id='e' value='${u.email || ""}' placeholder='Email'>
         <input id='p' placeholder='Contraseña'>
         <select id='r'>
           <option ${u.rol === "Gestor" ? "selected" : ""}>Gestor</option>
           <option ${u.rol === "Técnico" ? "selected" : ""}>Técnico</option>
         </select>
-        <button onclick='guardarUsuario(${u.id},${ed})'>Guardar</button>
-        <button onclick='cerrarModal()'>Cancelar</button>
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+          <button onclick='guardarUsuario(${u.id || 0},${ed})'>Guardar</button>
+          <button onclick='cerrarModal()'>Cancelar</button>
+        </div>
       </div>`;
       modal.style.display = "block";
     }
@@ -350,8 +376,8 @@
         rol: document.getElementById('r').value
       };
 
-      if (!d.nombre || !d.usuario || !d.email || !d.password) {
-        alert("Todos los campos son obligatorios.");
+      if (!d.nombre || !d.usuario || !d.email || (!ed && !d.password)) {
+        alert("Todos los campos son obligatorios (incluye contraseña al crear).");
         return;
       }
 
@@ -368,40 +394,59 @@
       }
     }
 
+    /* ====== CLIENTES ====== */
     async function cargarClientes() {
       const res = await fetch(api + "/clientes", { headers });
       clientes = await res.json();
 
       const contenedor = document.getElementById("clientesCards");
+      if (!contenedor) return;
       contenedor.innerHTML = "";
 
       clientes.forEach(c => {
         const card = document.createElement("div");
-        card.style = `
-          background: white;
-          border: 1px solid #ccc;
-          border-radius: 10px;
-          padding: 12px;
-          width: 100%;
-          max-width: 700px;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        `;
-
+        card.className = "cliente-card";
         card.innerHTML = `
           <strong>Nombre:</strong> ${c.nombre}<br>
-          <strong>Observaciones:</strong> ${c.obs}<br><br>
+          <strong>Observaciones:</strong> ${c.obs || ""}<br><br>
           <button onclick='editarCliente(${JSON.stringify(c)})'>✏️ Editar</button>
           <button onclick='borrar("clientes", ${c.id})'>🗑️ Borrar</button>
         `;
-
         contenedor.appendChild(card);
       });
     }
 
+    function nuevoCliente() { abrirCliente({ id: 0, nombre: "", obs: "" }, false); }
+    function editarCliente(c) { abrirCliente(c, true); }
+
+    function abrirCliente(c, ed) {
+      const modal = document.getElementById("modal");
+      modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Cliente</h3>
+        <input id='cn' value='${c.nombre || ""}' placeholder='Nombre'>
+        <textarea id='co' placeholder='Observaciones' rows="3">${c.obs || ""}</textarea><br>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button onclick='guardarCliente(${c.id || 0},${ed})'>Guardar</button>
+          <button onclick='cerrarModal()'>Cancelar</button>
+        </div>
+      </div>`;
+      modal.style.display = "block";
+    }
+
+    async function guardarCliente(id, ed) {
+      const data = { nombre: document.getElementById('cn').value, obs: document.getElementById('co').value };
+      const method = ed ? "PUT" : "POST";
+      const url = ed ? `${api}/clientes/${parseInt(id, 10)}` : `${api}/clientes`;
+      const res = await fetch(url, { method, headers, body: JSON.stringify(data) });
+      if (!res.ok) alert("Error al guardar cliente");
+      cerrarModal();
+      cargarClientes();
+    }
+
+    /* ====== AVISOS ====== */
     async function cargarTecnicos() {
       const res = await fetch(api + "/usuarios", { headers });
       const data = await res.json();
-      tecnicos = data.filter(t => t.rol === "Técnico");
+      tecnicos = data.filter(t => t.rol === "Técnico" || t.rol === "tecnico");
     }
 
     async function cargarAvisos(filtro = "todos") {
@@ -417,12 +462,12 @@
         card.className = "aviso-card";
 
         card.innerHTML = `
-          <div class="cliente">Cliente: ${a.cliente}</div>
-          <div class="obs">Observaciones: ${a.tarea}</div>
+          <div class="cliente">Cliente: ${a.cliente || ""}</div>
+          <div class="obs">Observaciones: ${a.tarea || ""}</div>
 
           <div class="meta">
-            <span><strong>Fecha:</strong> ${a.fecha_programada}</span>
-            <span><strong>Técnico:</strong> ${a.tecnico}</span>
+            <span><strong>Fecha:</strong> ${a.fecha_programada || ""}</span>
+            <span><strong>Técnico:</strong> ${a.tecnico || ""}</span>
           </div>
 
           <div class="estado">
@@ -434,9 +479,9 @@
           </div>
 
           <div class="acciones">
+            <button class="btn-ticket" onclick='abrirTicket(${a.id})'>🎫 Ticket</button>
             <button onclick='editarAviso(${JSON.stringify(a)})'>✏️ Editar</button>
             <button onclick='borrarAviso(${a.id})'>🗑️ Borrar</button>
-            <button onclick='abrirTicket(${a.id})'>🎫 Ticket</button>
           </div>
         `;
 
@@ -445,75 +490,53 @@
     }
 
     async function cambiarEstado(id, nuevoEstado) {
-      const res = await fetch(api + "/avisos/" + id, { headers });
-      const aviso = await res.json();
-      const data = { ...aviso, estado: nuevoEstado };
-      await fetch(api + "/avisos/" + id, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify(data)
-      });
-
+      try {
+        const res = await fetch(api + "/avisos/" + id, { headers });
+        const aviso = await res.json();
+        const data = { ...aviso, estado: nuevoEstado };
+        const upd = await fetch(api + "/avisos/" + id, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(data)
+        });
+        if (!upd.ok) throw new Error(await upd.text());
+      } catch (e) {
+        alert("No se pudo cambiar el estado.");
+      }
       const filtro = document.getElementById('filtroEstado').value;
       cargarAvisos(filtro);
     }
 
-    function nuevoCliente() {
-      abrirCliente({ nombre: "", obs: "" }, false);
-    }
-
-    function editarCliente(c) {
-      abrirCliente(c, true);
-    }
-
-    function abrirCliente(c, ed) {
-      const modal = document.getElementById("modal");
-      modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Cliente</h3>
-        <input id='cn' value='${c.nombre}' placeholder='Nombre'>
-        <input id='co' value='${c.obs}' placeholder='Observaciones'><br>
-        <button onclick='guardarCliente(${ed ? c.id : 0},${ed})'>Guardar</button>
-        <button onclick='cerrarModal()'>Cancelar</button>
-      </div>`;
-      modal.style.display = "block";
-    }
-
-    async function guardarCliente(id, ed) {
-      const data = { nombre: document.getElementById('cn').value, obs: document.getElementById('co').value };
-      const method = ed ? "PUT" : "POST";
-      const url = ed ? `${api}/clientes/${parseInt(id, 10)}` : `${api}/clientes`;
-      await fetch(url, { method, headers, body: JSON.stringify(data) });
-      cerrarModal();
-      cargarClientes();
-    }
-
     function nuevoAviso() {
-      abrirAviso({ cliente: "", tarea: "", fecha_programada: "", tecnico: "", estado: "Pendiente" }, false);
+      abrirAviso({ id: 0, cliente_id: null, cliente: "", tarea: "", fecha_programada: "", tecnico: "", estado: "Pendiente" }, false);
     }
 
-    function editarAviso(a) {
-      abrirAviso(a, true);
-    }
+    function editarAviso(a) { abrirAviso(a, true); }
 
     function abrirAviso(a, ed) {
       const modal = document.getElementById("modal");
       const fecha = a.fecha_programada ? a.fecha_programada.substring(0, 10) : "";
+      const optionsClientes = (clientes || []).map(c =>
+        `<option value="${c.id}" ${c.id === a.cliente_id ? 'selected' : ''}>${c.nombre}</option>`
+      ).join("");
+
+      const optionsTecnicos = (tecnicos || []).map(t =>
+        `<option ${t.nombre === a.tecnico ? 'selected' : ""}>${t.nombre}</option>`
+      ).join("");
 
       modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Aviso</h3>
-        <select id='cl'>
-          ${clientes.map(c => `<option value="${c.id}" ${c.id === a.cliente_id ? 'selected' : ''}>${c.nombre}</option>`).join("")}
-        </select>
-
+        <select id='cl'>${optionsClientes}</select>
         <input id='ta' placeholder='Observaciones' value='${a.tarea || ""}'>
         <input id='fe' type='date' value='${fecha}'>
-        <select id='te'>
-          ${tecnicos.map(t => `<option ${t.nombre === a.tecnico ? 'selected' : ""}>${t.nombre}</option>`).join("")}
-        </select>
+        <select id='te'>${optionsTecnicos}</select>
         <select id='es'>
           <option ${a.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
           <option ${a.estado === "Cerrado" ? "selected" : ""}>Cerrado</option>
-        </select><br><br>
-        <button onclick='guardarAviso(${JSON.stringify(a)},${ed})'>Guardar</button>
-        <button onclick='cerrarModal()'>Cancelar</button>
+        </select><br>
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+          <button onclick='guardarAviso(${JSON.stringify(a)},${ed})'>Guardar</button>
+          <button onclick='cerrarModal()'>Cancelar</button>
+        </div>
       </div>`;
 
       modal.style.display = "block";
@@ -531,7 +554,8 @@
       const url = ed ? `${api}/avisos/${a.id}` : `${api}/avisos`;
       await fetch(url, { method, headers, body: JSON.stringify(data) });
       cerrarModal();
-      cargarAvisos();
+      const filtro = document.getElementById('filtroEstado').value;
+      cargarAvisos(filtro);
     }
 
     async function borrar(tipo, id) {
@@ -545,7 +569,8 @@
       id = parseInt(id, 10);
       if (confirm("¿Seguro?")) {
         await fetch(api + "/avisos/" + id, { method: "DELETE", headers });
-        cargarAvisos();
+        const filtro = document.getElementById('filtroEstado').value;
+        cargarAvisos(filtro);
       }
     }
 
