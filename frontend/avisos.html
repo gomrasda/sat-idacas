@@ -54,17 +54,62 @@
     .btn-primary:hover{ background:#0056b3 }
     .btn-warning{ background:#fff7e6; border-color:#ffe0a3 }
 
-    /* Móvil / tablet: textos grandes como en tickets */
+    /* ====== MÓVIL/TABLET: Mismo look que TICKETS ====== */
     @media (max-width:1024px){
-      h2{font-size:34px; font-weight:800}
-      #avisoForm{grid-template-columns:1fr}
-      #avisoForm button[type="submit"]{font-size:20px; padding:14px}
+      .container{ max-width:100%; padding:12px; }
 
-      .aviso-card{padding:14px}
-      .aviso-cliente{font-size:26px}
-      .aviso-obs{font-size:20px}
-      .aviso-meta{grid-template-columns:1fr; font-size:18px}
-      .btn{font-size:18px; padding:10px 14px}
+      h2{
+        font-size:54px !important;
+        line-height:1.2;
+        margin:8px 0 22px;
+        text-align:center;
+        font-weight:800;
+        text-transform:uppercase;
+      }
+
+      #avisoForm{ grid-template-columns:1fr; gap:12px; }
+      #avisoForm select,
+      #avisoForm input,
+      #avisoForm button{
+        font-size:40px !important;
+        height:64px;
+        padding:10px 16px;
+        border-radius:12px;
+      }
+      #avisoForm button[type="submit"]{ padding:14px 28px; }
+
+      .aviso-card{
+        padding:14px;
+        border:2px solid var(--card-b);
+        box-shadow:0 2px 8px rgba(0,0,0,.06);
+        margin:14px 0;
+        border-radius:12px;
+      }
+
+      .aviso-cliente{ font-size:54px !important; font-weight:800; margin:0 0 6px; }
+      .aviso-obs{ font-size:40px !important; font-weight:600; margin:0 0 8px; }
+
+      .aviso-meta{
+        display:grid; grid-template-columns:1fr; gap:10px; font-size:40px !important;
+      }
+      .aviso-meta span{
+        display:flex; align-items:center;
+        background:var(--chip);
+        border:1px solid var(--b);
+        padding:10px 16px;
+        border-radius:999px;
+        height:52px;
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      }
+
+      .acciones{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+      .acciones .btn{
+        font-size:40px !important;
+        padding:12px 16px;
+        border-radius:12px;
+        height:64px;
+        display:inline-flex; align-items:center; justify-content:center;
+      }
     }
   </style>
 </head>
@@ -90,7 +135,6 @@
     const lista = document.getElementById('listaAvisos');
     const form = document.getElementById('avisoForm');
 
-    // Escapar texto para innerHTML seguro
     const esc = s => String(s ?? "")
       .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
       .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
