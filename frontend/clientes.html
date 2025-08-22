@@ -1,71 +1,247 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Clientes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root{
+      --b:#e9eef6; --bg:#f5f5f5; --ink:#1f2937; --chip:#eef2f7; --card-b:#cfd8e6;
+      --primary:#007bff; --primary-h:#0056b3;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:Arial,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink)}
+    .container{max-width:100%; padding:16px}
+
+    h2{margin:8px 0 16px; text-align:center}
+
+    /* ===== Acciones (buscador + Nuevo) ===== */
+    .clientes-actions{
+      display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center;
+      gap:16px; margin:8px 0 14px;
+    }
+    #filtroCliente{
+      min-width:380px; font-size:20px; height:52px; padding:12px 16px;
+      border-radius:12px; border:1px solid var(--b); background:#fff; outline:0;
+    }
+    #btnNuevoCliente{
+      font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px;
+      border:none; cursor:pointer; background:var(--primary); color:#fff;
+    }
+    #btnNuevoCliente:hover{ background:var(--primary-h) }
+
+    /* ===== Tarjetas de clientes (mismo look que avisos) ===== */
+    #clientesCards{ display:flex; flex-direction:column; gap:16px; margin-top:16px; }
+    .cliente-card{
+      background:#fff; border:2px solid var(--card-b); border-radius:0;
+      padding:16px; width:100%; box-shadow:0 2px 8px rgba(0,0,0,.06);
+      line-height:1.5; font-size:18px;
+    }
+    .cliente-card .nombre{
+      font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase;
+    }
+    .cliente-card .obs{
+      font-size:20px; font-weight:600; color:#333; margin:0 0 8px;
+    }
+    .cliente-card .acciones{
+      display:flex; gap:8px; justify-content:flex-end; margin-top:12px; align-items:center;
+    }
+    .cliente-card .acciones button{
+      font-size:16px; padding:10px 14px; border-radius:10px;
+      border:1px solid var(--b); background:#fff; cursor:pointer;
+    }
+    .cliente-card .acciones button:hover{ background:#f1f5fb }
+
+    /* Iconos grandes (igual que avisos) */
+    .ico{
+      font-size:1.7em; line-height:1; display:inline-block; vertical-align:-2px; margin-right:8px;
+    }
+
+    /* ===== Modal ===== */
+    .modal-wrap{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; z-index:1000; }
+    .modal{
+      background:#fff; border:1px solid #ccc; border-radius:12px; width:90%; max-width:420px; padding:20px;
+    }
+    .modal h3{ margin-top:0 }
+    .modal input, .modal textarea, .modal select{
+      width:100%; padding:10px 12px; border:1px solid var(--b); border-radius:10px; font:inherit; margin:6px 0;
+      background:#fff;
+    }
+    .modal textarea{ resize:vertical; min-height:80px }
+    .modal .actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px }
+    .btn{ padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid var(--b); background:#fff }
+    .btn.primary{ background:var(--primary); color:#fff; border-color:transparent }
+    .btn.primary:hover{ background:var(--primary-h) }
+
+    /* ===== Responsive ===== */
+    @media (max-width:1024px){
+      .ico{ font-size:2em; }
+
+      .cliente-card{ padding:14px; font-size:20px; border-radius:0; width:100% }
+      .cliente-card .nombre{ font-size:26px }
+      .cliente-card .obs{ font-size:22px }
+      .cliente-card .acciones button{ font-size:18px }
+
+      /* Buscador + botón en una sola línea 50/50 */
+      .clientes-actions{
+        display:grid !important; grid-template-columns:1fr 1fr; gap:14px; align-items:stretch; justify-content:stretch;
+      }
+      #filtroCliente, #btnNuevoCliente{ width:100%; min-width:0 }
+
+      /* Más grandes en móvil */
+      #filtroCliente{ font-size:26px; height:64px; padding:16px 18px; border-radius:14px }
+      #btnNuevoCliente{ font-size:26px; padding:16px 24px; min-height:64px; border-radius:14px }
+    }
+  </style>
 </head>
 <body>
-<h2>Clientes</h2>
-<form id="clienteForm">
-  <input type="hidden" name="id">
-  <input type="text" name="nombre" placeholder="Nombre" required><br>
-  <input type="text" name="obs" placeholder="Observaciones"><br>
-  <button type="submit">Guardar</button>
-</form>
-<ul id="listaClientes"></ul>
+  <div class="container">
+    <h2>Clientes</h2>
 
-<script>
-const api = "https://sat-idacas.onrender.com/api";
-const token = localStorage.getItem('token');
+    <div class="clientes-actions">
+      <input id="filtroCliente" placeholder="Buscar cliente..." oninput="filtrarClientes()">
+      <button id="btnNuevoCliente" onclick="nuevoCliente()">➕ Nuevo Cliente</button>
+    </div>
 
-// 🔒 Redirige si no hay token
-if (!token) {
-  alert("Debes iniciar sesión.");
-  location.href = "login.html";
-}
+    <div id="clientesCards"></div>
+  </div>
 
-const lista = document.getElementById('listaClientes');
-const form = document.getElementById('clienteForm');
+  <div id="modal" style="display:none;"></div>
 
-async function cargar() {
-  lista.innerHTML = '';
-  try {
-    const res = await fetch(`${api}/clientes`, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const clientes = await res.json();
-    clientes.forEach(c => {
-      const li = document.createElement('li');
-      li.innerHTML = `${c.nombre} - ${c.obs || ''} ` +
-        `<button onclick="editar(${c.id}, '${c.nombre.replace(/'/g, "\\'")}', '${(c.obs || '').replace(/'/g, "\\'")}')">Editar</button> ` +
-        `<button onclick="borrar(${c.id})">Borrar</button>`;
-      lista.appendChild(li);
-    });
-  } catch (err) {
-    console.error("Error al cargar clientes:", err);
-    alert("Error al cargar clientes.");
-  }
-}
+  <script>
+    const api = "https://sat-idacas.onrender.com/api";
+    const token = localStorage.getItem('token');
 
-form.onsubmit = async e => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(form).entries());
-  const metodo = data.id ? 'PUT' : 'POST';
-  const url = data.id ? `${api}/clientes/${data.id}` : `${api}/clientes`;
+    if (!token) {
+      alert("Debes iniciar sesión.");
+      location.href = "login.html";
+    }
 
-  try {
-    const res = await fetch(url, {
-      method: metodo,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify(data)
-    });
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    };
 
-    const result = await res.json();
+    let clientes = [];
 
-    if (!res.ok) {
-      console.error("Error al guardar cliente:", result);
-      alert(result.error || result.mensaje || "Error desconocido al guardar.");
-      return;
+    // Utilidad para escape seguro si hiciera falta
+    const esc = s => String(s ?? "")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+
+    async function apiFetch(url, options = {}) {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        let msg = "";
+        try { msg = await res.text(); } catch {}
+        throw new Error(`API ${res.status}: ${msg}`);
+      }
+      try { return await res.json(); } catch { return null; }
+    }
+
+    async function cargarClientes() {
+      try {
+        clientes = await apiFetch(`${api}/clientes`, { headers }) || [];
+        renderClientes(clientes);
+      } catch (e) {
+        console.error("Error al cargar clientes:", e);
+        alert("Error al cargar clientes.");
+      }
+    }
+
+    function renderClientes(lista) {
+      const cont = document.getElementById('clientesCards');
+      cont.innerHTML = "";
+      (lista || []).forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'cliente-card';
+        card.innerHTML = `
+          <div class="nombre">Cliente: ${esc(c.nombre)}</div>
+          <div class="obs">Observaciones: ${esc(c.obs || "")}</div>
+          <div class="acciones">
+            <button onclick='editarCliente(${JSON.stringify(c)})'>
+              <span class="ico" aria-hidden="true">✏️</span>Editar
+            </button>
+            <button onclick='borrarCliente(${c.id})'>
+              <span class="ico" aria-hidden="true">🗑️</span>Borrar
+            </button>
+          </div>
+        `;
+        cont.appendChild(card);
+      });
+    }
+
+    function filtrarClientes(){
+      const q = (document.getElementById('filtroCliente').value || "").toLowerCase().trim();
+      if (!q) { renderClientes(clientes); return; }
+      const lista = clientes.filter(c =>
+        (c.nombre || "").toLowerCase().includes(q) ||
+        (c.obs || "").toLowerCase().includes(q)
+      );
+      renderClientes(lista);
+    }
+
+    function nuevoCliente(){
+      abrirModalCliente({ id: 0, nombre: "", obs: "" }, false);
+    }
+    function editarCliente(c){
+      abrirModalCliente(c, true);
+    }
+
+    function abrirModalCliente(c, ed){
+      const m = document.getElementById('modal');
+      m.innerHTML = `
+        <div class="modal-wrap" onclick="cerrarModalBg(event)">
+          <div class="modal" role="dialog" aria-modal="true">
+            <h3>${ed ? "Editar" : "Nuevo"} Cliente</h3>
+            <input id="cn" placeholder="Nombre" value="${esc(c.nombre || "")}" />
+            <textarea id="co" rows="4" placeholder="Observaciones">${esc(c.obs || "")}</textarea>
+            <div class="actions">
+              <button class="btn" onclick="cerrarModal()">Cancelar</button>
+              <button class="btn primary" onclick="guardarCliente(${c.id || 0}, ${ed})">Guardar</button>
+            </div>
+          </div>
+        </div>`;
+      m.style.display = "block";
+    }
+
+    function cerrarModal(){ document.getElementById('modal').style.display = "none"; }
+    function cerrarModalBg(e){ if (e.target.classList.contains('modal-wrap')) cerrarModal(); }
+
+    async function guardarCliente(id, ed){
+      const data = {
+        nombre: document.getElementById('cn').value.trim(),
+        obs: document.getElementById('co').value.trim()
+      };
+      if (!data.nombre) { alert("El nombre es obligatorio."); return; }
+
+      const url = ed ? `${api}/clientes/${parseInt(id,10)}` : `${api}/clientes`;
+      const method = ed ? "PUT" : "POST";
+
+      try {
+        await apiFetch(url, { method, headers, body: JSON.stringify(data) });
+        cerrarModal();
+        await cargarClientes();
+      } catch (e) {
+        console.error("Error al guardar cliente:", e);
+        alert("Error al guardar cliente.");
+      }
+    }
+
+    async function borrarCliente(id){
+      if (!confirm("¿Borrar cliente?")) return;
+      try {
+        await apiFetch(`${api}/clientes/${parseInt(id,10)}`, { method: "DELETE", headers });
+        await cargarClientes();
+      } catch (e) {
+        console.error("Error al borrar cliente:", e);
+        alert("No se pudo borrar el cliente.");
+      }
+    }
+
+    // Init
+    window.addEventListener('load', cargarClientes);
+  </script>
+</body>
+</html>
