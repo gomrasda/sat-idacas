@@ -103,12 +103,12 @@
     /* ====== Fila superior (filtro + nuevo) ====== */
     .avisos-actions{
       display:flex; flex-wrap:wrap;
-      justify-content:flex-start; /* ← ahora a la izquierda */
+      justify-content:flex-start; /* izquierda */
       gap:16px;
       align-items:center;
       margin:8px 0 14px;
     }
-    /* >>> MAS GRANDE: filtro y botón Nuevo Aviso (ESCRITORIO) */
+    /* Más grande en escritorio */
     #filtroEstado{
       min-width:380px; font-size:20px; height:52px; padding:12px 16px;
       border-radius:12px; border:1px solid #e9eef6; background:#fff;
@@ -135,14 +135,28 @@
       #avisosCards .obs{ font-size:22px }
       #avisosCards .acciones button{ font-size:18px; padding:10px 14px }
 
-      .avisos-actions{ margin:8px 0 14px; gap:14px; justify-content:flex-start; }
-      /* >>> MAS GRANDE en móvil/tablet */
+      /* Móvil/Tablet: filtro + botón en UNA sola línea 50/50 */
+      .avisos-actions{
+        display: grid !important;
+        grid-template-columns: 1fr 1fr; /* 50% + 50% */
+        gap: 14px;
+        align-items: stretch;
+        justify-content: stretch;
+      }
+      .avisos-actions #filtroEstado,
+      .avisos-actions #btnNuevoAviso{
+        width: 100%;
+        min-width: 0; /* anula min-width del select */
+      }
+
+      /* Aun grandes en móvil/tablet */
       #filtroEstado{
-        width:100%; min-width:unset; font-size:26px; height:64px; padding:16px 18px; border-radius:14px;
+        font-size:26px; height:64px; padding:16px 18px; border-radius:14px;
       }
       #btnNuevoAviso{
         font-size:26px; padding:16px 24px; min-height:64px; border-radius:14px;
       }
+
       #avisosCards .estado strong{ font-size:22px; }
       #avisosCards .estado select{ font-size:20px; min-height:64px; padding:12px 18px; }
     }
@@ -321,7 +335,7 @@
       cerrarModal(); cargarUsuarios();
     }
 
-    /* ================== CLIENTES ================= Ile */
+    /* ================== CLIENTES ================== */
     async function cargarClientes(){
       const res = await fetch(api + "/clientes", { headers });
       clientes = await res.json();
