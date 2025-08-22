@@ -91,29 +91,31 @@
 
     /* ====== Iconos más grandes (Opción A) ====== */
     #avisosCards .acciones .ico{
-      font-size: 1.7em;     /* tamaño del icono respecto al texto del botón */
+      font-size: 1.7em;     /* tamaño del icono relativo al texto */
       line-height: 1;
       display: inline-block;
-      vertical-align: -2px; /* alineación vertical más fina */
+      vertical-align: -2px; /* ajuste fino vertical */
       margin-right: 8px;    /* separación icono-texto */
     }
-    /* En móvil, un poco más grandes */
-    @media (max-width:1024px){
-      #avisosCards .acciones .ico{ font-size: 2em; }
-    }
-    /* Un pelín más de área clicable para los botones */
+    /* Un pelín más de área clicable */
     #avisosCards .acciones button{ padding: 10px 14px; }
 
-    /* Fila superior (filtro + nuevo) */
+    /* ====== Fila superior (filtro + nuevo) ====== */
     .avisos-actions{
-      display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; align-items:center; margin:8px 0 14px;
+      display:flex; flex-wrap:wrap;
+      justify-content:flex-start; /* ← ahora a la izquierda */
+      gap:16px;
+      align-items:center;
+      margin:8px 0 14px;
     }
+    /* >>> MAS GRANDE: filtro y botón Nuevo Aviso (ESCRITORIO) */
     #filtroEstado{
-      min-width:300px; font-size:18px; height:44px; padding:10px 14px;
-      border-radius:10px; border:1px solid #e9eef6; background:#fff;
+      min-width:380px; font-size:20px; height:52px; padding:12px 16px;
+      border-radius:12px; border:1px solid #e9eef6; background:#fff;
     }
     #btnNuevoAviso{
-      font-size:16px; padding:8px 16px; border-radius:10px; border:none; cursor:pointer; background:#007bff; color:#fff;
+      font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px;
+      border:none; cursor:pointer; background:#007bff; color:#fff;
     }
     #btnNuevoAviso:hover{ background:#0056b3; }
 
@@ -125,14 +127,22 @@
 
     /* ====== Responsive ====== */
     @media (max-width:1024px){
+      /* Iconos un poco más grandes en móvil */
+      #avisosCards .acciones .ico{ font-size: 2em; }
+
       #avisosCards .aviso-card{ padding:14px; font-size:20px; border-radius:0; max-width:none !important; width:100% !important; }
       #avisosCards .cliente{ font-size:26px }
       #avisosCards .obs{ font-size:22px }
       #avisosCards .acciones button{ font-size:18px; padding:10px 14px }
 
-      .avisos-actions{ margin:8px 0 14px; }
-      #filtroEstado{ font-size:20px; height:56px; padding:12px 16px; border-radius:12px; }
-      #btnNuevoAviso{ font-size:20px; padding:14px 22px; border-radius:12px; }
+      .avisos-actions{ margin:8px 0 14px; gap:14px; justify-content:flex-start; }
+      /* >>> MAS GRANDE en móvil/tablet */
+      #filtroEstado{
+        width:100%; min-width:unset; font-size:26px; height:64px; padding:16px 18px; border-radius:14px;
+      }
+      #btnNuevoAviso{
+        font-size:26px; padding:16px 24px; min-height:64px; border-radius:14px;
+      }
       #avisosCards .estado strong{ font-size:22px; }
       #avisosCards .estado select{ font-size:20px; min-height:64px; padding:12px 18px; }
     }
@@ -311,7 +321,7 @@
       cerrarModal(); cargarUsuarios();
     }
 
-    /* ================== CLIENTES ================== */
+    /* ================== CLIENTES ================= Ile */
     async function cargarClientes(){
       const res = await fetch(api + "/clientes", { headers });
       clientes = await res.json();
