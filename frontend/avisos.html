@@ -12,9 +12,9 @@
     *{box-sizing:border-box}
     body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--ink)}
     .container{max-width:980px; margin:auto; padding:16px}
-    h2{margin:8px 0 16px; text-align:center; font-size:28px}
+    h2{margin:8px 0 16px; text-align:center; font-size:28px; letter-spacing:.3px}
 
-    /* Form básico */
+    /* ===== formulario ===== */
     #avisoForm{
       background:#fff; border:1px solid var(--card-b); border-radius:12px; padding:12px; margin-bottom:16px;
       display:grid; grid-template-columns: repeat(2,1fr); gap:10px;
@@ -22,31 +22,32 @@
     }
     #avisoForm input, #avisoForm select, #avisoForm button{
       width:100%; padding:10px 12px; border:1px solid var(--b); border-radius:10px; font:inherit;
+      background:#fff;
     }
     #avisoForm button{ background:var(--primary); color:#fff; cursor:pointer }
     #avisoForm button:hover{ background:#0056b3 }
     #avisoForm input[type="hidden"]{display:none}
     #avisoForm button[type="submit"]{ grid-column: 1 / -1 }
 
-    /* Lista de avisos con tarjetas */
+    /* ===== tarjetas de aviso ===== */
     #listaAvisos{list-style:none; padding:0; margin:0}
     .aviso-card{
       background:#fff; border:2px solid var(--card-b); border-radius:12px; padding:16px; margin:14px 0;
       box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5;
     }
     .aviso-top{margin-bottom:10px}
-    .aviso-cliente{
-      font-size:24px; font-weight:800; margin:0 0 6px;
-    }
-    .aviso-obs{
-      font-size:18px; font-weight:600; color:#333; margin:0 0 8px;
-    }
-    .aviso-meta{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; font-size:16px; color:#444}
-    .aviso-meta span{display:block; background:var(--chip); border:1px solid var(--b); border-radius:10px; padding:8px 10px}
+    .aviso-cliente{font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase}
+    .aviso-obs{font-size:18px; font-weight:600; color:#333; margin:0 0 8px}
 
-    .acciones{
-      display:flex; gap:8px; justify-content:flex-end; margin-top:12px;
+    .aviso-meta{
+      display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; font-size:16px; color:#444
     }
+    .aviso-meta .chip{
+      display:flex; align-items:center;
+      background:var(--chip); border:1px solid var(--b); border-radius:999px;
+      padding:8px 12px; height:40px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .acciones{ display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
     .btn{ border:1px solid var(--b); background:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:16px }
     .btn:hover{ background:#f1f5fb }
     .btn-danger{ border-color:#e5a3a3; background:#fff3f3 }
@@ -54,7 +55,7 @@
     .btn-primary:hover{ background:#0056b3 }
     .btn-warning{ background:#fff7e6; border-color:#ffe0a3 }
 
-    /* ====== MÓVIL/TABLET: Mismo look que TICKETS ====== */
+    /* ====== MÓVIL/TABLET: igual que TICKETS ====== */
     @media (max-width:1024px){
       .container{ max-width:100%; padding:12px; }
 
@@ -67,6 +68,7 @@
         text-transform:uppercase;
       }
 
+      /* formulario 1 columna + tamaños XL */
       #avisoForm{ grid-template-columns:1fr; gap:12px; }
       #avisoForm select,
       #avisoForm input,
@@ -78,6 +80,7 @@
       }
       #avisoForm button[type="submit"]{ padding:14px 28px; }
 
+      /* tarjeta grande */
       .aviso-card{
         padding:14px;
         border:2px solid var(--card-b);
@@ -90,19 +93,13 @@
       .aviso-obs{ font-size:40px !important; font-weight:600; margin:0 0 8px; }
 
       .aviso-meta{
-        display:grid; grid-template-columns:1fr; gap:10px; font-size:40px !important;
+        grid-template-columns:1fr; gap:10px; font-size:40px !important;
       }
-      .aviso-meta span{
-        display:flex; align-items:center;
-        background:var(--chip);
-        border:1px solid var(--b);
-        padding:10px 16px;
-        border-radius:999px;
-        height:52px;
-        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      .aviso-meta .chip{
+        padding:10px 16px; height:52px; border-radius:999px;
       }
 
-      .acciones{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+      .acciones{ gap:10px; }
       .acciones .btn{
         font-size:40px !important;
         padding:12px 16px;
@@ -132,9 +129,12 @@
   <script>
     const api = "https://sat-idacas.onrender.com/api";
     const token = localStorage.getItem('token');
-    const lista = document.getElementById('listaAvisos');
-    const form = document.getElementById('avisoForm');
+    if(!token){ location.href='login.html'; }
 
+    const lista = document.getElementById('listaAvisos');
+    const form  = document.getElementById('avisoForm');
+
+    // Escapar texto para innerHTML seguro
     const esc = s => String(s ?? "")
       .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
       .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
@@ -178,9 +178,9 @@
         li.className = "aviso-card";
 
         const cliente = esc(a.cliente || "");
-        const tarea = esc(a.tarea || "");
+        const tarea   = esc(a.tarea || "");
         const tecnico = esc(a.tecnico || "");
-        const fecha = esc(a.fecha_programada || "");
+        const fecha   = esc(a.fecha_programada || "");
 
         li.innerHTML = `
           <div class="aviso-top">
@@ -189,13 +189,13 @@
           </div>
 
           <div class="aviso-meta">
-            <span><strong>Fecha:</strong> ${fecha}</span>
-            <span><strong>Técnico:</strong> ${tecnico}</span>
+            <span class="chip"><strong style="margin-right:8px">Fecha:</strong> ${fecha}</span>
+            <span class="chip"><strong style="margin-right:8px">Técnico:</strong> ${tecnico}</span>
           </div>
 
           <div class="acciones">
             <button class="btn btn-warning" onclick="editar(${a.id}, ${a.cliente_id}, '${esc(a.tarea)}', '${esc(a.fecha_programada)}', '${esc(a.tecnico)}')">✏️ Editar</button>
-            <button class="btn btn-danger" onclick="borrar(${a.id})">🗑️ Borrar</button>
+            <button class="btn btn-danger"  onclick="borrar(${a.id})">🗑️ Borrar</button>
             <button class="btn btn-primary" onclick="location.href='ticket.html?avisoId=${a.id}'">🎫 Ticket</button>
           </div>
         `;
@@ -205,15 +205,17 @@
 
     form.onsubmit = async e => {
       e.preventDefault();
-      const data = Object.fromEntries(new FormData(form).entries());
+      const data   = Object.fromEntries(new FormData(form).entries());
       const metodo = data.id ? 'PUT' : 'POST';
-      const url = data.id ? `${api}/avisos/${data.id}` : `${api}/avisos`;
+      const url    = data.id ? `${api}/avisos/${data.id}` : `${api}/avisos`;
       data.cliente = parseInt(data.cliente, 10);
+
       await fetch(url, {
         method: metodo,
         headers: {'Content-Type':'application/json','Authorization':'Bearer ' + token},
         body: JSON.stringify(data)
       });
+
       form.reset();
       cargarAvisos();
     };
