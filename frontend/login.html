@@ -20,61 +20,57 @@
       font-family:Arial,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     }
 
-    .wrap{ width:100%; max-width:720px; }
-
-    /* Tamaños fluidos con clamp: muy grandes en móvil */
+    /* ======== PC (base) → más pequeño ======== */
+    .wrap{ width:100%; max-width:520px; }          /* antes era muy ancho */
     .logo{
-      display:block; margin:0 auto 16px;
-      width:clamp(220px, 60vw, 380px);
-      max-width:90%; height:auto; object-fit:contain;
+      display:block; margin:0 auto 14px;
+      width:200px; max-width:75%; height:auto; object-fit:contain;
     }
-
     .card{
       background:var(--card);
-      padding:clamp(24px, 6vw, 36px);
-      border-radius:16px;
+      padding:24px;
+      border-radius:14px;
       border:1px solid var(--b);
       box-shadow:0 10px 30px rgba(0,0,0,.06);
     }
-
     h2{
-      margin:0 0 clamp(16px, 4vw, 24px);
-      text-align:center;
-      font-weight:800;
-      font-size:clamp(26px, 7vw, 40px);
-      letter-spacing:.2px;
+      margin:0 0 16px; text-align:center;
+      font-weight:800; font-size:26px; letter-spacing:.2px;
     }
-
     input{
-      width:100%;
-      margin:clamp(10px, 2.8vw, 14px) 0;
-      height:clamp(58px, 12vw, 80px);
-      font-size:clamp(18px, 6vw, 28px);
-      padding:clamp(12px, 3.8vw, 18px) clamp(14px, 4.2vw, 22px);
-      border:1px solid var(--b);
-      border-radius:12px;
-      outline:0; background:#fff;
+      width:100%; margin:10px 0;
+      height:52px; font-size:17px;
+      padding:12px 14px;
+      border:1px solid var(--b); border-radius:12px; outline:0; background:#fff;
     }
     input::placeholder{font-size:inherit; color:#9aa3af}
     input:focus{border-color:#b6c3ff; box-shadow:0 0 0 4px rgba(22,119,255,.12)}
-
     button{
-      width:100%;
-      height:clamp(60px, 12.5vw, 84px);
-      margin-top:clamp(6px, 2vw, 10px);
-      font-size:clamp(18px, 6.2vw, 28px);
-      font-weight:700;
-      border:none; border-radius:12px;
-      background:var(--primary); color:#fff; cursor:pointer;
+      width:100%; height:54px; margin-top:6px;
+      font-size:17px; font-weight:700;
+      border:none; border-radius:12px; background:var(--primary); color:#fff; cursor:pointer;
     }
     button:hover{ background:var(--primary-h) }
+    .msg{margin-top:10px; text-align:center; color:#e11d48; min-height:20px; font-size:14px}
 
-    .msg{
-      margin-top:clamp(8px, 2.4vw, 12px);
-      text-align:center;
-      color:#e11d48;
-      min-height:clamp(20px, 4.8vw, 26px);
-      font-size:clamp(14px, 4.8vw, 18px);
+    /* ======== Tablet/Móvil grande (≤ 768px) → más GRANDE ======== */
+    @media (max-width:768px){
+      .wrap{ max-width:640px }
+      .logo{ width:300px }
+      .card{ padding:28px }
+      h2{ font-size:34px; margin-bottom:18px }
+      input{ height:66px; font-size:22px; padding:16px 18px }
+      button{ height:68px; font-size:22px }
+      .msg{ font-size:16px }
+    }
+
+    /* ======== Móvil pequeño (≤ 480px) → aún más GRANDE ======== */
+    @media (max-width:480px){
+      .logo{ width:320px }
+      h2{ font-size:36px }
+      input{ height:72px; font-size:24px; padding:18px 20px }
+      button{ height:74px; font-size:24px }
+      .msg{ font-size:18px }
     }
   </style>
 </head>
@@ -83,7 +79,6 @@
   <div class="wrap">
     <!-- Cambia la ruta si tu logo tiene otro nombre -->
     <img class="logo" src="logo.jpg" alt="Logo de la empresa" onerror="this.style.display='none'">
-
     <div class="card">
       <h2>Inicio de sesión</h2>
       <form id="loginForm">
@@ -127,6 +122,5 @@
       }
     });
   </script>
-
 </body>
 </html>
