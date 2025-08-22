@@ -4,29 +4,22 @@
   <meta charset="UTF-8">
   <title>SAT CRUD Completo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <style>
-    /* ====== Base ====== */
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
+    :root{
+      --b:#e9eef6; --bg:#f5f5f5; --ink:#1f2937; --chip:#eef2f7; --card-b:#cfd8e6;
+      --primary:#007bff; --primary-h:#0056b3;
     }
+    *{box-sizing:border-box}
+    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
     .topbar {
-      background: #003366;
-      color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
+      background: #003366; color: white; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;
     }
     .topbar h2 { margin: 0; font-size: 1.2rem; }
     .topbar button { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
 
     .sidebar {
       position: fixed; top: 0; left: -220px; width: 200px; height: 100%;
-      background: #222; color: white; padding: 20px;
-      transition: left 0.3s ease; z-index: 1001;
+      background: #222; color: white; padding: 20px; transition: left 0.3s ease; z-index: 1001;
     }
     .sidebar.active { left: 0; }
     .sidebar button {
@@ -42,154 +35,80 @@
     .overlay.active { display: block; }
 
     .main { padding: 16px 16px 16px 24px; margin-top: 60px; }
-    .main h2, .main button { margin-left: 8px; }
-
-    table { border-collapse: collapse; width: 100%; background: white; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #eee; }
-
     .modal {
       position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: #fff; padding: 20px; border-radius: 10px; border: 1px solid #ccc;
-      z-index: 1002; width: 90%; max-width: 420px;
+      background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #ccc;
+      z-index: 1002; width: 90%; max-width: 460px;
     }
+    .modal h3{ margin:0 0 8px }
     .modal input, .modal select, .modal textarea {
-      width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px;
+      width: 100%; padding: 10px 12px; margin: 6px 0; border: 1px solid var(--b); border-radius: 10px; font: inherit;
     }
+    .modal .hint{ font-size:12px; color:#666; margin-top:-2px }
+    .modal .row { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+    .btn { padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid var(--b); background:#fff }
+    .btn.primary{ background: var(--primary); color:#fff; border-color:transparent }
+    .btn.primary:hover{ background: var(--primary-h) }
 
-    /* ====== AVISOS: tarjetas estilo “tickets” ====== */
-    #avisosCards .aviso-card{
-      background:#fff; border:2px solid #cfd8e6; border-radius:0; padding:16px;
-      width:100%; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5; font-size:18px;
+    /* ==== Tarjetas (Avisos/Clientes/Usuarios) ==== */
+    .cards{ display:flex; flex-direction:column; gap:16px; margin-top:16px; }
+    .card{
+      background:#fff; border:2px solid var(--card-b); border-radius:0; padding:16px; width:100%;
+      box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5; font-size:18px;
     }
-    #avisosCards .cliente{ font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
-    #avisosCards .obs{ font-size:20px; font-weight:600; color:#333; margin:0 0 8px; }
-    #avisosCards .meta{
-      display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; margin-top:6px;
-    }
-    #avisosCards .meta > span{
-      display:block; background:#eef2f7; border:1px solid #e9eef6; border-radius:999px; padding:8px 10px;
-    }
-    #avisosCards .estado{ display:flex; align-items:center; gap:10px; margin-top:8px; }
-    #avisosCards .estado strong{ font-size:18px; }
-    #avisosCards .estado select{
-      font-size:18px; min-height:46px; padding:10px 14px; border-radius:12px; border:1px solid #e9eef6; background:#eef2f7;
-    }
+    .card .title{ font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
+    .meta{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; margin:8px 0; }
+    .meta > span{ display:block; background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:8px 10px; }
+    .actions{ display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:12px }
+    .actions .ico{ font-size:1.7em; line-height:1; vertical-align:-2px; display:inline-block; margin-right:8px }
+    .actions button{ font-size:16px; padding:10px 14px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer }
+    .actions button:hover{ background:#f1f5fb }
 
-    /* Acciones: 🎫 izquierda, resto derecha */
-    #avisosCards .acciones{
-      display:flex; gap:8px; margin-top:12px; align-items:center; width:100%;
+    /* ==== Acciones (barra superior) ==== */
+    .section-actions{
+      display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center; gap:16px; margin:8px 0 14px;
     }
-    #avisosCards .acciones .btn-ticket{
-      order:-1;          /* Ticket aparece primero */
-      margin-right:auto; /* empuja Editar/Borrar a la derecha */
+    .section-actions input[type="text"], .section-actions select{
+      min-width:380px; font-size:20px; height:52px; padding:12px 16px; border-radius:12px; border:1px solid var(--b); background:#fff;
     }
-    #avisosCards .acciones button{
-      font-size:16px; padding:8px 12px; border-radius:10px; border:1px solid #e9eef6; background:#fff; cursor:pointer;
+    .section-actions .primary-btn{
+      font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px; border:none; cursor:pointer; background:var(--primary); color:#fff;
     }
-    #avisosCards .acciones button:hover{ background:#f1f5fb }
+    .section-actions .primary-btn:hover{ background:var(--primary-h) }
 
-    /* ====== CLIENTES: MISMO FORMATO QUE AVISOS ====== */
-    .clientes-actions{
-      display:flex; flex-wrap:wrap; justify-content:flex-start; gap:16px; align-items:center; margin:8px 0 14px;
-    }
-    /* buscador + botón (ESCRITORIO) */
-    #filtroCliente{
-      min-width:380px; font-size:20px; height:52px; padding:12px 16px;
-      border-radius:12px; border:1px solid #e9eef6; background:#fff;
-    }
-    #btnNuevoCliente{
-      font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px;
-      border:none; cursor:pointer; background:#007bff; color:#fff;
-    }
-    #btnNuevoCliente:hover{ background:#0056b3; }
+    /* Específico AVISOS: 🎫 Ticket a la izquierda */
+    .actions .btn-ticket{ order:-1; margin-right:auto }
 
-    #clientesCards .cliente-card{
-      background:#fff; border:2px solid #cfd8e6; border-radius:0; padding:16px;
-      width:100%; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5; font-size:18px;
-    }
-    #clientesCards .nombre{ font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
-    #clientesCards .obs{ font-size:20px; font-weight:600; color:#333; margin:0 0 8px; }
-    #clientesCards .acciones{
-      display:flex; gap:8px; justify-content:flex-end; margin-top:12px; align-items:center;
-    }
-    #clientesCards .acciones button{
-      font-size:16px; padding:8px 12px; border-radius:10px; border:1px solid #e9eef6; background:#fff; cursor:pointer;
-    }
-    #clientesCards .acciones button:hover{ background:#f1f5fb }
-
-    /* ====== Iconos grandes para ambos (Avisos/Clientes) ====== */
-    #avisosCards .acciones .ico,
-    #clientesCards .acciones .ico{
-      font-size: 1.7em;
-      line-height: 1;
-      display: inline-block;
-      vertical-align: -2px;
-      margin-right: 8px;
-    }
-    /* Un pelín más de área clicable */
-    #avisosCards .acciones button,
-    #clientesCards .acciones button{ padding: 10px 14px; }
-
-    /* ====== Fila superior de AVISOS ====== */
-    .avisos-actions{
-      display:flex; flex-wrap:wrap; justify-content:flex-start; gap:16px; align-items:center; margin:8px 0 14px;
-    }
-    #filtroEstado{
-      min-width:380px; font-size:20px; height:52px; padding:12px 16px;
-      border-radius:12px; border:1px solid #e9eef6; background:#fff;
-    }
-    #btnNuevoAviso{
-      font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px;
-      border:none; cursor:pointer; background:#007bff; color:#fff;
-    }
-    #btnNuevoAviso:hover{ background:#0056b3; }
-
-    /* ====== Responsive ====== */
+    /* ===== Responsive ===== */
     @media (max-width:1024px){
-      #avisosCards .acciones .ico, #clientesCards .acciones .ico{ font-size: 2em; }
+      .actions .ico{ font-size:2em }
+      .card{ padding:14px; font-size:20px }
+      .card .title{ font-size:26px }
+      .actions button{ font-size:18px }
 
-      #avisosCards .aviso-card, #clientesCards .cliente-card{
-        padding:14px; font-size:20px; border-radius:0; max-width:none !important; width:100% !important;
-      }
-      #avisosCards .cliente, #clientesCards .nombre{ font-size:26px }
-      #avisosCards .obs, #clientesCards .obs{ font-size:22px }
-      #avisosCards .acciones button, #clientesCards .acciones button{ font-size:18px; padding:10px 14px }
-
-      /* AVISOS: filtro+botón 50/50 en una línea */
-      .avisos-actions{
+      /* Barras de acciones 50/50 */
+      .section-actions{
         display:grid !important; grid-template-columns: 1fr 1fr; gap:14px; align-items:stretch; justify-content:stretch;
       }
-      .avisos-actions #filtroEstado, .avisos-actions #btnNuevoAviso{
+      .section-actions input[type="text"], .section-actions select, .section-actions .primary-btn{
         width:100%; min-width:0;
       }
-
-      /* CLIENTES: buscador+botón 50/50 en una línea */
-      .clientes-actions{
-        display:grid !important; grid-template-columns: 1fr 1fr; gap:14px; align-items:stretch; justify-content:stretch;
-      }
-      .clientes-actions #filtroCliente, .clientes-actions #btnNuevoCliente{
-        width:100%; min-width:0;
-      }
-
-      /* Campos más grandes en móvil */
-      #filtroEstado, #filtroCliente{ font-size:26px; height:64px; padding:16px 18px; border-radius:14px; }
-      #btnNuevoAviso, #btnNuevoCliente{ font-size:26px; padding:16px 24px; min-height:64px; border-radius:14px; }
+      .section-actions input[type="text"], .section-actions select{ font-size:26px; height:64px; padding:16px 18px; border-radius:14px }
+      .section-actions .primary-btn{ font-size:26px; min-height:64px; padding:16px 24px; border-radius:14px }
     }
   </style>
 </head>
-
 <body>
-  <!-- ====== TOP ====== -->
+
+  <!-- Top -->
   <div class="topbar">
     <button onclick="toggleSidebar()">☰</button>
     <h2>SAT Control</h2>
     <span></span>
   </div>
-
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-  <!-- ====== SIDEBAR ====== -->
+  <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <button class="logout" onclick="logout()">Cerrar sesión</button>
     <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
@@ -197,361 +116,340 @@
     <button onclick="mostrar('avisos')">Avisos</button>
   </div>
 
-  <!-- ====== MAIN ====== -->
+  <!-- Main -->
   <div class="main">
     <div id="inicio" style="text-align:center; margin-top: 80px;">
       <img src="logo.jpg" alt="Logo de la empresa" style="max-width: 200px;">
       <h2>Bienvenido a SAT Control</h2>
     </div>
 
-    <!-- === USUARIOS === -->
+    <!-- === USUARIOS (ahora con tarjetas y barra de acciones) === -->
     <div id="usuarios" style="display:none;">
       <h2>Usuarios</h2>
-      <button onclick="nuevoUsuario()">➕ Nuevo Usuario</button>
-      <table>
-        <thead>
-          <tr><th>Nombre</th><th>Usuario</th><th>Email</th><th>Rol</th><th>Acciones</th></tr>
-        </thead>
-        <tbody id="usuariosBody"></tbody>
-      </table>
+      <div class="section-actions">
+        <input id="filtroUsuario" type="text" placeholder="Buscar por nombre, usuario, email o rol..." oninput="filtrarUsuarios()">
+        <button class="primary-btn" onclick="nuevoUsuario()">➕ Nuevo Usuario</button>
+      </div>
+      <div id="usuariosCards" class="cards"></div>
     </div>
 
     <!-- === CLIENTES (mismo formato) === -->
     <div id="clientes" style="display:none;">
-      <div class="clientes-actions">
-        <input id="filtroCliente" placeholder="Buscar cliente..." oninput="filtrarClientes()">
-        <button id="btnNuevoCliente" onclick="nuevoCliente()">➕ Nuevo Cliente</button>
+      <h2>Clientes</h2>
+      <div class="section-actions">
+        <input id="filtroCliente" type="text" placeholder="Buscar cliente..." oninput="filtrarClientes()">
+        <button class="primary-btn" onclick="nuevoCliente()">➕ Nuevo Cliente</button>
       </div>
-      <div id="clientesCards" style="display:flex; flex-direction:column; gap:16px; margin-top:16px;"></div>
+      <div id="clientesCards" class="cards"></div>
     </div>
 
     <!-- === AVISOS === -->
     <div id="avisos" style="display:none;">
-      <div class="avisos-actions">
+      <h2>Avisos</h2>
+      <div class="section-actions">
         <select id="filtroEstado" onchange="filtrarAvisos()">
           <option value="todos">Todos</option>
           <option value="Pendiente">Pendientes</option>
           <option value="Cerrado">Cerrados</option>
         </select>
-        <button id="btnNuevoAviso" onclick="nuevoAviso()">➕ Nuevo Aviso</button>
+        <button class="primary-btn" onclick="nuevoAviso()">➕ Nuevo Aviso</button>
       </div>
-
-      <div id="avisosCards" style="display:flex; flex-direction:column; gap:16px; margin-top:16px;"></div>
+      <div id="avisosCards" class="cards"></div>
     </div>
 
     <div id="modal" style="display:none;"></div>
   </div>
 
   <script>
-    /* ================== AUTH / API ================== */
+    /* ===== AUTH / BASE ===== */
     const token = localStorage.getItem('token');
     if (!token) window.location.href = 'login.html';
-
     const payload = JSON.parse(atob(token.split('.')[1] || 'e30='));
     const rol = payload.rol;
     const api = "https://sat-idacas.onrender.com/api";
+    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
-    };
+    function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
+    function logout(){ localStorage.removeItem('token'); window.location.href = 'login.html'; }
+    if (rol !== "Gestor") { const el = document.getElementById('btnUsuarios'); if (el) el.style.display = 'none'; }
 
-    let clientes = [];
-    let tecnicos = [];
-
-    /* ================== UI BASICS ================== */
-    function logout() {
-      localStorage.removeItem('token');
-      window.location.href = 'login.html';
-    }
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('active');
-      document.getElementById('overlay').classList.toggle('active');
-    }
-    if (rol !== "Gestor") {
-      const el = document.getElementById("btnUsuarios");
-      if (el) el.style.display = "none";
-    }
-
-    function mostrar(seccion) {
-      ["inicio","usuarios","clientes","avisos"].forEach(id => {
-        const n = document.getElementById(id);
-        if (n) n.style.display = "none";
-      });
-      document.getElementById(seccion).style.display = "block";
+    function mostrar(seccion){
+      ['inicio','usuarios','clientes','avisos'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+      document.getElementById(seccion).style.display = 'block';
       document.getElementById('sidebar').classList.remove('active');
       document.getElementById('overlay').classList.remove('active');
-
-      if (seccion === "usuarios") cargarUsuarios();
-      if (seccion === "clientes") cargarClientes();
-      if (seccion === "avisos") {
-        cargarClientes();
-        cargarTecnicos();
-        cargarAvisos(document.getElementById('filtroEstado').value);
-      }
+      if (seccion==='usuarios') cargarUsuarios();
+      if (seccion==='clientes') cargarClientes();
+      if (seccion==='avisos') { cargarClientes(); cargarTecnicos(); cargarAvisos(document.getElementById('filtroEstado').value); }
     }
 
-    /* ================== USUARIOS ================== */
-    async function cargarUsuarios() {
+    const esc = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+
+    /* ===== MODAL HELPERS ===== */
+    function abrirModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.style.display='block'; }
+    function cerrarModal(){ document.getElementById('modal').style.display='none'; }
+
+    /* =================== USUARIOS =================== */
+    let usuariosArr = [];
+
+    async function cargarUsuarios(){
       const res = await fetch(api + "/usuarios", { headers });
-      const data = await res.json();
-      const body = document.getElementById("usuariosBody");
-      body.innerHTML = "";
-      data.forEach(u => {
-        body.innerHTML += `
-          <tr>
-            <td>${u.nombre}</td>
-            <td>${u.usuario}</td>
-            <td>${u.email}</td>
-            <td>${u.rol}</td>
-            <td>
-              <button onclick='editarUsuario(${JSON.stringify(u)})'>✏️</button>
-              <button onclick='borrar("usuarios", ${u.id})'>🗑️</button>
-            </td>
-          </tr>`;
+      usuariosArr = await res.json();
+      renderUsuarios(usuariosArr);
+    }
+    function renderUsuarios(lista){
+      const cont = document.getElementById('usuariosCards'); cont.innerHTML = "";
+      (lista||[]).forEach(u=>{
+        const nombre = u.nombre_completo || u.nombre || "";
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="title">${esc(nombre)}</div>
+          <div class="meta">
+            <span><strong>Usuario:</strong> ${esc(u.usuario||"")}</span>
+            <span><strong>Email:</strong> ${esc(u.email||"")}</span>
+            <span><strong>Rol:</strong> ${esc(u.rol||"")}</span>
+          </div>
+          <div class="actions">
+            <button onclick="editarUsuario(${u.id})"><span class="ico">✏️</span>Editar</button>
+            <button onclick="borrarUsuario(${u.id})"><span class="ico">🗑️</span>Borrar</button>
+          </div>`;
+        cont.appendChild(card);
       });
     }
-    function nuevoUsuario(){ abrirUsuario({ id:0, nombre:"", usuario:"", email:"", rol:"Gestor" }, false); }
-    function editarUsuario(u){ abrirUsuario(u, true); }
-
-    function abrirUsuario(u, ed){
-      const modal = document.getElementById('modal');
-      modal.innerHTML = `
-        <div class="modal">
-          <h3>${ed ? "Editar" : "Nuevo"} Usuario</h3>
-          <input id="n" value="${u.nombre||""}" placeholder="Nombre">
-          <input id="u" value="${u.usuario||""}" placeholder="Usuario">
-          <input id="e" value="${u.email||""}" placeholder="Email">
-          <input id="p" placeholder="Contraseña">
-          <select id="r">
-            <option ${u.rol==="Gestor"?"selected":""}>Gestor</option>
-            <option ${u.rol==="Técnico"?"selected":""}>Técnico</option>
-          </select>
-          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
-            <button onclick='guardarUsuario(${u.id||0}, ${ed})'>Guardar</button>
-            <button onclick='cerrarModal()'>Cancelar</button>
-          </div>
-        </div>`;
-      modal.style.display = "block";
+    function filtrarUsuarios(){
+      const q = (document.getElementById('filtroUsuario').value||"").toLowerCase().trim();
+      if (!q) return renderUsuarios(usuariosArr);
+      renderUsuarios(usuariosArr.filter(u =>
+        (u.nombre_completo||u.nombre||"").toLowerCase().includes(q) ||
+        (u.usuario||"").toLowerCase().includes(q) ||
+        (u.email||"").toLowerCase().includes(q) ||
+        (u.rol||"").toLowerCase().includes(q)
+      ));
     }
-    async function guardarUsuario(id, ed){
-      const d = {
-        nombre: document.getElementById('n').value,
-        usuario: document.getElementById('u').value,
-        email:   document.getElementById('e').value,
-        password:document.getElementById('p').value,
-        rol:     document.getElementById('r').value
+    function nuevoUsuario(){
+      abrirModal(`
+        <div class="modal">
+          <h3>Nuevo Usuario</h3>
+          <input id="u_nombre" placeholder="Nombre completo" />
+          <input id="u_user" placeholder="Usuario" />
+          <input id="u_mail" type="email" placeholder="Email" />
+          <select id="u_rol">
+            <option>Gestor</option><option>Técnico</option><option>tecnico</option>
+          </select>
+          <input id="u_pwd" type="password" placeholder="Contraseña (obligatoria)" />
+          <div class="row">
+            <button class="btn" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn primary" onclick="guardarUsuario(null)">Guardar</button>
+          </div>
+        </div>`);
+    }
+    function editarUsuario(id){
+      const u = usuariosArr.find(x=>x.id===id); if(!u) return;
+      abrirModal(`
+        <div class="modal">
+          <h3>Editar Usuario</h3>
+          <input id="u_nombre" placeholder="Nombre completo" value="${esc(u.nombre_completo||u.nombre||"")}" />
+          <input id="u_user" placeholder="Usuario" value="${esc(u.usuario||"")}" />
+          <input id="u_mail" type="email" placeholder="Email" value="${esc(u.email||"")}" />
+          <select id="u_rol">
+            <option ${ (u.rol||"")==="Gestor"?"selected":"" }>Gestor</option>
+            <option ${ (u.rol||"")==="Técnico"?"selected":"" }>Técnico</option>
+            <option ${ (u.rol||"")==="tecnico"?"selected":"" }>tecnico</option>
+          </select>
+          <input id="u_pwd" type="password" placeholder="Contraseña (deja en blanco para no cambiar)" />
+          <div class="hint">Si dejas la contraseña vacía, no se modificará.</div>
+          <div class="row">
+            <button class="btn" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn primary" onclick="guardarUsuario(${id})">Guardar</button>
+          </div>
+        </div>`);
+    }
+    async function guardarUsuario(id){
+      const data = {
+        nombre_completo: document.getElementById('u_nombre').value.trim(),
+        usuario: document.getElementById('u_user').value.trim(),
+        email: document.getElementById('u_mail').value.trim(),
+        rol: document.getElementById('u_rol').value
       };
-      if (!d.nombre || !d.usuario || !d.email || (!ed && !d.password)) {
-        alert("Completa todos los campos (la contraseña es obligatoria al crear).");
-        return;
+      const pwd = document.getElementById('u_pwd').value;
+      if (!data.nombre_completo || !data.usuario || !data.email || !data.rol){
+        alert("Nombre, usuario, email y rol son obligatorios."); return;
       }
-      const url = ed ? `${api}/usuarios/${parseInt(id,10)}` : `${api}/usuarios`;
-      const method = ed ? "PUT" : "POST";
-      const res = await fetch(url, { method, headers, body: JSON.stringify(d) });
-      if (!res.ok) alert(await res.text());
+      data.nombre = data.nombre_completo; // compat
+      if (!id && !pwd){ alert("La contraseña es obligatoria al crear."); return; }
+      if (pwd) data.password = pwd;
+
+      const url = id ? `${api}/usuarios/${id}` : `${api}/auth/register`;
+      const method = id ? "PUT" : "POST";
+      const res = await fetch(url, { method, headers, body: JSON.stringify(data) });
+      if (!res.ok) { alert(await res.text()); return; }
       cerrarModal(); cargarUsuarios();
     }
-
-    /* ================== CLIENTES (mismo formato) ================== */
-    async function cargarClientes() {
-      const res = await fetch(api + "/clientes", { headers });
-      clientes = await res.json();
-      filtrarClientes(); // pinta con el filtro actual (si hay)
+    async function borrarUsuario(id){
+      if (!confirm("¿Borrar usuario?")) return;
+      const res = await fetch(`${api}/usuarios/${id}`, { method:"DELETE", headers });
+      if (!res.ok) alert("No se pudo borrar.");
+      cargarUsuarios();
     }
 
-    function renderClientes(lista) {
-      const contenedor = document.getElementById("clientesCards");
-      if (!contenedor) return;
-      contenedor.innerHTML = "";
-
-      (lista || []).forEach(c => {
-        const card = document.createElement("div");
-        card.className = "cliente-card";
+    /* =================== CLIENTES =================== */
+    let clientesArr = [];
+    async function cargarClientes(){
+      const res = await fetch(api + "/clientes", { headers });
+      clientesArr = await res.json();
+      renderClientes(clientesArr);
+    }
+    function renderClientes(lista){
+      const cont = document.getElementById('clientesCards'); cont.innerHTML="";
+      (lista||[]).forEach(c=>{
+        const card = document.createElement('div'); card.className='card';
         card.innerHTML = `
-          <div class="nombre">Cliente: ${c.nombre || ""}</div>
-          <div class="obs">Observaciones: ${c.obs || ""}</div>
-          <div class="acciones">
-            <button onclick='editarCliente(${JSON.stringify(c)})'>
-              <span class="ico" aria-hidden="true">✏️</span>Editar
-            </button>
-            <button onclick='borrar("clientes", ${c.id})'>
-              <span class="ico" aria-hidden="true">🗑️</span>Borrar
-            </button>
+          <div class="title">Cliente: ${esc(c.nombre||"")}</div>
+          <div class="meta">
+            <span><strong>Observaciones:</strong> ${esc(c.obs||"")}</span>
           </div>
-        `;
-        contenedor.appendChild(card);
+          <div class="actions">
+            <button onclick="editarCliente(${c.id})"><span class="ico">✏️</span>Editar</button>
+            <button onclick="borrarCliente(${c.id})"><span class="ico">🗑️</span>Borrar</button>
+          </div>`;
+        cont.appendChild(card);
       });
     }
-
     function filtrarClientes(){
-      const q = (document.getElementById('filtroCliente')?.value || "").toLowerCase().trim();
-      if (!q) { renderClientes(clientes); return; }
-      const lista = clientes.filter(c =>
-        (c.nombre || "").toLowerCase().includes(q) ||
-        (c.obs || "").toLowerCase().includes(q)
-      );
-      renderClientes(lista);
+      const q=(document.getElementById('filtroCliente').value||"").toLowerCase().trim();
+      if(!q) return renderClientes(clientesArr);
+      renderClientes(clientesArr.filter(c =>
+        (c.nombre||"").toLowerCase().includes(q) || (c.obs||"").toLowerCase().includes(q)
+      ));
     }
-
-    function nuevoCliente() { abrirCliente({ id: 0, nombre: "", obs: "" }, false); }
-    function editarCliente(c) { abrirCliente(c, true); }
-
-    function abrirCliente(c, ed) {
-      const modal = document.getElementById("modal");
-      modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Cliente</h3>
-        <input id='cn' value='${c.nombre || ""}' placeholder='Nombre'>
-        <textarea id='co' placeholder='Observaciones' rows="3">${c.obs || ""}</textarea><br>
-        <div style="display:flex; gap:8px; justify-content:flex-end;">
-          <button onclick='guardarCliente(${c.id || 0},${ed})'>Guardar</button>
-          <button onclick='cerrarModal()'>Cancelar</button>
-        </div>
-      </div>`;
-      modal.style.display = "block";
+    function nuevoCliente(){
+      abrirModal(`
+        <div class="modal">
+          <h3>Nuevo Cliente</h3>
+          <input id="c_nombre" placeholder="Nombre" />
+          <textarea id="c_obs" rows="3" placeholder="Observaciones"></textarea>
+          <div class="row">
+            <button class="btn" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn primary" onclick="guardarCliente(null)">Guardar</button>
+          </div>
+        </div>`);
     }
-
-    async function guardarCliente(id, ed) {
-      const data = { nombre: document.getElementById('cn').value, obs: document.getElementById('co').value };
-      const method = ed ? "PUT" : "POST";
-      const url = ed ? `${api}/clientes/${parseInt(id, 10)}` : `${api}/clientes`;
+    function editarCliente(id){
+      const c = clientesArr.find(x=>x.id===id); if(!c) return;
+      abrirModal(`
+        <div class="modal">
+          <h3>Editar Cliente</h3>
+          <input id="c_nombre" placeholder="Nombre" value="${esc(c.nombre||"")}" />
+          <textarea id="c_obs" rows="3" placeholder="Observaciones">${esc(c.obs||"")}</textarea>
+          <div class="row">
+            <button class="btn" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn primary" onclick="guardarCliente(${id})">Guardar</button>
+          </div>
+        </div>`);
+    }
+    async function guardarCliente(id){
+      const data={ nombre: document.getElementById('c_nombre').value.trim(), obs: document.getElementById('c_obs').value.trim() };
+      if(!data.nombre){ alert("El nombre es obligatorio."); return; }
+      const url = id ? `${api}/clientes/${id}` : `${api}/clientes`; const method = id ? "PUT":"POST";
       const res = await fetch(url, { method, headers, body: JSON.stringify(data) });
-      if (!res.ok) alert("Error al guardar cliente");
-      cerrarModal();
+      if(!res.ok) alert("Error al guardar.");
+      cerrarModal(); cargarClientes();
+    }
+    async function borrarCliente(id){
+      if (!confirm("¿Borrar cliente?")) return;
+      const res = await fetch(`${api}/clientes/${id}`, { method:"DELETE", headers });
+      if(!res.ok) alert("No se pudo borrar.");
       cargarClientes();
     }
 
-    /* ================== AVISOS ================== */
-    async function cargarTecnicos(){
-      const res = await fetch(api + "/usuarios", { headers });
-      const data = await res.json();
-      tecnicos = data.filter(t => t.rol === "Técnico" || t.rol === "tecnico");
+    /* =================== AVISOS =================== */
+    let avisosArr = []; let tecnicos = [];
+    async function cargarTecnicos(){ const r=await fetch(api+"/usuarios",{headers}); const u=await r.json(); tecnicos=u.filter(t=>t.rol==="Técnico"||t.rol==="tecnico"); }
+    async function cargarAvisos(f="todos"){
+      const res = await fetch(api + "/avisos", { headers }); const data = await res.json();
+      avisosArr = data; renderAvisos(f==="todos"?data:data.filter(a=>a.estado===f));
     }
-
-    async function cargarAvisos(filtro = "todos"){
-      const res = await fetch(api + "/avisos", { headers });
-      const data = await res.json();
-      const contenedor = document.getElementById("avisosCards");
-      contenedor.innerHTML = "";
-
-      const lista = filtro === "todos" ? data : data.filter(a => a.estado === filtro);
-      lista.forEach(a=>{
-        const card = document.createElement("div");
-        card.className = "aviso-card";
-        card.innerHTML = `
-          <div class="cliente">Cliente: ${a.cliente||""}</div>
-          <div class="obs">Observaciones: ${a.tarea||""}</div>
+    function renderAvisos(lista){
+      const cont = document.getElementById('avisosCards'); cont.innerHTML="";
+      (lista||[]).forEach(a=>{
+        const card=document.createElement('div'); card.className='card';
+        card.innerHTML=`
+          <div class="title">Cliente: ${esc(a.cliente||"")}</div>
           <div class="meta">
-            <span><strong>Fecha:</strong> ${a.fecha_programada||""}</span>
-            <span><strong>Técnico:</strong> ${a.tecnico||""}</span>
+            <span><strong>Fecha:</strong> ${esc(a.fecha_programada||"")}</span>
+            <span><strong>Técnico:</strong> ${esc(a.tecnico||"")}</span>
           </div>
-          <div class="estado">
-            <strong>Estado:</strong>
-            <select onchange="cambiarEstado(${a.id}, this.value)">
-              <option value="Pendiente" ${a.estado==="Pendiente"?"selected":""}>Pendiente</option>
-              <option value="Cerrado" ${a.estado==="Cerrado"?"selected":""}>Cerrado</option>
-            </select>
-          </div>
-          <div class="acciones">
-            <button class="btn-ticket" onclick='abrirTicket(${a.id})'>
-              <span class="ico" aria-hidden="true">🎫</span>Ticket
-            </button>
-            <button onclick='editarAviso(${JSON.stringify(a)})'>
-              <span class="ico" aria-hidden="true">✏️</span>Editar
-            </button>
-            <button onclick='borrarAviso(${a.id})'>
-              <span class="ico" aria-hidden="true">🗑️</span>Borrar
-            </button>
+          <div class="actions">
+            <button class="btn-ticket" onclick="abrirTicket(${a.id})"><span class="ico">🎫</span>Ticket</button>
+            <button onclick="editarAviso(${a.id})"><span class="ico">✏️</span>Editar</button>
+            <button onclick="borrarAviso(${a.id})"><span class="ico">🗑️</span>Borrar</button>
           </div>`;
-        contenedor.appendChild(card);
+        cont.appendChild(card);
       });
     }
-
-    async function cambiarEstado(id, nuevoEstado){
-      try{
-        const res = await fetch(api + "/avisos/" + id, { headers });
-        const aviso = await res.json();
-        const upd = await fetch(api + "/avisos/" + id, {
-          method:"PUT", headers, body: JSON.stringify({ ...aviso, estado: nuevoEstado })
-        });
-        if (!upd.ok) throw new Error(await upd.text());
-      }catch(e){
-        alert("No se pudo cambiar el estado.");
-      }
-      cargarAvisos(document.getElementById('filtroEstado').value);
-    }
-
+    function filtrarAvisos(){ const est=document.getElementById('filtroEstado').value; cargarAvisos(est); }
     function nuevoAviso(){
-      abrirAviso({ id:0, cliente_id:null, cliente:"", tarea:"", fecha_programada:"", tecnico:"", estado:"Pendiente" }, false);
-    }
-    function editarAviso(a){ abrirAviso(a, true); }
-
-    function abrirAviso(a, ed){
-      const modal = document.getElementById('modal');
-      const fecha = a.fecha_programada ? a.fecha_programada.substring(0,10) : "";
-      const optionsClientes = (clientes||[]).map(c => `<option value="${c.id}" ${c.id===a.cliente_id?'selected':''}>${c.nombre}</option>`).join("");
-      const optionsTecnicos = (tecnicos||[]).map(t => `<option ${t.nombre===a.tecnico?'selected':''}>${t.nombre}</option>`).join("");
-
-      modal.innerHTML = `
+      const optionsTecnicos = (tecnicos||[]).map(t=>`<option>${esc(t.nombre)}</option>`).join("");
+      abrirModal(`
         <div class="modal">
-          <h3>${ed ? "Editar" : "Nuevo"} Aviso</h3>
-          <select id="cl">${optionsClientes}</select>
-          <input id="ta" placeholder="Observaciones" value="${a.tarea||""}">
-          <input id="fe" type="date" value="${fecha}">
-          <select id="te">${optionsTecnicos}</select>
-          <select id="es">
+          <h3>Nuevo Aviso</h3>
+          <input id="a_cliente" placeholder="Cliente (id o nombre)" />
+          <input id="a_tarea" placeholder="Observaciones" />
+          <input id="a_fecha" type="date" />
+          <select id="a_tecnico">${optionsTecnicos}</select>
+          <select id="a_estado"><option>Pendiente</option><option>Cerrado</option></select>
+          <div class="row">
+            <button class="btn" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn primary" onclick="guardarAviso(null)">Guardar</button>
+          </div>
+        </div>`);
+    }
+    function editarAviso(id){
+      const a = avisosArr.find(x=>x.id===id); if(!a) return;
+      const optionsTecnicos = (tecnicos||[]).map(t=>`<option ${t.nombre===a.tecnico?'selected':''}>${esc(t.nombre)}</option>`).join("");
+      abrirModal(`
+        <div class="modal">
+          <h3>Editar Aviso</h3>
+          <input id="a_cliente" placeholder="Cliente (id o nombre)" value="${esc(a.cliente||"")}" />
+          <input id="a_tarea" placeholder="Observaciones" value="${esc(a.tarea||"")}" />
+          <input id="a_fecha" type="date" value="${esc((a.fecha_programada||"").substring(0,10))}" />
+          <select id="a_tecnico">${optionsTecnicos}</select>
+          <select id="a_estado">
             <option ${a.estado==="Pendiente"?"selected":""}>Pendiente</option>
             <option ${a.estado==="Cerrado"?"selected":""}>Cerrado</option>
           </select>
-          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
-            <button onclick='guardarAviso(${JSON.stringify(a)}, ${ed})'>Guardar</button>
-            <button onclick='cerrarModal()'>Cancelar</button>
+          <div class="row">
+            <button class="btn" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn primary" onclick="guardarAviso(${id})">Guardar</button>
           </div>
-        </div>`;
-      modal.style.display = "block";
+        </div>`);
     }
-
-    async function guardarAviso(a, ed){
-      const data = {
-        cliente: parseInt(document.getElementById('cl').value, 10),
-        tarea: document.getElementById('ta').value,
-        fecha_programada: document.getElementById('fe').value,
-        tecnico: document.getElementById('te').value,
-        estado: document.getElementById('es').value
+    async function guardarAviso(id){
+      const data={
+        cliente: document.getElementById('a_cliente').value.trim(),
+        tarea: document.getElementById('a_tarea').value.trim(),
+        fecha_programada: document.getElementById('a_fecha').value,
+        tecnico: document.getElementById('a_tecnico').value,
+        estado: document.getElementById('a_estado').value
       };
-      const url = ed ? `${api}/avisos/${a.id}` : `${api}/avisos`;
-      const method = ed ? "PUT" : "POST";
-      await fetch(url, { method, headers, body: JSON.stringify(data) });
-      cerrarModal();
-      cargarAvisos(document.getElementById('filtroEstado').value);
-    }
-
-    async function borrar(tipo, id){
-      if (confirm("¿Seguro?")) {
-        await fetch(api + "/" + tipo + "/" + id, { method:"DELETE", headers });
-        mostrar(tipo);
-      }
+      const url = id ? `${api}/avisos/${id}` : `${api}/avisos`; const method = id ? "PUT":"POST";
+      const res = await fetch(url, { method, headers, body: JSON.stringify(data) });
+      if(!res.ok) alert("Error al guardar aviso");
+      cerrarModal(); cargarAvisos(document.getElementById('filtroEstado').value);
     }
     async function borrarAviso(id){
-      id = parseInt(id,10);
-      if (confirm("¿Seguro?")) {
-        await fetch(api + "/avisos/" + id, { method:"DELETE", headers });
-        cargarAvisos(document.getElementById('filtroEstado').value);
-      }
+      if(!confirm("¿Borrar aviso?")) return;
+      const r = await fetch(`${api}/avisos/${id}`, { method:"DELETE", headers });
+      if(!r.ok) alert("No se pudo borrar.");
+      cargarAvisos(document.getElementById('filtroEstado').value);
     }
+    function abrirTicket(avisoId){ avisoId=parseInt(avisoId,10); window.open('ticket.html?avisoId='+avisoId, '_blank'); }
 
-    function abrirTicket(avisoId){
-      avisoId = parseInt(avisoId, 10);
-      window.open('ticket.html?avisoId=' + avisoId, '_blank');
-    }
-
-    function cerrarModal(){ document.getElementById('modal').style.display = "none"; }
-    function filtrarAvisos(){ cargarAvisos(document.getElementById('filtroEstado').value); }
-
-    /* ================== INIT ================== */
-    window.addEventListener('load', () => {
-      const hash = window.location.hash.substring(1);
-      if (hash) { mostrar(hash); }
-      else { document.getElementById('inicio').style.display = 'block'; }
+    /* ===== INIT ===== */
+    window.addEventListener('load', ()=>{
+      const hash = location.hash.substring(1);
+      if (hash){ mostrar(hash); } else { document.getElementById('inicio').style.display='block'; }
     });
   </script>
 </body>
