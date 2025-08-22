@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <title>SAT CRUD Completo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <style>
+    /* ====== Base ====== */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -18,62 +20,27 @@
       align-items: center;
       padding: 12px 16px;
     }
-    .topbar h2 {
-      margin: 0;
-      font-size: 1.2rem;
-    }
-    .topbar button {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
+    .topbar h2 { margin: 0; font-size: 1.2rem; }
+    .topbar button { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: -220px;
-      width: 200px;
-      height: 100%;
-      background: #222;
-      color: white;
-      padding: 20px;
-      transition: left 0.3s ease;
-      z-index: 1001;
+      position: fixed; top: 0; left: -220px; width: 200px; height: 100%;
+      background: #222; color: white; padding: 20px;
+      transition: left 0.3s ease; z-index: 1001;
     }
     .sidebar.active { left: 0; }
     .sidebar button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 10px;
-      background: none;
-      border: none;
-      color: white;
-      border-bottom: 1px solid #444;
-      margin: 5px 0;
-      font-size: 1rem;
-      cursor: pointer;
+      display: block; width: 100%; text-align: left; padding: 10px;
+      background: none; border: none; color: white; border-bottom: 1px solid #444;
+      margin: 5px 0; font-size: 1rem; cursor: pointer;
     }
     .logout {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 5px;
-      margin-bottom: 15px;
-      cursor: pointer;
-      width: 100%;
+      background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px;
+      margin-bottom: 15px; cursor: pointer; width: 100%;
     }
-    .overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      z-index: 1000;
-    }
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 1000; }
     .overlay.active { display: block; }
+
     .main { padding: 16px 16px 16px 24px; margin-top: 60px; }
     .main h2, .main button { margin-left: 8px; }
 
@@ -82,144 +49,83 @@
     th { background: #eee; }
 
     .modal {
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      z-index: 1002;
-      width: 90%;
-      max-width: 400px;
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: #fff; padding: 20px; border-radius: 10px; border: 1px solid #ccc;
+      z-index: 1002; width: 90%; max-width: 420px;
     }
     .modal input, .modal select, .modal textarea {
-      width: 100%;
-      padding: 8px;
-      margin: 5px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px;
     }
 
-    /* ==== Tarjetas de AVISOS estilo "tickets" ==== */
+    /* ====== AVISOS: tarjetas estilo “tickets” ====== */
     #avisosCards .aviso-card{
-      background:#fff;
-      border:2px solid #cfd8e6;
-      border-radius:0;
-      padding:16px;
-      width:100%;
-      margin:14px 0;
-      box-shadow:0 2px 8px rgba(0,0,0,.06);
-      line-height:1.5;
-      font-size:18px;
+      background:#fff; border:2px solid #cfd8e6; border-radius:0; padding:16px;
+      width:100%; margin:14px 0; box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5; font-size:18px;
     }
     #avisosCards .cliente{ font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
     #avisosCards .obs{ font-size:20px; font-weight:600; color:#333; margin:0 0 8px; }
     #avisosCards .meta{
-      display:grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap:8px;
-      margin-top:6px;
+      display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; margin-top:6px;
     }
     #avisosCards .meta > span{
-      display:block;
-      background:#eef2f7;
-      border:1px solid #e9eef6;
-      border-radius:999px;
-      padding:8px 10px;
+      display:block; background:#eef2f7; border:1px solid #e9eef6; border-radius:999px; padding:8px 10px;
     }
-    #avisosCards .estado{
-      display:flex; align-items:center; gap:10px; margin-top:8px;
-    }
+    #avisosCards .estado{ display:flex; align-items:center; gap:10px; margin-top:8px; }
     #avisosCards .estado strong{ font-size:18px; }
     #avisosCards .estado select{
-      font-size:18px; min-height:46px; padding:10px 14px;
-      border-radius:12px; border:1px solid #e9eef6; background:#eef2f7;
+      font-size:18px; min-height:46px; padding:10px 14px; border-radius:12px; border:1px solid #e9eef6; background:#eef2f7;
     }
+
+    /* Acciones: 🎫 izquierda, resto derecha */
     #avisosCards .acciones{
-      display:flex;
-      justify-content: space-between; /* 🎫 a la izq, otros a la dcha */
-      gap:8px;
-      margin-top:12px;
+      display:flex; gap:8px; margin-top:12px; align-items:center; width:100%;
+    }
+    #avisosCards .acciones .btn-ticket{
+      order:-1;          /* Ticket aparece primero */
+      margin-right:auto; /* empuja Editar/Borrar a la derecha */
     }
     #avisosCards .acciones button{
-      font-size:16px;
-      padding:8px 12px;
-      border-radius:10px;
-      border:1px solid #e9eef6;
-      background:#fff;
-      cursor:pointer;
+      font-size:16px; padding:8px 12px; border-radius:10px; border:1px solid #e9eef6; background:#fff; cursor:pointer;
     }
     #avisosCards .acciones button:hover{ background:#f1f5fb }
 
-    /* Botón Ticket especial */
-    .btn-ticket {
-      margin-right: auto; /* empuja editar/borrar a la derecha */
-    }
-
-    /* ===== Acciones superiores (filtro + nuevo) estilo tickets ===== */
+    /* Fila superior (filtro + nuevo) */
     .avisos-actions{
-      display:flex; gap:12px; flex-wrap:wrap;
-      justify-content:space-between; align-items:center;
-      margin:8px 0 14px;
+      display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; align-items:center; margin:8px 0 14px;
     }
-    /* Filtro más largo y cómodo */
     #filtroEstado{
-      min-width:300px;   /* más largo */
-      font-size:18px;
-      height:44px;
-      padding:10px 14px;
-      border-radius:10px; 
-      border:1px solid #e9eef6; 
-      background:#fff;
+      min-width:300px; font-size:18px; height:44px; padding:10px 14px;
+      border-radius:10px; border:1px solid #e9eef6; background:#fff;
     }
     #btnNuevoAviso{
-      font-size:16px; padding:8px 16px;
-      border-radius:10px; border:none; cursor:pointer;
-      background:#007bff; color:#fff;
+      font-size:16px; padding:8px 16px; border-radius:10px; border:none; cursor:pointer; background:#007bff; color:#fff;
     }
     #btnNuevoAviso:hover{ background:#0056b3; }
 
-    /* ==== Tarjetas de CLIENTES (sin cambio de ancho) ==== */
+    /* ====== CLIENTES (tarjeta simple) ====== */
     #clientesCards .cliente-card {
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 12px;
-      width: 100%;
-      max-width: 700px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      background:#fff; border:1px solid #ccc; border-radius:10px; padding:12px;
+      width: 100%; max-width: 700px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    /* Móvil / tablet grande */
+    /* ====== Responsive ====== */
     @media (max-width:1024px){
-      #avisosCards .aviso-card{
-        padding:14px;
-        font-size:20px;
-        border-radius:0;
-        max-width:none !important;
-        width:100% !important;
-      }
+      #avisosCards .aviso-card{ padding:14px; font-size:20px; border-radius:0; max-width:none !important; width:100% !important; }
       #avisosCards .cliente{ font-size:26px }
       #avisosCards .obs{ font-size:22px }
       #avisosCards .acciones button{ font-size:18px; padding:10px 14px }
 
       .avisos-actions{ margin:8px 0 14px; }
-      #filtroEstado{
-        font-size:20px; height:56px; padding:12px 16px; border-radius:12px;
-      }
-      #btnNuevoAviso{
-        font-size:20px; padding:14px 22px; border-radius:12px;
-      }
+      #filtroEstado{ font-size:20px; height:56px; padding:12px 16px; border-radius:12px; }
+      #btnNuevoAviso{ font-size:20px; padding:14px 22px; border-radius:12px; }
       #avisosCards .estado strong{ font-size:22px; }
-      #avisosCards .estado select{
-        font-size:20px; min-height:64px; padding:12px 18px;
-      }
+      #avisosCards .estado select{ font-size:20px; min-height:64px; padding:12px 18px; }
     }
   </style>
 </head>
-<body>
 
+<body>
+  <!-- ====== TOP ====== -->
   <div class="topbar">
     <button onclick="toggleSidebar()">☰</button>
     <h2>SAT Control</h2>
@@ -228,6 +134,7 @@
 
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
+  <!-- ====== SIDEBAR ====== -->
   <div class="sidebar" id="sidebar">
     <button class="logout" onclick="logout()">Cerrar sesión</button>
     <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
@@ -235,8 +142,8 @@
     <button onclick="mostrar('avisos')">Avisos</button>
   </div>
 
+  <!-- ====== MAIN ====== -->
   <div class="main">
-
     <div id="inicio" style="text-align:center; margin-top: 80px;">
       <img src="logo.jpg" alt="Logo de la empresa" style="max-width: 200px;">
       <h2>Bienvenido a SAT Control</h2>
@@ -247,7 +154,9 @@
       <h2>Usuarios</h2>
       <button onclick="nuevoUsuario()">➕ Nuevo Usuario</button>
       <table>
-        <thead><tr><th>Nombre</th><th>Usuario</th><th>Email</th><th>Rol</th><th>Acciones</th></tr></thead>
+        <thead>
+          <tr><th>Nombre</th><th>Usuario</th><th>Email</th><th>Rol</th><th>Acciones</th></tr>
+        </thead>
         <tbody id="usuariosBody"></tbody>
       </table>
     </div>
@@ -256,7 +165,7 @@
     <div id="clientes" style="display:none;">
       <h2>Clientes</h2>
       <button onclick="nuevoCliente()">➕ Nuevo Cliente</button>
-      <div id="clientesCards" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;"></div>
+      <div id="clientesCards" style="display:flex; flex-direction:column; gap:16px; margin-top:16px;"></div>
     </div>
 
     <!-- === AVISOS === -->
@@ -270,279 +179,252 @@
         <button id="btnNuevoAviso" onclick="nuevoAviso()">➕ Nuevo Aviso</button>
       </div>
 
-      <div id="avisosCards" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;"></div>
+      <div id="avisosCards" style="display:flex; flex-direction:column; gap:16px; margin-top:16px;"></div>
     </div>
 
     <div id="modal" style="display:none;"></div>
   </div>
 
   <script>
+    /* ================== AUTH / API ================== */
     const token = localStorage.getItem('token');
     if (!token) window.location.href = 'login.html';
 
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(token.split('.')[1] || 'e30='));
     const rol = payload.rol;
-
     const api = "https://sat-idacas.onrender.com/api";
-    let clientes = [], tecnicos = [];
 
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + token
     };
 
+    let clientes = [];
+    let tecnicos = [];
+
+    /* ================== UI BASICS ================== */
     function logout() {
       localStorage.removeItem('token');
       window.location.href = 'login.html';
     }
-
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('active');
       document.getElementById('overlay').classList.toggle('active');
     }
-
     if (rol !== "Gestor") {
-      document.getElementById("btnUsuarios").style.display = "none";
+      const el = document.getElementById("btnUsuarios");
+      if (el) el.style.display = "none";
     }
 
     function mostrar(seccion) {
-      document.getElementById('inicio').style.display = 'none';
-      document.getElementById('usuarios').style.display = 'none';
-      document.getElementById('clientes').style.display = 'none';
-      document.getElementById('avisos').style.display = 'none';
-      document.getElementById(seccion).style.display = 'block';
-
+      ["inicio","usuarios","clientes","avisos"].forEach(id => {
+        const n = document.getElementById(id);
+        if (n) n.style.display = "none";
+      });
+      document.getElementById(seccion).style.display = "block";
       document.getElementById('sidebar').classList.remove('active');
       document.getElementById('overlay').classList.remove('active');
 
-      if (seccion === 'usuarios') cargarUsuarios();
-      if (seccion === 'clientes') cargarClientes();
-      if (seccion === 'avisos') {
+      if (seccion === "usuarios") cargarUsuarios();
+      if (seccion === "clientes") cargarClientes();
+      if (seccion === "avisos") {
         cargarClientes();
         cargarTecnicos();
-        const filtro = document.getElementById('filtroEstado').value;
-        cargarAvisos(filtro);
+        cargarAvisos(document.getElementById('filtroEstado').value);
       }
     }
 
-    /* ====== USUARIOS ====== */
+    /* ================== USUARIOS ================== */
     async function cargarUsuarios() {
       const res = await fetch(api + "/usuarios", { headers });
       const data = await res.json();
       const body = document.getElementById("usuariosBody");
       body.innerHTML = "";
       data.forEach(u => {
-        body.innerHTML += `<tr>
-          <td>${u.nombre}</td>
-          <td>${u.usuario}</td>
-          <td>${u.email}</td>
-          <td>${u.rol}</td>
-          <td>
-            <button onclick='editarUsuario(${JSON.stringify(u)})'>✏️</button>
-            <button onclick='borrar("usuarios",${u.id})'>🗑️</button>
-          </td>
-        </tr>`;
+        body.innerHTML += `
+          <tr>
+            <td>${u.nombre}</td>
+            <td>${u.usuario}</td>
+            <td>${u.email}</td>
+            <td>${u.rol}</td>
+            <td>
+              <button onclick='editarUsuario(${JSON.stringify(u)})'>✏️</button>
+              <button onclick='borrar("usuarios", ${u.id})'>🗑️</button>
+            </td>
+          </tr>`;
       });
     }
+    function nuevoUsuario(){ abrirUsuario({ id:0, nombre:"", usuario:"", email:"", rol:"Gestor" }, false); }
+    function editarUsuario(u){ abrirUsuario(u, true); }
 
-    function nuevoUsuario() { abrirUsuario({ id: 0, nombre: "", usuario: "", email: "", rol: "Gestor" }, false); }
-    function editarUsuario(u) { abrirUsuario(u, true); }
-
-    function abrirUsuario(u, ed) {
-      const modal = document.getElementById("modal");
-      modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Usuario</h3>
-        <input id='n' value='${u.nombre || ""}' placeholder='Nombre'>
-        <input id='u' value='${u.usuario || ""}' placeholder='Usuario'>
-        <input id='e' value='${u.email || ""}' placeholder='Email'>
-        <input id='p' placeholder='Contraseña'>
-        <select id='r'>
-          <option ${u.rol === "Gestor" ? "selected" : ""}>Gestor</option>
-          <option ${u.rol === "Técnico" ? "selected" : ""}>Técnico</option>
-        </select>
-        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
-          <button onclick='guardarUsuario(${u.id || 0},${ed})'>Guardar</button>
-          <button onclick='cerrarModal()'>Cancelar</button>
-        </div>
-      </div>`;
+    function abrirUsuario(u, ed){
+      const modal = document.getElementById('modal');
+      modal.innerHTML = `
+        <div class="modal">
+          <h3>${ed ? "Editar" : "Nuevo"} Usuario</h3>
+          <input id="n" value="${u.nombre||""}" placeholder="Nombre">
+          <input id="u" value="${u.usuario||""}" placeholder="Usuario">
+          <input id="e" value="${u.email||""}" placeholder="Email">
+          <input id="p" placeholder="Contraseña">
+          <select id="r">
+            <option ${u.rol==="Gestor"?"selected":""}>Gestor</option>
+            <option ${u.rol==="Técnico"?"selected":""}>Técnico</option>
+          </select>
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+            <button onclick='guardarUsuario(${u.id||0}, ${ed})'>Guardar</button>
+            <button onclick='cerrarModal()'>Cancelar</button>
+          </div>
+        </div>`;
       modal.style.display = "block";
     }
-
-    async function guardarUsuario(id, ed) {
+    async function guardarUsuario(id, ed){
       const d = {
         nombre: document.getElementById('n').value,
         usuario: document.getElementById('u').value,
-        email: document.getElementById('e').value,
-        password: document.getElementById('p').value,
-        rol: document.getElementById('r').value
+        email:   document.getElementById('e').value,
+        password:document.getElementById('p').value,
+        rol:     document.getElementById('r').value
       };
-
       if (!d.nombre || !d.usuario || !d.email || (!ed && !d.password)) {
-        alert("Todos los campos son obligatorios (incluye contraseña al crear).");
+        alert("Completa todos los campos (la contraseña es obligatoria al crear).");
         return;
       }
-
-      const url = ed ? `${api}/usuarios/${parseInt(id, 10)}` : `${api}/usuarios`;
+      const url = ed ? `${api}/usuarios/${parseInt(id,10)}` : `${api}/usuarios`;
       const method = ed ? "PUT" : "POST";
-
-      try {
-        const res = await fetch(url, { method, headers, body: JSON.stringify(d) });
-        if (!res.ok) throw new Error(await res.text());
-        cerrarModal();
-        cargarUsuarios();
-      } catch (err) {
-        alert("Error al guardar usuario: " + err.message);
-      }
+      const res = await fetch(url, { method, headers, body: JSON.stringify(d) });
+      if (!res.ok) alert(await res.text());
+      cerrarModal(); cargarUsuarios();
     }
 
-    /* ====== CLIENTES ====== */
-    async function cargarClientes() {
+    /* ================== CLIENTES ================== */
+    async function cargarClientes(){
       const res = await fetch(api + "/clientes", { headers });
       clientes = await res.json();
 
-      const contenedor = document.getElementById("clientesCards");
-      if (!contenedor) return;
-      contenedor.innerHTML = "";
-
-      clientes.forEach(c => {
+      const cont = document.getElementById("clientesCards");
+      if (!cont) return;
+      cont.innerHTML = "";
+      clientes.forEach(c=>{
         const card = document.createElement("div");
         card.className = "cliente-card";
         card.innerHTML = `
           <strong>Nombre:</strong> ${c.nombre}<br>
-          <strong>Observaciones:</strong> ${c.obs || ""}<br><br>
+          <strong>Observaciones:</strong> ${c.obs||""}<br><br>
           <button onclick='editarCliente(${JSON.stringify(c)})'>✏️ Editar</button>
-          <button onclick='borrar("clientes", ${c.id})'>🗑️ Borrar</button>
-        `;
-        contenedor.appendChild(card);
+          <button onclick='borrar("clientes", ${c.id})'>🗑️ Borrar</button>`;
+        cont.appendChild(card);
       });
     }
-
-    function nuevoCliente() { abrirCliente({ id: 0, nombre: "", obs: "" }, false); }
-    function editarCliente(c) { abrirCliente(c, true); }
-
-    function abrirCliente(c, ed) {
-      const modal = document.getElementById("modal");
-      modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Cliente</h3>
-        <input id='cn' value='${c.nombre || ""}' placeholder='Nombre'>
-        <textarea id='co' placeholder='Observaciones' rows="3">${c.obs || ""}</textarea><br>
-        <div style="display:flex; gap:8px; justify-content:flex-end;">
-          <button onclick='guardarCliente(${c.id || 0},${ed})'>Guardar</button>
-          <button onclick='cerrarModal()'>Cancelar</button>
-        </div>
-      </div>`;
+    function nuevoCliente(){ abrirCliente({ id:0, nombre:"", obs:"" }, false); }
+    function editarCliente(c){ abrirCliente(c, true); }
+    function abrirCliente(c, ed){
+      const modal = document.getElementById('modal');
+      modal.innerHTML = `
+        <div class="modal">
+          <h3>${ed ? "Editar" : "Nuevo"} Cliente</h3>
+          <input id="cn" value="${c.nombre||""}" placeholder="Nombre">
+          <textarea id="co" rows="3" placeholder="Observaciones">${c.obs||""}</textarea>
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button onclick='guardarCliente(${c.id||0}, ${ed})'>Guardar</button>
+            <button onclick='cerrarModal()'>Cancelar</button>
+          </div>
+        </div>`;
       modal.style.display = "block";
     }
-
-    async function guardarCliente(id, ed) {
-      const data = { nombre: document.getElementById('cn').value, obs: document.getElementById('co').value };
+    async function guardarCliente(id, ed){
+      const data = { nombre: cn.value, obs: co.value };
+      const url = ed ? `${api}/clientes/${parseInt(id,10)}` : `${api}/clientes`;
       const method = ed ? "PUT" : "POST";
-      const url = ed ? `${api}/clientes/${parseInt(id, 10)}` : `${api}/clientes`;
       const res = await fetch(url, { method, headers, body: JSON.stringify(data) });
       if (!res.ok) alert("Error al guardar cliente");
-      cerrarModal();
-      cargarClientes();
+      cerrarModal(); cargarClientes();
     }
 
-    /* ====== AVISOS ====== */
-    async function cargarTecnicos() {
+    /* ================== AVISOS ================== */
+    async function cargarTecnicos(){
       const res = await fetch(api + "/usuarios", { headers });
       const data = await res.json();
       tecnicos = data.filter(t => t.rol === "Técnico" || t.rol === "tecnico");
     }
 
-    async function cargarAvisos(filtro = "todos") {
+    async function cargarAvisos(filtro = "todos"){
       const res = await fetch(api + "/avisos", { headers });
       const data = await res.json();
       const contenedor = document.getElementById("avisosCards");
       contenedor.innerHTML = "";
 
-      const avisosFiltrados = filtro === "todos" ? data : data.filter(a => a.estado === filtro);
-
-      avisosFiltrados.forEach(a => {
+      const lista = filtro === "todos" ? data : data.filter(a => a.estado === filtro);
+      lista.forEach(a=>{
         const card = document.createElement("div");
         card.className = "aviso-card";
-
         card.innerHTML = `
-          <div class="cliente">Cliente: ${a.cliente || ""}</div>
-          <div class="obs">Observaciones: ${a.tarea || ""}</div>
-
+          <div class="cliente">Cliente: ${a.cliente||""}</div>
+          <div class="obs">Observaciones: ${a.tarea||""}</div>
           <div class="meta">
-            <span><strong>Fecha:</strong> ${a.fecha_programada || ""}</span>
-            <span><strong>Técnico:</strong> ${a.tecnico || ""}</span>
+            <span><strong>Fecha:</strong> ${a.fecha_programada||""}</span>
+            <span><strong>Técnico:</strong> ${a.tecnico||""}</span>
           </div>
-
           <div class="estado">
             <strong>Estado:</strong>
             <select onchange="cambiarEstado(${a.id}, this.value)">
-              <option value="Pendiente" ${a.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
-              <option value="Cerrado" ${a.estado === "Cerrado" ? "selected" : ""}>Cerrado</option>
+              <option value="Pendiente" ${a.estado==="Pendiente"?"selected":""}>Pendiente</option>
+              <option value="Cerrado" ${a.estado==="Cerrado"?"selected":""}>Cerrado</option>
             </select>
           </div>
-
           <div class="acciones">
             <button class="btn-ticket" onclick='abrirTicket(${a.id})'>🎫 Ticket</button>
             <button onclick='editarAviso(${JSON.stringify(a)})'>✏️ Editar</button>
             <button onclick='borrarAviso(${a.id})'>🗑️ Borrar</button>
-          </div>
-        `;
-
+          </div>`;
         contenedor.appendChild(card);
       });
     }
 
-    async function cambiarEstado(id, nuevoEstado) {
-      try {
+    async function cambiarEstado(id, nuevoEstado){
+      try{
         const res = await fetch(api + "/avisos/" + id, { headers });
         const aviso = await res.json();
-        const data = { ...aviso, estado: nuevoEstado };
         const upd = await fetch(api + "/avisos/" + id, {
-          method: "PUT",
-          headers,
-          body: JSON.stringify(data)
+          method:"PUT", headers, body: JSON.stringify({ ...aviso, estado: nuevoEstado })
         });
         if (!upd.ok) throw new Error(await upd.text());
-      } catch (e) {
+      }catch(e){
         alert("No se pudo cambiar el estado.");
       }
-      const filtro = document.getElementById('filtroEstado').value;
-      cargarAvisos(filtro);
+      cargarAvisos(document.getElementById('filtroEstado').value);
     }
 
-    function nuevoAviso() {
-      abrirAviso({ id: 0, cliente_id: null, cliente: "", tarea: "", fecha_programada: "", tecnico: "", estado: "Pendiente" }, false);
+    function nuevoAviso(){
+      abrirAviso({ id:0, cliente_id:null, cliente:"", tarea:"", fecha_programada:"", tecnico:"", estado:"Pendiente" }, false);
     }
+    function editarAviso(a){ abrirAviso(a, true); }
 
-    function editarAviso(a) { abrirAviso(a, true); }
+    function abrirAviso(a, ed){
+      const modal = document.getElementById('modal');
+      const fecha = a.fecha_programada ? a.fecha_programada.substring(0,10) : "";
+      const optionsClientes = (clientes||[]).map(c => `<option value="${c.id}" ${c.id===a.cliente_id?'selected':''}>${c.nombre}</option>`).join("");
+      const optionsTecnicos = (tecnicos||[]).map(t => `<option ${t.nombre===a.tecnico?'selected':''}>${t.nombre}</option>`).join("");
 
-    function abrirAviso(a, ed) {
-      const modal = document.getElementById("modal");
-      const fecha = a.fecha_programada ? a.fecha_programada.substring(0, 10) : "";
-      const optionsClientes = (clientes || []).map(c =>
-        `<option value="${c.id}" ${c.id === a.cliente_id ? 'selected' : ''}>${c.nombre}</option>`
-      ).join("");
-
-      const optionsTecnicos = (tecnicos || []).map(t =>
-        `<option ${t.nombre === a.tecnico ? 'selected' : ""}>${t.nombre}</option>`
-      ).join("");
-
-      modal.innerHTML = `<div class='modal'><h3>${ed ? "Editar" : "Nuevo"} Aviso</h3>
-        <select id='cl'>${optionsClientes}</select>
-        <input id='ta' placeholder='Observaciones' value='${a.tarea || ""}'>
-        <input id='fe' type='date' value='${fecha}'>
-        <select id='te'>${optionsTecnicos}</select>
-        <select id='es'>
-          <option ${a.estado === "Pendiente" ? "selected" : ""}>Pendiente</option>
-          <option ${a.estado === "Cerrado" ? "selected" : ""}>Cerrado</option>
-        </select><br>
-        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
-          <button onclick='guardarAviso(${JSON.stringify(a)},${ed})'>Guardar</button>
-          <button onclick='cerrarModal()'>Cancelar</button>
-        </div>
-      </div>`;
-
+      modal.innerHTML = `
+        <div class="modal">
+          <h3>${ed ? "Editar" : "Nuevo"} Aviso</h3>
+          <select id="cl">${optionsClientes}</select>
+          <input id="ta" placeholder="Observaciones" value="${a.tarea||""}">
+          <input id="fe" type="date" value="${fecha}">
+          <select id="te">${optionsTecnicos}</select>
+          <select id="es">
+            <option ${a.estado==="Pendiente"?"selected":""}>Pendiente</option>
+            <option ${a.estado==="Cerrado"?"selected":""}>Cerrado</option>
+          </select>
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+            <button onclick='guardarAviso(${JSON.stringify(a)}, ${ed})'>Guardar</button>
+            <button onclick='cerrarModal()'>Cancelar</button>
+          </div>
+        </div>`;
       modal.style.display = "block";
     }
 
-    async function guardarAviso(a, ed) {
+    async function guardarAviso(a, ed){
       const data = {
         cliente: parseInt(document.getElementById('cl').value, 10),
         tarea: document.getElementById('ta').value,
@@ -550,53 +432,41 @@
         tecnico: document.getElementById('te').value,
         estado: document.getElementById('es').value
       };
-      const method = ed ? "PUT" : "POST";
       const url = ed ? `${api}/avisos/${a.id}` : `${api}/avisos`;
+      const method = ed ? "PUT" : "POST";
       await fetch(url, { method, headers, body: JSON.stringify(data) });
       cerrarModal();
-      const filtro = document.getElementById('filtroEstado').value;
-      cargarAvisos(filtro);
+      cargarAvisos(document.getElementById('filtroEstado').value);
     }
 
-    async function borrar(tipo, id) {
+    async function borrar(tipo, id){
       if (confirm("¿Seguro?")) {
-        await fetch(api + "/" + tipo + "/" + id, { method: "DELETE", headers });
+        await fetch(api + "/" + tipo + "/" + id, { method:"DELETE", headers });
         mostrar(tipo);
       }
     }
-
-    async function borrarAviso(id) {
-      id = parseInt(id, 10);
+    async function borrarAviso(id){
+      id = parseInt(id,10);
       if (confirm("¿Seguro?")) {
-        await fetch(api + "/avisos/" + id, { method: "DELETE", headers });
-        const filtro = document.getElementById('filtroEstado').value;
-        cargarAvisos(filtro);
+        await fetch(api + "/avisos/" + id, { method:"DELETE", headers });
+        cargarAvisos(document.getElementById('filtroEstado').value);
       }
     }
 
-    function abrirTicket(avisoId) {
+    function abrirTicket(avisoId){
       avisoId = parseInt(avisoId, 10);
       window.open('ticket.html?avisoId=' + avisoId, '_blank');
     }
 
-    function cerrarModal() {
-      document.getElementById("modal").style.display = "none";
-    }
+    function cerrarModal(){ document.getElementById('modal').style.display = "none"; }
+    function filtrarAvisos(){ cargarAvisos(document.getElementById('filtroEstado').value); }
 
-    function filtrarAvisos() {
-      const estado = document.getElementById('filtroEstado').value;
-      cargarAvisos(estado);
-    }
-
+    /* ================== INIT ================== */
     window.addEventListener('load', () => {
       const hash = window.location.hash.substring(1);
-      if (hash) {
-        mostrar(hash);
-      } else {
-        document.getElementById('inicio').style.display = 'block';
-      }
+      if (hash) { mostrar(hash); }
+      else { document.getElementById('inicio').style.display = 'block'; }
     });
   </script>
-
 </body>
 </html>
