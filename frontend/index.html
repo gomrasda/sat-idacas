@@ -11,6 +11,7 @@
     }
     *{box-sizing:border-box}
     body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
+
     .topbar {
       background: #003366; color: white; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;
     }
@@ -35,6 +36,32 @@
     .overlay.active { display: block; }
 
     .main { padding: 16px 16px 16px 24px; margin-top: 60px; }
+
+    /* ===== HERO de bienvenida (MEJOR EN MÓVIL) ===== */
+    #inicio{
+      min-height: calc(100vh - 60px); /* resta la topbar */
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      gap:14px;
+      padding:24px;
+    }
+    #inicio img{
+      width: clamp(220px, 55vw, 420px); /* móvil grande: enorme / pc: moderado */
+      height:auto;
+      object-fit:contain;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.08));
+    }
+    #inicio h2{
+      margin: 6px 0 0;
+      font-weight: 800;
+      letter-spacing:.3px;
+      color:#1f2937;
+      font-size: clamp(22px, 6.5vw, 42px);
+    }
+
     .modal {
       position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
       background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #ccc;
@@ -118,8 +145,9 @@
 
   <!-- Main -->
   <div class="main">
-    <div id="inicio" style="text-align:center; margin-top: 80px;">
-      <img src="logo.jpg" alt="Logo de la empresa" style="max-width: 200px;">
+    <!-- HERO de bienvenida (sin estilos inline) -->
+    <div id="inicio">
+      <img src="logo.jpg" alt="Logo de la empresa">
       <h2>Bienvenido a SAT Control</h2>
     </div>
 
@@ -276,7 +304,7 @@
       if (!data.nombre_completo || !data.usuario || !data.email || !data.rol){
         alert("Nombre, usuario, email y rol son obligatorios."); return;
       }
-      data.nombre = data.nombre_completo; // compat
+      data.nombre = data.nombre_completo;
       if (!id && !pwd){ alert("La contraseña es obligatoria al crear."); return; }
       if (pwd) data.password = pwd;
 
