@@ -49,7 +49,8 @@
     body.cards #ticketsBody tr.r1{ grid-template-columns:1fr 1fr; border-bottom:0; border-radius:12px 12px 0 0; margin-top:14px; align-items:center; }
     body.cards #ticketsBody tr.r2{ grid-template-columns:1fr; border-top:0; border-bottom:0; }
     body.cards #ticketsBody tr.r3{ grid-template-columns:1fr 1fr; border-top:0; border-bottom:0; }
-    body.cards #ticketsBody tr.r4{ grid-template-columns:0.7fr auto; border-top:0; border-radius:0 0 12px 12px; margin-bottom:14px; }
+    body.cards #ticketsBody tr.r4{ grid-template-columns:1fr 1fr; align-items:center; border-top:0; border-radius:0 0 12px 12px; margin-bottom:14px; }
+
     body.cards #ticketsBody td{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:0; border:0; }
     body.cards #ticketsBody td::before{ content:attr(data-label); font-weight:600; color:#6b7280; font-size:14px; margin-bottom:2px; }
 
@@ -64,13 +65,13 @@
     }
 
     /* Estado con colores dinámicos */
-    .estado select{ padding:10px 12px; border-radius:8px; color:#fff; }
+    .estado select{ padding:10px 12px; border-radius:8px; color:#fff; width:100%; }
     .estado.paused select{ background:var(--paused); color:#000; }
     .estado.closed select{ background:var(--closed); }
     .estado.billed select{ background:var(--billed); }
 
     /* Acciones */
-    .acciones { display:flex; flex-direction:row; gap:10px; justify-content:flex-end; align-items:center; }
+    .acciones { display:flex; flex-direction:row; gap:10px; justify-content:flex-end; align-items:center; width:100%; }
     .acciones button {
       width:52px; height:52px; font-size:28px;
       display:inline-flex; align-items:center; justify-content:center;
@@ -172,11 +173,14 @@ async function cargarTickets(){
       <tr class="r2${alt}"><td data-label="Descripción" style="grid-column:1/-1;"><textarea onchange="actualizarCampo(${t.id},'description',this.value)" ${dis}>${d}</textarea></td></tr>
       <tr class="r3${alt}"><td data-label="Horas"><input type="number" value="${t.horas_totales||0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${dis}></td>
       <td data-label="Materiales"><input type="number" value="${t.precio_materiales||0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${dis}></td></tr>
-      <tr class="r4${alt}"><td class="estado ${claseEstado}" data-label="Estado"><select onchange="cambiarEstadoTicket(${t.id},this.value,this)">
-        <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-        <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-        <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option></select></td>
-      <td class="acciones"><button onclick=editarTicket(${t.id})>✏️</button><button onclick=borrarTicket(${t.id})>🗑️</button></td></tr>`
+      <tr class="r4${alt}">
+        <td class="estado ${claseEstado}" data-label="Estado"><select onchange="cambiarEstadoTicket(${t.id},this.value,this)">
+          <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+          <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+          <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+        </select></td>
+        <td class="acciones"><button onclick=editarTicket(${t.id})>✏️</button><button onclick=borrarTicket(${t.id})>🗑️</button></td>
+      </tr>`
   });ajustarTodos();actualizarResumen();
 }
 
