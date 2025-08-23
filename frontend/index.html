@@ -12,26 +12,26 @@
     *{box-sizing:border-box}
     body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
 
+    /* ===== Topbar ===== */
     .topbar {
       background: #003366; color: white; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;
     }
     .topbar h2 { margin: 0; font-size: 1.2rem; }
 
-    /* BOTÓN HAMBURGUESA MEJORADO (solo visual, sin tocar layout) */
+    /* Botón hamburguesa mejorado */
     .menu-btn{
       display:inline-flex; align-items:center; justify-content:center;
       width:48px; height:48px; border:none; background:none; color:#fff;
-      cursor:pointer; border-radius:10px; font-size:1.5rem;
+      cursor:pointer; border-radius:10px;
     }
+    .menu-btn svg{ width:28px; height:28px; }
     .menu-btn:active{ transform:scale(0.96); }
 
-    /* Sidebar */
+    /* ===== Sidebar (desktop por defecto) ===== */
     .sidebar {
       position: fixed; top: 0; left: -220px; width: 200px; height: 100%;
       background: #222; color: white; padding: 20px; transition: left 0.3s ease; z-index: 1001;
-
-      /* NUEVO: convertir en columna flexible para empujar logout al final */
-      display:flex; flex-direction:column;
+      display:flex; flex-direction:column;   /* para empujar logout al fondo */
     }
     .sidebar.active { left: 0; }
     .sidebar button {
@@ -39,13 +39,10 @@
       background: none; border: none; color: white; border-bottom: 1px solid #444;
       margin: 5px 0; font-size: 1rem; cursor: pointer;
     }
-
-    /* Cerrar sesión con icono y pegado al fondo */
     .logout {
       background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px;
-      cursor: pointer; width: 100%;
-      display:flex; align-items:center; gap:10px;
-      border-bottom:none; margin-top:auto; /* 👈 lo manda al fondo */
+      cursor: pointer; width: 100%; display:flex; align-items:center; gap:10px;
+      margin-top:auto; border-bottom:none;   /* 👈 siempre abajo */
     }
     .logout svg{ flex:0 0 auto }
 
@@ -101,22 +98,28 @@
     }
     .section-actions .primary-btn:hover{ background:var(--primary-h) }
 
-    /* ===== Responsive ===== */
-    @media (max-width:1024px){
-      .actions .ico{ font-size:2em }
-      .card{ padding:14px; font-size:20px }
-      .card .title{ font-size:40px }
-      .actions button{ font-size:32px; padding:20px }
-      .cards{ gap:32px; margin-top:32px }
-
-      .section-actions{ display:grid !important; grid-template-columns:1fr; gap:14px; }
-      .section-actions input[type="text"], .section-actions select, .section-actions .primary-btn{
-        width:100%; min-width:0;
+    /* ===== Versión móvil: menú 3/4 y controles grandes ===== */
+    @media (max-width:768px){
+      /* Sidebar ocupa 75% de pantalla y desliza desde -75% */
+      .sidebar{
+        left:-75%;
+        width:75%;
+        max-width:none;  /* sin límite en móvil */
       }
-      .section-actions input[type="text"], .section-actions select{ font-size:26px; height:64px; padding:16px 18px; border-radius:14px }
-      .section-actions .primary-btn{ font-size:26px; min-height:64px; padding:16px 24px; border-radius:14px }
+      .sidebar.active{ left:0; }
 
-      /* 📍 Titulos grandes en móvil */
+      /* Botones del menú grandes para tocar mejor */
+      .sidebar button,
+      .sidebar .logout{
+        font-size: 1.6rem;
+        padding: 22px 18px;
+      }
+
+      /* Botón hamburguesa más grande */
+      .menu-btn{ width:64px; height:64px; }
+      .menu-btn svg{ width:36px; height:36px; }
+
+      /* Títulos grandes que ya tenías */
       #usuarios h2,
       #clientes h2,
       #avisos h2 {
@@ -132,11 +135,10 @@
 <body>
   <!-- Top -->
   <div class="topbar">
-    <!-- Botón hamburguesa con SVG (sustituye el botón anterior) -->
+    <!-- Botón hamburguesa con SVG -->
     <button class="menu-btn" aria-label="Abrir menú" onclick="toggleSidebar()">
-      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-        <path d="M3 6h18M3 12h18M3 18h18"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
     <h2>SAT Control</h2>
@@ -146,11 +148,6 @@
 
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
-    <!-- Botones del menú -->
-    <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
-    <button onclick="mostrar('clientes')">Clientes</button>
-    <button onclick="mostrar('avisos')">Avisos</button>
-
     <!-- Cerrar sesión abajo con icono -->
     <button class="logout" onclick="logout()" aria-label="Cerrar sesión">
       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -159,6 +156,9 @@
       </svg>
       Cerrar sesión
     </button>
+    <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
+    <button onclick="mostrar('clientes')">Clientes</button>
+    <button onclick="mostrar('avisos')">Avisos</button>
   </div>
 
   <!-- Main -->
@@ -199,20 +199,18 @@
 
   <script>
     const token=localStorage.getItem('token'); if(!token) location.href='login.html';
-    // Decode base64url seguro (por si el JWT usa -/_)
     function decodeJwt(seg){ try{ return JSON.parse(atob(seg.replace(/-/g,'+').replace(/_/g,'/'))); }catch(e){ return {}; } }
     const payload=decodeJwt(token.split('.')[1]||''); const rol=payload.rol;
     const api="https://sat-idacas.onrender.com/api"; const headers={'Content-Type':'application/json','Authorization':'Bearer '+token};
 
-    function toggleSidebar(){sidebar.classList.toggle('active');overlay.classList.toggle('active');}
-    function logout(){localStorage.removeItem('token');location.href='login.html';}
+    function toggleSidebar(){ sidebar.classList.toggle('active'); overlay.classList.toggle('active'); }
+    function logout(){ localStorage.removeItem('token'); location.href='login.html'; }
     if(rol!=="Gestor"){ const el=document.getElementById('btnUsuarios'); if(el) el.style.display='none'; }
 
     function mostrar(sec){
       ['inicio','usuarios','clientes','avisos'].forEach(id=>document.getElementById(id).style.display='none');
       document.getElementById(sec).style.display='block';
       sidebar.classList.remove('active'); overlay.classList.remove('active');
-
       if(sec==='usuarios')cargarUsuarios();
       if(sec==='clientes')cargarClientes();
       if(sec==='avisos'){cargarClientes();cargarTecnicos();cargarAvisos();}
@@ -305,7 +303,7 @@
     }
     function abrirTicket(id){ window.open('ticket.html?avisoId='+id,'_blank'); }
 
-    /* INIT: abrir sección por hash o inicio */
+    /* INIT */
     window.addEventListener('load',()=>{ mostrar(location.hash.substring(1)||'inicio'); });
   </script>
 </body>
