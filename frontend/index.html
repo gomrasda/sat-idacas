@@ -37,79 +37,42 @@
 
     .main { padding: 16px 16px 16px 24px; margin-top: 60px; }
 
-    /* ===== HERO de bienvenida ===== */
+    /* HERO */
     #inicio{
       min-height: calc(100vh - 60px);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
-      gap:14px;
-      padding:24px;
+      display:flex; flex-direction:column;
+      justify-content:center; align-items:center;
+      text-align:center; gap:14px; padding:24px;
     }
-    #inicio img{
-      width: clamp(220px, 55vw, 420px);
-      height:auto;
-      object-fit:contain;
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,.08));
-    }
-    #inicio h2{
-      margin: 6px 0 0;
-      font-weight: 800;
-      letter-spacing:.3px;
-      color:#1f2937;
-      font-size: clamp(22px, 6.5vw, 42px);
-    }
+    #inicio img{ width: clamp(220px, 55vw, 420px); height:auto; object-fit:contain; filter: drop-shadow(0 10px 24px rgba(0,0,0,.08)); }
+    #inicio h2{ margin: 6px 0 0; font-weight: 800; letter-spacing:.3px; color:#1f2937; font-size: clamp(22px, 6.5vw, 42px); }
 
-    .modal {
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #ccc;
-      z-index: 1002; width: 90%; max-width: 460px;
-    }
+    .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #ccc; z-index: 1002; width: 90%; max-width: 460px; }
     .modal h3{ margin:0 0 8px }
-    .modal input, .modal select, .modal textarea {
-      width: 100%; padding: 10px 12px; margin: 6px 0; border: 1px solid var(--b); border-radius: 10px; font: inherit;
-    }
-    .modal .hint{ font-size:12px; color:#666; margin-top:-2px }
+    .modal input, .modal select, .modal textarea { width: 100%; padding: 10px 12px; margin: 6px 0; border: 1px solid var(--b); border-radius: 10px; font: inherit; }
     .modal .row { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
     .btn { padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid var(--b); background:#fff }
     .btn.primary{ background: var(--primary); color:#fff; border-color:transparent }
     .btn.primary:hover{ background: var(--primary-h) }
 
-    /* ==== Tarjetas ==== */
+    /* Tarjetas */
     .cards{ display:flex; flex-direction:column; gap:16px; margin-top:16px; }
-    .card{
-      background:#fff; border:2px solid var(--card-b); border-radius:0; padding:16px; width:100%;
-      box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5; font-size:18px;
-    }
+    .card{ background:#fff; border:2px solid var(--card-b); border-radius:0; padding:16px; width:100%; box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5; font-size:18px; }
     .card .title{ font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
     .meta{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; margin:8px 0; }
     .meta > span{ display:block; background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:8px 10px; }
     .actions{ display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:12px }
-    .actions .ico{ font-size:1.7em; line-height:1; vertical-align:-2px; display:inline-block; margin-right:8px }
+    .actions .ico{ font-size:1.7em; margin-right:8px }
     .actions button{ font-size:16px; padding:10px 14px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer }
     .actions button:hover{ background:#f1f5fb }
 
-    /* ==== Acciones (barra superior) ==== */
-    .section-actions{
-      display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center; gap:16px; margin:8px 0 14px;
-    }
-    .section-actions input[type="text"], .section-actions select{
-      min-width:380px; font-size:20px; height:52px; padding:12px 16px; border-radius:12px; border:1px solid var(--b); background:#fff;
-    }
-    .section-actions .primary-btn{
-      font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px; border:none; cursor:pointer; background:var(--primary); color:#fff;
-    }
+    /* Barra superior */
+    .section-actions{ display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center; gap:16px; margin:8px 0 14px; }
+    .section-actions .primary-btn{ font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px; border:none; cursor:pointer; background:var(--primary); color:#fff; }
     .section-actions .primary-btn:hover{ background:var(--primary-h) }
 
-    .actions .btn-ticket{ order:-1; margin-right:auto }
-
-    /* ===== Responsive (ajustado como tickets) ===== */
     @media (max-width:1024px){
       h2 { font-size:54px; }
-      label { font-size:35px !important; }
-      input, select, textarea { font-size:40px !important; height:64px; padding:16px 18px; }
       .primary-btn { font-size:36px !important; min-height:64px; padding:20px; }
       .cards { gap:24px; }
       .card .title { font-size:40px; }
@@ -147,7 +110,7 @@
     <div id="usuarios" style="display:none;">
       <h2>Usuarios</h2>
       <div class="section-actions">
-        <input id="filtroUsuario" type="text" placeholder="Buscar por nombre, usuario, email o rol..." oninput="filtrarUsuarios()">
+        <input id="filtroUsuario" type="text" placeholder="Buscar..." oninput="filtrarUsuarios()">
         <button class="primary-btn" onclick="nuevoUsuario()">➕ Nuevo Usuario</button>
       </div>
       <div id="usuariosCards" class="cards"></div>
@@ -167,11 +130,6 @@
     <div id="avisos" style="display:none;">
       <h2>Avisos</h2>
       <div class="section-actions">
-        <select id="filtroEstado" onchange="filtrarAvisos()">
-          <option value="todos">Todos</option>
-          <option value="Pendiente">Pendientes</option>
-          <option value="Cerrado">Cerrados</option>
-        </select>
         <button class="primary-btn" onclick="nuevoAviso()">➕ Nuevo Aviso</button>
       </div>
       <div id="avisosCards" class="cards"></div>
@@ -181,132 +139,51 @@
   </div>
 
   <script>
-    /* ===== AUTH / BASE ===== */
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = 'login.html';
-    const payload = JSON.parse(atob(token.split('.')[1] || 'e30='));
-    const rol = payload.rol;
-    const api = "https://sat-idacas.onrender.com/api";
-    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+    const token=localStorage.getItem('token');
+    if(!token) location.href='login.html';
+    const payload=JSON.parse(atob(token.split('.')[1]||'e30='));
+    const rol=payload.rol;
+    const api="https://sat-idacas.onrender.com/api";
+    const headers={'Content-Type':'application/json','Authorization':'Bearer '+token};
 
-    function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
-    function logout(){ localStorage.removeItem('token'); window.location.href = 'login.html'; }
-    if (rol !== "Gestor") { const el = document.getElementById('btnUsuarios'); if (el) el.style.display = 'none'; }
+    function toggleSidebar(){ sidebar.classList.toggle('active'); overlay.classList.toggle('active'); }
+    function logout(){ localStorage.removeItem('token'); location.href='login.html'; }
+    if(rol!=="Gestor") btnUsuarios.style.display='none';
 
-    function mostrar(seccion){
-      ['inicio','usuarios','clientes','avisos'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
-      document.getElementById(seccion).style.display = 'block';
-      document.getElementById('sidebar').classList.remove('active');
-      document.getElementById('overlay').classList.remove('active');
-      if (seccion==='usuarios') cargarUsuarios();
-      if (seccion==='clientes') cargarClientes();
-      if (seccion==='avisos') { cargarClientes(); cargarTecnicos(); cargarAvisos(document.getElementById('filtroEstado').value); }
-    }
+    function mostrar(sec){ ['inicio','usuarios','clientes','avisos'].forEach(id=>document.getElementById(id).style.display='none'); document.getElementById(sec).style.display='block'; sidebar.classList.remove('active'); overlay.classList.remove('active'); if(sec==='usuarios') cargarUsuarios(); if(sec==='clientes') cargarClientes(); if(sec==='avisos'){ cargarClientes(); cargarTecnicos(); cargarAvisos(); } }
+    const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 
-    const esc = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    function abrirModal(h){ modal.innerHTML=h; modal.style.display='block'; }
+    function cerrarModal(){ modal.style.display='none'; }
 
-    function abrirModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.style.display='block'; }
-    function cerrarModal(){ document.getElementById('modal').style.display='none'; }
+    /* USUARIOS */
+    let usuariosArr=[];
+    async function cargarUsuarios(){ const r=await fetch(api+"/usuarios",{headers}); usuariosArr=await r.json(); renderUsuarios(usuariosArr); }
+    function renderUsuarios(l){ usuariosCards.innerHTML=""; (l||[]).forEach(u=>{ usuariosCards.innerHTML+=`<div class="card"><div class="title">${esc(u.nombre_completo||u.nombre||"")}</div><div class="meta"><span><strong>Usuario:</strong> ${esc(u.usuario||"")}</span><span><strong>Email:</strong> ${esc(u.email||"")}</span><span><strong>Rol:</strong> ${esc(u.rol||"")}</span></div><div class="actions"><button onclick="editarUsuario(${u.id})"><span class="ico">✏️</span>Editar</button><button onclick="borrarUsuario(${u.id})"><span class="ico">🗑️</span>Borrar</button></div></div>` }); }
+    function filtrarUsuarios(){ const q=filtroUsuario.value.toLowerCase().trim(); renderUsuarios(!q?usuariosArr:usuariosArr.filter(u=>(u.nombre_completo||u.nombre||"").toLowerCase().includes(q)||(u.usuario||"").toLowerCase().includes(q)||(u.email||"").toLowerCase().includes(q)||(u.rol||"").toLowerCase().includes(q))); }
+    function nuevoUsuario(){ abrirModal(`<div class="modal"><h3>Nuevo Usuario</h3><input id="u_nombre"/><input id="u_user"/><input id="u_mail" type="email"/><select id="u_rol"><option>Gestor</option><option>Técnico</option><option>tecnico</option></select><input id="u_pwd" type="password"/><div class="row"><button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn primary" onclick="guardarUsuario(null)">Guardar</button></div></div>`); }
+    async function guardarUsuario(id){ const data={nombre_completo:u_nombre.value,usuario:u_user.value,email:u_mail.value,rol:u_rol.value}; if(u_pwd.value) data.password=u_pwd.value; const url=id?`${api}/usuarios/${id}`:`${api}/auth/register`; const method=id?"PUT":"POST"; await fetch(url,{method,headers,body:JSON.stringify(data)}); cerrarModal(); cargarUsuarios(); }
+    async function borrarUsuario(id){ if(confirm("¿Borrar?")){ await fetch(`${api}/usuarios/${id}`,{method:"DELETE",headers}); cargarUsuarios(); } }
 
-    /* === USUARIOS === */
-    let usuariosArr = [];
-    async function cargarUsuarios(){ const res = await fetch(api + "/usuarios", { headers }); usuariosArr = await res.json(); renderUsuarios(usuariosArr); }
-    function renderUsuarios(lista){
-      const cont = document.getElementById('usuariosCards'); cont.innerHTML = "";
-      (lista||[]).forEach(u=>{
-        const card = document.createElement('div'); card.className = 'card';
-        card.innerHTML = `
-          <div class="title">${esc(u.nombre_completo||u.nombre||"")}</div>
-          <div class="meta">
-            <span><strong>Usuario:</strong> ${esc(u.usuario||"")}</span>
-            <span><strong>Email:</strong> ${esc(u.email||"")}</span>
-            <span><strong>Rol:</strong> ${esc(u.rol||"")}</span>
-          </div>
-          <div class="actions">
-            <button onclick="editarUsuario(${u.id})"><span class="ico">✏️</span>Editar</button>
-            <button onclick="borrarUsuario(${u.id})"><span class="ico">🗑️</span>Borrar</button>
-          </div>`;
-        cont.appendChild(card);
-      });
-    }
-    function filtrarUsuarios(){
-      const q=(filtroUsuario.value||"").toLowerCase().trim();
-      renderUsuarios(!q?usuariosArr:usuariosArr.filter(u =>
-        (u.nombre_completo||u.nombre||"").toLowerCase().includes(q) ||
-        (u.usuario||"").toLowerCase().includes(q) ||
-        (u.email||"").toLowerCase().includes(q) ||
-        (u.rol||"").toLowerCase().includes(q)
-      ));
-    }
-    function nuevoUsuario(){
-      abrirModal(`<div class="modal"><h3>Nuevo Usuario</h3>
-        <input id="u_nombre" placeholder="Nombre completo" />
-        <input id="u_user" placeholder="Usuario" />
-        <input id="u_mail" type="email" placeholder="Email" />
-        <select id="u_rol"><option>Gestor</option><option>Técnico</option><option>tecnico</option></select>
-        <input id="u_pwd" type="password" placeholder="Contraseña" />
-        <div class="row"><button class="btn" onclick="cerrarModal()">Cancelar</button>
-        <button class="btn primary" onclick="guardarUsuario(null)">Guardar</button></div></div>`);
-    }
-    async function guardarUsuario(id){
-      const data={nombre_completo:u_nombre.value,usuario:u_user.value,email:u_mail.value,rol:u_rol.value};
-      if(u_pwd.value) data.password=u_pwd.value;
-      const url=id?`${api}/usuarios/${id}`:`${api}/auth/register`;
-      const method=id?"PUT":"POST";
-      await fetch(url,{method,headers,body:JSON.stringify(data)});
-      cerrarModal(); cargarUsuarios();
-    }
-    async function borrarUsuario(id){ if(confirm("¿Borrar usuario?")){ await fetch(`${api}/usuarios/${id}`,{method:"DELETE",headers}); cargarUsuarios(); } }
-
-    /* === CLIENTES === */
-    let clientesArr=[];
-    async function cargarClientes(){ const r=await fetch(api+"/clientes",{headers}); clientesArr=await r.json(); renderClientes(clientesArr); }
-    function renderClientes(lista){
-      const cont=clientesCards; cont.innerHTML="";
-      (lista||[]).forEach(c=>{
-        const card=document.createElement('div'); card.className='card';
-        card.innerHTML=`
-          <div class="title">${esc(c.nombre||"")}</div>
-          <div class="meta"><span><strong>Observaciones:</strong> ${esc(c.obs||"")}</span></div>
-          <div class="actions">
-            <button onclick="editarCliente(${c.id})"><span class="ico">✏️</span>Editar</button>
-            <button onclick="borrarCliente(${c.id})"><span class="ico">🗑️</span>Borrar</button>
-          </div>`;
-        cont.appendChild(card);
-      });
-    }
-    function filtrarClientes(){ const q=(filtroCliente.value||"").toLowerCase().trim(); renderClientes(!q?clientesArr:clientesArr.filter(c=>(c.nombre||"").toLowerCase().includes(q)||(c.obs||"").toLowerCase().includes(q))); }
-    function nuevoCliente(){ abrirModal(`<div class="modal"><h3>Nuevo Cliente</h3><input id="c_nombre" placeholder="Nombre"/><textarea id="c_obs"></textarea><div class="row"><button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn primary" onclick="guardarCliente(null)">Guardar</button></div></div>`); }
+    /* CLIENTES */
+    let clientesArr=[]; async function cargarClientes(){ const r=await fetch(api+"/clientes",{headers}); clientesArr=await r.json(); renderClientes(clientesArr); }
+    function renderClientes(l){ clientesCards.innerHTML=""; (l||[]).forEach(c=>{ clientesCards.innerHTML+=`<div class="card"><div class="title">${esc(c.nombre||"")}</div><div class="meta"><span><strong>Observaciones:</strong> ${esc(c.obs||"")}</span></div><div class="actions"><button onclick="editarCliente(${c.id})"><span class="ico">✏️</span>Editar</button><button onclick="borrarCliente(${c.id})"><span class="ico">🗑️</span>Borrar</button></div></div>` }); }
+    function filtrarClientes(){ const q=filtroCliente.value.toLowerCase().trim(); renderClientes(!q?clientesArr:clientesArr.filter(c=>(c.nombre||"").toLowerCase().includes(q)||(c.obs||"").toLowerCase().includes(q))); }
+    function nuevoCliente(){ abrirModal(`<div class="modal"><h3>Nuevo Cliente</h3><input id="c_nombre"/><textarea id="c_obs"></textarea><div class="row"><button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn primary" onclick="guardarCliente(null)">Guardar</button></div></div>`); }
     async function guardarCliente(id){ const data={nombre:c_nombre.value,obs:c_obs.value}; const url=id?`${api}/clientes/${id}`:`${api}/clientes`; const method=id?"PUT":"POST"; await fetch(url,{method,headers,body:JSON.stringify(data)}); cerrarModal(); cargarClientes(); }
-    async function borrarCliente(id){ if(confirm("¿Borrar cliente?")){ await fetch(`${api}/clientes/${id}`,{method:"DELETE",headers}); cargarClientes(); } }
+    async function borrarCliente(id){ if(confirm("¿Borrar?")){ await fetch(`${api}/clientes/${id}`,{method:"DELETE",headers}); cargarClientes(); } }
 
-    /* === AVISOS === */
+    /* AVISOS */
     let avisosArr=[]; let tecnicos=[];
     async function cargarTecnicos(){ const r=await fetch(api+"/usuarios",{headers}); const u=await r.json(); tecnicos=u.filter(t=>t.rol==="Técnico"||t.rol==="tecnico"); }
-    async function cargarAvisos(f="todos"){ const r=await fetch(api+"/avisos",{headers}); avisosArr=await r.json(); renderAvisos(f==="todos"?avisosArr:avisosArr.filter(a=>a.estado===f)); }
-    function renderAvisos(lista){
-      const cont=avisosCards; cont.innerHTML="";
-      (lista||[]).forEach(a=>{
-        const card=document.createElement('div'); card.className='card';
-        card.innerHTML=`
-          <div class="title">${esc(a.cliente||"")}</div>
-          <div class="meta"><span><strong>Fecha:</strong> ${esc(a.fecha_programada||"")}</span><span><strong>Técnico:</strong> ${esc(a.tecnico||"")}</span></div>
-          <div class="actions">
-            <button class="btn-ticket" onclick="abrirTicket(${a.id})"><span class="ico">🎫</span>Ticket</button>
-            <button onclick="editarAviso(${a.id})"><span class="ico">✏️</span>Editar</button>
-            <button onclick="borrarAviso(${a.id})"><span class="ico">🗑️</span>Borrar</button>
-          </div>`;
-        cont.appendChild(card);
-      });
-    }
-    function filtrarAvisos(){ cargarAvisos(filtroEstado.value); }
+    async function cargarAvisos(){ const r=await fetch(api+"/avisos",{headers}); avisosArr=await r.json(); renderAvisos(avisosArr); }
+    function renderAvisos(l){ avisosCards.innerHTML=""; (l||[]).forEach(a=>{ avisosCards.innerHTML+=`<div class="card"><div class="title">${esc(a.cliente||"")}</div><div class="meta"><span><strong>Fecha:</strong> ${esc(a.fecha_programada||"")}</span><span><strong>Técnico:</strong> ${esc(a.tecnico||"")}</span></div><div class="actions"><button class="btn-ticket" onclick="abrirTicket(${a.id})"><span class="ico">🎫</span>Ticket</button><button onclick="editarAviso(${a.id})"><span class="ico">✏️</span>Editar</button><button onclick="borrarAviso(${a.id})"><span class="ico">🗑️</span>Borrar</button></div></div>` }); }
     function nuevoAviso(){ const options=tecnicos.map(t=>`<option>${t.nombre}</option>`).join(""); abrirModal(`<div class="modal"><h3>Nuevo Aviso</h3><input id="a_cliente"/><input id="a_tarea"/><input id="a_fecha" type="date"/><select id="a_tecnico">${options}</select><select id="a_estado"><option>Pendiente</option><option>Cerrado</option></select><div class="row"><button class="btn" onclick="cerrarModal()">Cancelar</button><button class="btn primary" onclick="guardarAviso(null)">Guardar</button></div></div>`); }
-    async function guardarAviso(id){ const data={cliente:a_cliente.value,tarea:a_tarea.value,fecha_programada:a_fecha.value,tecnico:a_tecnico.value,estado:a_estado.value}; const url=id?`${api}/avisos/${id}`:`${api}/avisos`; const method=id?"PUT":"POST"; await fetch(url,{method,headers,body:JSON.stringify(data)}); cerrarModal(); cargarAvisos(filtroEstado.value); }
-    async function borrarAviso(id){ if(confirm("¿Borrar aviso?")){ await fetch(`${api}/avisos/${id}`,{method:"DELETE",headers}); cargarAvisos(filtroEstado.value); } }
+    async function guardarAviso(id){ const data={cliente:a_cliente.value,tarea:a_tarea.value,fecha_programada:a_fecha.value,tecnico:a_tecnico.value,estado:a_estado.value}; const url=id?`${api}/avisos/${id}`:`${api}/avisos`; const method=id?"PUT":"POST"; await fetch(url,{method,headers,body:JSON.stringify(data)}); cerrarModal(); cargarAvisos(); }
+    async function borrarAviso(id){ if(confirm("¿Borrar?")){ await fetch(`${api}/avisos/${id}`,{method:"DELETE",headers}); cargarAvisos(); } }
     function abrirTicket(id){ window.open('ticket.html?avisoId='+id,'_blank'); }
 
-    /* INIT */
-    window.addEventListener('load',()=>{ const hash=location.hash.substring(1); mostrar(hash||'inicio'); });
+    window.addEventListener('load',()=>{ mostrar(location.hash.substring(1)||'inicio'); });
   </script>
 </body>
 </html>
