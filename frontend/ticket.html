@@ -19,6 +19,9 @@
     .btn-grey { background:#6c757d; }
     .btn-grey:hover { background:#5a6268; }
 
+    /* Label general */
+    label { font-size:24px; font-weight:600; }
+
     .table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
     table { width:100%; border-collapse:collapse; background:white; margin-top:20px; }
     th, td { padding:10px; border:1px solid #ccc; text-align:left; }
@@ -31,7 +34,7 @@
 
     /* Resumen horas/materiales */
     #resumen { display:flex; justify-content:space-between; align-items:center;
-      font-size:18px; font-weight:700; color:#1f2937;
+      font-size:24px; font-weight:700; color:#1f2937;
       margin:10px 0 20px; background:#eef2f7; padding:10px 14px; border-radius:8px;
     }
 
@@ -95,6 +98,7 @@
     @media (max-width: 1024px){
       .container { max-width: 100%; padding: 12px; }
       #tituloCliente{ font-size: 54px !important; }
+      label { font-size:35px !important; }
       #filtroEstado{ font-size: 40px !important; height: 64px; }
       .chip{ font-size: 40px; }
       #ticketsBody tr.r2 textarea,
@@ -105,7 +109,7 @@
       }
       #ticketsBody tr.r2 textarea{ min-height: 220px; }
       .actions-row .btn { font-size: 36px; padding: 20px; }
-      #resumen{ font-size:32px; }
+      #resumen{ font-size:35px; }
       .acciones button{ width:70px; height:70px; font-size:40px; }
 
       /* Labels grandes solo en Descripción, Horas, Materiales y Estado en móvil */
