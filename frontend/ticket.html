@@ -22,7 +22,7 @@
     th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
     /* Forzar mayúsculas al título principal */
     #tituloCliente {
-    text-transform: uppercase;
+      text-transform: uppercase;
     }
 
     /* Base inputs escritorio */
@@ -30,7 +30,14 @@
     td input, td select, td textarea{
       width:100%; font:inherit; padding:8px; border:1px solid var(--b); border-radius:8px; background:#fff
     }
-    td textarea{ resize:vertical; min-height:56px }
+
+    /* TEXTAREA: autoajuste sin scroll (escritorio) */
+    td textarea{
+      resize: none;          /* sin tirador */
+      overflow: hidden;      /* sin scroll interno */
+      min-height: 56px;      /* alto mínimo */
+      line-height: 1.4;
+    }
 
     .modal {
       position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -114,7 +121,7 @@
         padding: 10px 16px;
       }
 
-      /* Descripción editable y deshabilitada IGUAL y más alta */
+      /* Descripción editable y deshabilitada IGUAL y más alta + sin scroll */
       #ticketsBody tr.r2 textarea,
       #ticketsBody tr.r2 textarea:disabled {
         min-height: 220px;
@@ -126,6 +133,9 @@
         color: var(--ink);
         background-color: #fff;
         opacity: 1;
+
+        resize: none;       /* sin tirador */
+        overflow: hidden;   /* sin scroll interno */
       }
 
       /* Horas / Materiales */
@@ -211,7 +221,7 @@ const avisoId = parseInt(urlParams.get('avisoId'), 10);
 let tecnicos = [];
 let ticketsLista = [];
 
-// fetch con control de errores
+/* ================== UTIL: fetch con control de errores ================== */
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, options);
   if (!res.ok) {
@@ -221,6 +231,21 @@ async function apiFetch(url, options = {}) {
   }
   try { return await res.json(); } catch { return null; }
 }
+
+/* ================== AUTO-RESIZE TEXTAREAS ================== */
+function autoResize(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+// Ajustar todos los textareas presentes (tras render)
+function ajustarTodos() {
+  document.querySelectorAll('textarea').forEach(autoResize);
+}
+// Autoajustar mientras se escribe (delegado global)
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.tagName === 'TEXTAREA') autoResize(e.target);
+});
 
 /* ================== DATOS INICIALES ================== */
 async function cargarTecnicos() {
@@ -385,6 +410,9 @@ async function cargarTickets() {
           </tr>`;
       }
     });
+
+  // Autoajustar alturas cuando termina de renderizar
+  ajustarTodos();
 }
 
 // Re-render al cambiar tamaño/orientación
@@ -410,13 +438,15 @@ function abrirModal(){
         <option value="Cerrado">Cerrado</option>
         <option value="Facturado">Facturado</option>
       </select><br><br>
-      <textarea id='descripcion' placeholder='Descripción' rows="3"></textarea><br><br>
+      <textarea id='descripcion' placeholder='Descripción' rows="3" style="resize:none; overflow:hidden;"></textarea><br><br>
       <div style="display:flex; gap:8px; justify-content:flex-end;">
         <button onclick='guardarTicket()' class="btn">Guardar</button>
         <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
       </div>
     </div>`;
   modal.style.display = "block";
+  // Ajustar el textarea del modal tras pintarlo
+  setTimeout(() => autoResize(document.getElementById('descripcion')), 0);
 }
 
 function cerrarModal(){
@@ -550,7 +580,7 @@ async function editarTicket(id) {
       </select><br><br>
 
       <label>Descripción</label>
-      <textarea id='descripcion' placeholder='Descripción' rows="3" ${disabledCampos}>${t.description ?? t.descripcion ?? ""}</textarea><br><br>
+      <textarea id='descripcion' placeholder='Descripción' rows="3" ${disabledCampos} style="resize:none; overflow:hidden;">${t.description ?? t.descripcion ?? ""}</textarea><br><br>
 
       <div style="display:flex; gap:8px; justify-content:flex-end;">
         <button onclick='guardarEdicion(${t.id})' class="btn">Guardar</button>
@@ -558,6 +588,8 @@ async function editarTicket(id) {
       </div>
     </div>`;
   modal.style.display = "block";
+  // Ajustar el textarea del modal tras pintarlo
+  setTimeout(() => autoResize(document.getElementById('descripcion')), 0);
 }
 
 async function guardarEdicion(id){
