@@ -70,8 +70,14 @@
     .estado.closed select{ background:var(--closed); }
     .estado.billed select{ background:var(--billed); }
 
-    /* Acciones */
-    .acciones { display:flex; flex-direction:row; gap:10px; justify-content:flex-end; align-items:center; width:100%; }
+    /* Acciones en fila */
+    .acciones {
+      display:flex !important;
+      flex-direction:row !important;
+      gap:10px;
+      justify-content:flex-end;
+      align-items:center;
+    }
     .acciones button {
       width:52px; height:52px; font-size:28px;
       display:inline-flex; align-items:center; justify-content:center;
