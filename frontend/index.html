@@ -1,225 +1,546 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>SAT CRUD Completo</title>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAT Control · CRUD</title>
   <style>
     :root{
       --b:#e9eef6; --bg:#f5f5f5; --ink:#1f2937; --chip:#eef2f7; --card-b:#cfd8e6;
-      --primary:#007bff; --primary-h:#0056b3;
+      --primary:#007bff; --primary-h:#0056b3; --danger:#dc3545; --ok:#10b981;
     }
     *{box-sizing:border-box}
-    body { margin:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--ink); }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial; background:var(--bg); color:var(--ink)}
 
     /* Topbar */
-    .topbar {
-      background:#003366; color:white; display:flex; justify-content:space-between; align-items:center; padding:12px 16px;
-      transition:transform 0.3s ease;
-    }
-    .topbar h2 { margin:0; font-size:1.6rem; }
-    .topbar button { background:none; border:none; color:white; font-size:2.5rem; cursor:pointer; }
+    .topbar{background:#003366;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;position:fixed;top:0;left:0;right:0;z-index:900;transition:transform .3s ease}
+    .topbar h2{margin:0;font-size:1.4rem}
+    .topbar .menu-btn{background:none;border:0;color:#fff;font-size:1.8rem;cursor:pointer}
+    .topbar .user{opacity:.85;font-size:.95rem}
 
     /* Sidebar */
-    .sidebar {
-      position:fixed; top:0; left:-75%;
-      width:75%; height:100%;
-      background:#222; color:white;
-      padding:40px;
-      display:flex; flex-direction:column;
-      transition:left 0.3s ease;
-      z-index:1001;
-    }
-    .sidebar.active { left:0; }
+    .sidebar{position:fixed;top:0;left:-75%;width:75%;max-width:420px;height:100%;background:#222;color:#fff;padding:40px;transition:left .3s ease;z-index:1001;overflow:auto}
+    .sidebar.active{left:0}
+    .sidebar .logout{background:var(--danger);color:#fff;border:0;padding:14px 16px;border-radius:10px;margin-bottom:16px;cursor:pointer;width:100%;font-size:1.1rem}
+    .sidebar button.nav{display:block;width:100%;text-align:left;padding:16px;background:none;border:0;color:#fff;border-bottom:1px solid #444;margin:8px 0;font-size:1.3rem;cursor:pointer}
 
-    .sidebar .menu-options { flex:1; }
-
-    .sidebar button {
-      display:block; width:100%; text-align:left;
-      padding:32px;
-      background:none; border:none; color:white;
-      border-bottom:1px solid #444;
-      margin:8px 0;
-      font-size:48px; cursor:pointer;
-    }
-
-    .logout {
-      background:#dc3545; color:white;
-      border:none; padding:32px;
-      border-radius:8px; margin-top:auto;
-      cursor:pointer; width:100%; font-size:48px;
-    }
-
-    /* Overlay */
-    .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); display:none; z-index:1000; }
-    .overlay.active { display:block; }
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:1000}
+    .overlay.active{display:block}
 
     /* Main */
-    .main { padding:16px 16px 16px 24px; margin-top:60px; transition:transform 0.3s ease; }
+    .main{padding:16px; margin-top:60px; transition:transform .3s ease}
+    body.shifted .topbar, body.shifted .main{ transform:translateX(75%) }
 
-    /* HERO */
-    #inicio{
-      min-height:calc(100vh - 60px);
-      display:flex; flex-direction:column; justify-content:center; align-items:center;
-      text-align:center; gap:14px; padding:24px;
-    }
-    #inicio img{ width:clamp(220px,55vw,420px); height:auto; object-fit:contain; filter:drop-shadow(0 10px 24px rgba(0,0,0,.08)); }
-    #inicio h2{ margin:6px 0 0; font-weight:800; letter-spacing:.3px; color:#1f2937; font-size:clamp(22px,6.5vw,42px); }
+    /* Hero */
+    #inicio{min-height:calc(100vh - 60px);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px;padding:24px}
+    #inicio img{width: clamp(220px, 45vw, 380px); height:auto; object-fit:contain}
+    #inicio h2{margin:6px 0 0;font-weight:800;color:#1f2937;font-size:clamp(22px,6vw,38px)}
 
-    /* Modal */
-    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-      background:#fff; padding:20px; border-radius:12px; border:1px solid #ccc;
-      z-index:1002; width:90%; max-width:460px;
-    }
-    .modal input, .modal select, .modal textarea {
-      width:100%; padding:10px 12px; margin:6px 0; border:1px solid var(--b); border-radius:10px; font:inherit;
-    }
-    .btn { padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid var(--b); background:#fff }
-    .btn.primary{ background:var(--primary); color:#fff; border-color:transparent }
-    .btn.primary:hover{ background:var(--primary-h) }
+    /* Section actions */
+    .section-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:8px 0 14px}
+    .section-actions input[type="text"], .section-actions select{min-width:280px;font-size:1rem;height:42px;padding:10px 12px;border-radius:12px;border:1px solid var(--b)}
+    .primary-btn{font-size:1rem;padding:11px 16px;min-height:42px;border-radius:12px;border:0;cursor:pointer;background:var(--primary);color:#fff}
+    .primary-btn:hover{background:var(--primary-h)}
 
     /* Cards */
-    .cards{ display:flex; flex-direction:column; gap:24px; margin-top:24px; }
-    .card{ background:#fff; border:2px solid var(--card-b); border-radius:0; padding:16px; width:100%;
-      box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5; font-size:20px; }
-    .card .title{ font-size:28px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
-    .meta{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:8px 0; }
-    .meta > span{ display:block; background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:8px 10px; font-size:20px; }
-    .actions{ display:flex; gap:12px; align-items:center; justify-content:flex-end; margin-top:12px }
-    .actions .ico{ font-size:2em; }
-    .actions button{ font-size:20px; padding:12px 16px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer }
-    .actions button:hover{ background:#f1f5fb }
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:10px}
+    .card{background:#fff;border:2px solid var(--card-b);padding:14px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);font-size:.95rem}
+    .card .title{font-size:1.05rem;font-weight:800;margin:0 0 6px;text-transform:uppercase}
+    .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:8px 0}
+    .meta>span{background:var(--chip);border:1px solid var(--b);border-radius:999px;padding:6px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px}
+    .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--b);background:#fff;cursor:pointer}
+    .btn:hover{background:#f1f5fb}
+    .btn.danger{border-color:#f6c8ce;color:#b91c1c}
 
-    /* Ticket botón a la izquierda */
-    .actions .btn-ticket {
-      order:-1;          /* lo manda a la izquierda */
-      margin-right:auto; /* empuja el resto a la derecha */
-    }
+    /* Modal */
+    dialog.modal{border:1px solid #ccc;border-radius:12px;padding:0;max-width:520px;width:92%}
+    .modal header{padding:14px 16px;border-bottom:1px solid #eee;font-weight:700}
+    .modal .content{padding:14px 16px}
+    .modal .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .modal .grid .full{grid-column:1/-1}
+    .modal input, .modal select, .modal textarea{width:100%;padding:10px 12px;margin:6px 0;border:1px solid var(--b);border-radius:10px;font:inherit}
+    .modal footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid #eee}
 
-    /* Actions bar */
-    .section-actions{ display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center; gap:16px; margin:8px 0 14px; }
-    .section-actions input[type="text"], .section-actions select{
-      min-width:380px; font-size:22px; height:52px; padding:12px 16px; border-radius:12px; border:1px solid var(--b); background:#fff;
-    }
-    .section-actions .primary-btn{
-      font-size:22px; padding:12px 20px; min-height:52px; border-radius:12px; border:none; cursor:pointer; background:var(--primary); color:#fff;
-    }
+    .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--b);background:#fff;border-radius:999px;padding:6px 10px}
+    .status.ok{border-color:#b7f3dc}
+    .status.bad{border-color:#f6c8ce}
 
-    /* Responsive */
     @media (max-width:1024px){
-      .card{ padding:18px; font-size:22px }
-      .card .title{ font-size:32px }
-      .actions button{ font-size:24px }
-      h2{ font-size:54px !important; text-transform:uppercase; text-align:left; font-weight:800; margin:12px 0; }
-    }
-
-    /* Desplazar contenido */
-    body.shifted .topbar,
-    body.shifted .main {
-      transform:translateX(75%);
+      .topbar h2{font-size:1.2rem}
+      .section-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+      .section-actions input, .section-actions select{height:52px;font-size:1.1rem}
+      .primary-btn{min-height:52px;font-size:1.1rem}
     }
   </style>
 </head>
 <body>
-
   <!-- Topbar -->
-  <div class="topbar">
-    <button onclick="toggleSidebar()">☰</button>
+  <div class="topbar" role="banner">
+    <button class="menu-btn" aria-label="Abrir menú" onclick="toggleSidebar()">☰</button>
     <h2>SAT Control</h2>
-    <span></span>
+    <div class="user" id="topUser"></div>
   </div>
-  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="toggleSidebar()" aria-hidden="true"></div>
 
   <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
-    <div class="menu-options">
-      <button onclick="mostrar('usuarios')" id="btnUsuarios">👤 Usuarios</button>
-      <button onclick="mostrar('clientes')">👥 Clientes</button>
-      <button onclick="mostrar('avisos')">📋 Avisos</button>
-    </div>
-    <button class="logout" onclick="logout()">🚪 Cerrar sesión</button>
-  </div>
+  <nav class="sidebar" id="sidebar" aria-label="Navegación principal">
+    <button class="logout" onclick="logout()">Cerrar sesión</button>
+    <button class="nav" onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
+    <button class="nav" onclick="mostrar('clientes')">Clientes</button>
+    <button class="nav" onclick="mostrar('avisos')">Avisos</button>
+  </nav>
 
   <!-- Main -->
-  <div class="main">
-    <div id="inicio">
-      <img src="logo.jpg" alt="Logo de la empresa">
+  <main class="main">
+    <section id="inicio">
+      <img src="logo.jpg" alt="Logo de la empresa" />
       <h2>Bienvenido a SAT Control</h2>
-    </div>
+      <p class="pill status ok">✅ Sesión activa</p>
+    </section>
 
-    <div id="usuarios" style="display:none;">
-      <h2>Usuarios</h2>
+    <section id="usuarios" hidden>
+      <h2>USUARIOS</h2>
       <div class="section-actions">
-        <input id="filtroUsuario" type="text" placeholder="Buscar usuario..." oninput="filtrarUsuarios()">
-        <button class="primary-btn" onclick="nuevoUsuario()">➕ Nuevo Usuario</button>
+        <input id="filtroUsuario" type="text" placeholder="Buscar usuario…" aria-label="Buscar usuario" />
+        <button class="primary-btn" id="btnNuevoUsuario">➕ Nuevo Usuario</button>
       </div>
       <div id="usuariosCards" class="cards"></div>
-    </div>
+    </section>
 
-    <div id="clientes" style="display:none;">
-      <h2>Clientes</h2>
+    <section id="clientes" hidden>
+      <h2>CLIENTES</h2>
       <div class="section-actions">
-        <input id="filtroCliente" type="text" placeholder="Buscar cliente..." oninput="filtrarClientes()">
-        <button class="primary-btn" onclick="nuevoCliente()">➕ Nuevo Cliente</button>
+        <input id="filtroCliente" type="text" placeholder="Buscar cliente…" aria-label="Buscar cliente" />
+        <button class="primary-btn" id="btnNuevoCliente">➕ Nuevo Cliente</button>
       </div>
       <div id="clientesCards" class="cards"></div>
-    </div>
+    </section>
 
-    <div id="avisos" style="display:none;">
-      <h2>Avisos</h2>
+    <section id="avisos" hidden>
+      <h2>AVISOS</h2>
       <div class="section-actions">
-        <button class="primary-btn" onclick="nuevoAviso()">➕ Nuevo Aviso</button>
+        <button class="primary-btn" id="btnNuevoAviso">➕ Nuevo Aviso</button>
       </div>
       <div id="avisosCards" class="cards"></div>
-    </div>
+    </section>
+  </main>
 
-    <div id="modal" style="display:none;"></div>
-  </div>
+  <!-- Modal (nativo <dialog>) -->
+  <dialog id="modal" class="modal" aria-modal="true"></dialog>
 
-  <script>
-    const token=localStorage.getItem('token');
-    if(!token)location.href='login.html';
-    const payload=JSON.parse(atob(token.split('.')[1]||'e30='));
-    const rol=payload.rol;
-    const api="https://sat-idacas.onrender.com/api";
-    const headers={'Content-Type':'application/json','Authorization':'Bearer '+token};
+<script>
+(() => {
+  // ====== CONFIG ======
+  const API_BASE = "https://sat-idacas.onrender.com/api"; // Cambia endpoints abajo si tu API difiere
+  const ENDPOINTS = {
+    usuarios: "/usuarios",      // e.g. "/users" o "/auth/users"
+    clientes: "/clientes",      // e.g. "/clients"
+    avisos: "/avisos"           // e.g. "/tickets" o "/orders"
+  };
 
-    function toggleSidebar(){
-      document.getElementById('sidebar').classList.toggle('active');
-      document.getElementById('overlay').classList.toggle('active');
-      document.body.classList.toggle('shifted');
+  // ====== AUTH ======
+  const token = localStorage.getItem('token');
+  if (!token) redirectToLogin();
+
+  let payload = {};
+  try {
+    const b64 = token.split('.')[1] || '';
+    payload = JSON.parse(atob(b64.replace(/-/g,'+').replace(/_/g,'/')) || '{}');
+  } catch(e){
+    console.warn('No se pudo decodificar el token', e);
+    redirectToLogin();
+  }
+
+  // Expiración (si existe "exp")
+  if (payload.exp && Date.now()/1000 > payload.exp) {
+    alert('La sesión ha expirado. Inicia sesión de nuevo.');
+    redirectToLogin();
+  }
+
+  const rol = payload.rol || payload.role || 'Usuario';
+  const nombre = payload.nombre || payload.name || '';
+  document.getElementById('topUser').textContent = nombre ? `${nombre} · ${rol}` : rol;
+
+  if (rol !== 'Gestor') {
+    const el = document.getElementById('btnUsuarios');
+    if (el) el.style.display = 'none';
+  }
+
+  function redirectToLogin(){
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+  }
+
+  // ====== UI HELPERS ======
+  const qs = (s, r=document) => r.querySelector(s);
+  const qsa = (s, r=document) => [...r.querySelectorAll(s)];
+  const el = (tag, attrs={}, children=[]) => {
+    const n = document.createElement(tag);
+    for (const [k,v] of Object.entries(attrs)){
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2), v);
+      else if (v !== null && v !== undefined) n.setAttribute(k, v);
     }
-    function logout(){ localStorage.removeItem('token'); location.href='login.html'; }
-    if(rol!=="Gestor"){ const el=document.getElementById('btnUsuarios'); if(el) el.style.display='none'; }
+    for (const c of (Array.isArray(children)?children:[children])) if (c) n.append(c);
+    return n;
+  };
 
-    function mostrar(seccion){
-      ['inicio','usuarios','clientes','avisos'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
-      document.getElementById(seccion).style.display='block';
-      document.getElementById('sidebar').classList.remove('active');
-      document.getElementById('overlay').classList.remove('active');
-      document.body.classList.remove('shifted');
-      if(seccion==='usuarios') cargarUsuarios();
-      if(seccion==='clientes') cargarClientes();
-      if(seccion==='avisos'){ cargarClientes(); cargarTecnicos(); cargarAvisos(); }
+  function toggleSidebar(){
+    qs('#sidebar').classList.toggle('active');
+    qs('#overlay').classList.toggle('active');
+    document.body.classList.toggle('shifted');
+  }
+  window.toggleSidebar = toggleSidebar; // para el botón del topbar
+
+  function mostrar(id){
+    qsa('main > section').forEach(sec => sec.hidden = true);
+    qs('#'+id).hidden = false;
+    qs('#sidebar').classList.remove('active');
+    qs('#overlay').classList.remove('active');
+    document.body.classList.remove('shifted');
+    if (id==='usuarios') cargarUsuarios();
+    if (id==='clientes') cargarClientes();
+    if (id==='avisos') { cargarClientes(true); cargarTecnicos(); cargarAvisos(); }
+  }
+  window.mostrar = mostrar;
+
+  function logout(){ localStorage.removeItem('token'); redirectToLogin(); }
+  window.logout = logout;
+
+  // ====== MODAL ======
+  const modal = qs('#modal');
+  function abrirModal(title, bodyNode, onAccept, acceptText='Guardar'){ // bodyNode: Node | HTMLElement
+    modal.innerHTML = '';
+    modal.append(
+      el('header', {}, title),
+      el('div', {class:'content'}, bodyNode),
+      el('footer', {}, [
+        el('button', {class:'btn', onclick: () => modal.close(), type:'button'}, 'Cancelar'),
+        el('button', {class:'primary-btn', onclick: async () => { try { await onAccept?.(); modal.close(); } catch(e){ console.error(e); alert('Error: '+(e.message||e)); } }}, acceptText)
+      ])
+    );
+    if (!modal.open) modal.showModal();
+  }
+  function cerrarModal(){ modal.close(); }
+  window.cerrarModal = cerrarModal;
+
+  // ====== API ======
+  async function apiFetch(path, { method='GET', data=null, params=null } = {}){
+    const url = new URL(API_BASE + path);
+    if (params) Object.entries(params).forEach(([k,v]) => v!=null && url.searchParams.set(k, v));
+    const res = await fetch(url.toString(), {
+      method,
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+      body: data ? JSON.stringify(data) : null
+    });
+    if (!res.ok){
+      const text = await res.text().catch(()=> '');
+      throw new Error(text || (`HTTP ${res.status}`));
     }
+    const ct = res.headers.get('content-type') || '';
+    return ct.includes('application/json') ? res.json() : res.text();
+  }
 
-    const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  // ====== LISTADOS RENDER ======
+  function renderUsuarioCard(u){
+    return el('article', {class:'card', 'data-id':u.id}, [
+      el('h3', {class:'title', text: u.nombre || u.name || 'Usuario'}),
+      el('div', {class:'meta'}, [
+        el('span', {}, `Email: ${u.email||''}`),
+        el('span', {}, `Rol: ${u.rol||u.role||''}`),
+        el('span', {}, `Tel: ${u.telefono||u.phone||''}`),
+        el('span', {}, `Activo: ${u.activo!==false ? 'Sí' : 'No'}`),
+      ]),
+      el('div', {class:'actions'}, [
+        el('button', {class:'btn', onclick: ()=> editarUsuario(u)}, 'Editar'),
+        el('button', {class:'btn danger', onclick: ()=> eliminarUsuario(u)}, 'Eliminar')
+      ])
+    ]);
+  }
 
-    /* Avisos */
-    let avisosArr=[],tecnicos=[];
-    async function cargarTecnicos(){const r=await fetch(api+"/usuarios",{headers});const u=await r.json();tecnicos=u.filter(t=>t.rol.toLowerCase().includes("tec"));}
-    async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
-    function renderAvisos(lista){const c=document.getElementById('avisosCards');c.innerHTML="";(lista||[]).forEach(a=>{
-      c.innerHTML+=`<div class="card"><div class="title">Cliente: ${esc(a.cliente||"")}</div>
-      <div class="meta"><span><strong>Fecha:</strong> ${esc(a.fecha_programada||"")}</span>
-      <span><strong>Técnico:</strong> ${esc(a.tecnico||"")}</span></div>
-      <div class="actions">
-        <button class="btn-ticket" onclick="abrirTicket(${a.id})"><span class="ico">🎫</span>Ticket</button>
-        <button onclick="editarAviso(${a.id})"><span class="ico">✏️</span>Editar</button>
-        <button onclick="borrarAviso(${a.id})"><span class="ico">🗑️</span>Borrar</button>
-      </div></div>`;
-    });}
-    function abrirTicket(id){window.open('ticket.html?avisoId='+id,'_blank');}
-  </script>
+  function renderClienteCard(c){
+    return el('article', {class:'card', 'data-id':c.id}, [
+      el('h3', {class:'title', text: c.nombre || c.razon_social || 'Cliente'}),
+      el('div', {class:'meta'}, [
+        el('span', {}, `NIF: ${c.nif||''}`),
+        el('span', {}, `Tel: ${c.telefono||''}`),
+        el('span', {class:'full'}, `Dirección: ${c.direccion||''}`),
+      ]),
+      el('div', {class:'actions'}, [
+        el('button', {class:'btn', onclick: ()=> editarCliente(c)}, 'Editar'),
+        el('button', {class:'btn danger', onclick: ()=> eliminarCliente(c)}, 'Eliminar')
+      ])
+    ]);
+  }
+
+  function renderAvisoCard(a){
+    return el('article', {class:'card', 'data-id':a.id}, [
+      el('h3', {class:'title', text: a.titulo || `Aviso #${a.id}` }),
+      el('div', {class:'meta'}, [
+        el('span', {}, `Cliente: ${a.cliente_nombre||a.clienteId||''}`),
+        el('span', {}, `Estado: ${a.estado||'Pendiente'}`),
+        el('span', {}, `Técnico: ${a.tecnico_nombre||a.tecnicoId||'-'}`),
+        el('span', {}, `Fecha: ${a.fecha ? new Date(a.fecha).toLocaleDateString() : '-'}`)
+      ]),
+      el('p', {}, a.descripcion || ''),
+      el('div', {class:'actions'}, [
+        el('button', {class:'btn', onclick: ()=> editarAviso(a)}, 'Editar'),
+        el('button', {class:'btn danger', onclick: ()=> eliminarAviso(a)}, 'Eliminar')
+      ])
+    ]);
+  }
+
+  // ====== USUARIOS ======
+  const $usuariosCards = qs('#usuariosCards');
+  const $filtroUsuario = qs('#filtroUsuario');
+  let usuariosCache = [];
+
+  async function cargarUsuarios(){
+    try{
+      const data = await apiFetch(ENDPOINTS.usuarios);
+      usuariosCache = Array.isArray(data) ? data : (data.items || data.results || []);
+      pintarUsuarios();
+    }catch(e){ console.error(e); alert('No se pudieron cargar usuarios'); }
+  }
+
+  function pintarUsuarios(){
+    const q = ($filtroUsuario.value||'').toLowerCase();
+    $usuariosCards.innerHTML = '';
+    usuariosCache
+      .filter(u => JSON.stringify(u).toLowerCase().includes(q))
+      .forEach(u => $usuariosCards.append(renderUsuarioCard(u)));
+  }
+
+  function nuevoUsuario(){
+    const form = buildUsuarioForm();
+    abrirModal('Nuevo usuario', form.node, async () => {
+      const payload = form.getData();
+      await apiFetch(ENDPOINTS.usuarios, { method:'POST', data: payload });
+      await cargarUsuarios();
+    });
+  }
+  window.nuevoUsuario = nuevoUsuario;
+
+  function editarUsuario(u){
+    const form = buildUsuarioForm(u);
+    abrirModal('Editar usuario', form.node, async () => {
+      const payload = form.getData();
+      await apiFetch(`${ENDPOINTS.usuarios}/${u.id}`, { method:'PUT', data: payload });
+      await cargarUsuarios();
+    });
+  }
+
+  async function eliminarUsuario(u){
+    if (!confirm(`¿Eliminar usuario "${u.nombre||u.email}"?`)) return;
+    try{ await apiFetch(`${ENDPOINTS.usuarios}/${u.id}`, { method:'DELETE' }); await cargarUsuarios(); }
+    catch(e){ alert('No se pudo eliminar'); }
+  }
+
+  function buildUsuarioForm(u={}){
+    const n = el('div', {class:'grid'}, [
+      el('div', {}, [ el('label', {for:'u_nombre', text:'Nombre'}), el('input', {id:'u_nombre', value:u.nombre||u.name||''}) ]),
+      el('div', {}, [ el('label', {for:'u_email', text:'Email'}), el('input', {id:'u_email', type:'email', value:u.email||''}) ]),
+      el('div', {}, [ el('label', {for:'u_rol', text:'Rol'}), el('select', {id:'u_rol'}, [ el('option', {value:'Gestor', text:'Gestor'}), el('option', {value:'Tecnico', text:'Técnico'}), el('option', {value:'Usuario', text:'Usuario'}) ]) ]),
+      el('div', {}, [ el('label', {for:'u_tel', text:'Teléfono'}), el('input', {id:'u_tel', value:u.telefono||u.phone||''}) ]),
+      el('div', {class:'full'}, [ el('label', {for:'u_pass', text:'Contraseña (al crear/cambiar)'}), el('input', {id:'u_pass', type:'password'}) ])
+    ]);
+    // set rol actual
+    setTimeout(()=>{ if(u.rol||u.role) qs('#u_rol', n).value = u.rol||u.role; },0);
+    return {
+      node:n,
+      getData(){
+        const data = {
+          nombre: qs('#u_nombre', n).value.trim(),
+          email: qs('#u_email', n).value.trim(),
+          rol: qs('#u_rol', n).value,
+          telefono: qs('#u_tel', n).value.trim()
+        };
+        const pass = qs('#u_pass', n).value;
+        if (pass) data.password = pass;
+        return data;
+      }
+    }
+  }
+
+  // ====== CLIENTES ======
+  const $clientesCards = qs('#clientesCards');
+  const $filtroCliente = qs('#filtroCliente');
+  let clientesCache = [];
+
+  async function cargarClientes(silencioso=false){
+    try{
+      const data = await apiFetch(ENDPOINTS.clientes);
+      clientesCache = Array.isArray(data) ? data : (data.items || data.results || []);
+      if (!silencioso) pintarClientes();
+    }catch(e){ console.error(e); if(!silencioso) alert('No se pudieron cargar clientes'); }
+  }
+
+  function pintarClientes(){
+    const q = ($filtroCliente.value||'').toLowerCase();
+    $clientesCards.innerHTML = '';
+    clientesCache
+      .filter(c => JSON.stringify(c).toLowerCase().includes(q))
+      .forEach(c => $clientesCards.append(renderClienteCard(c)));
+  }
+
+  function nuevoCliente(){
+    const form = buildClienteForm();
+    abrirModal('Nuevo cliente', form.node, async () => {
+      await apiFetch(ENDPOINTS.clientes, { method:'POST', data: form.getData() });
+      await cargarClientes();
+    });
+  }
+  window.nuevoCliente = nuevoCliente;
+
+  function editarCliente(c){
+    const form = buildClienteForm(c);
+    abrirModal('Editar cliente', form.node, async () => {
+      await apiFetch(`${ENDPOINTS.clientes}/${c.id}`, { method:'PUT', data: form.getData() });
+      await cargarClientes();
+    });
+  }
+
+  async function eliminarCliente(c){
+    if (!confirm(`¿Eliminar cliente "${c.nombre||c.razon_social}"?`)) return;
+    try{ await apiFetch(`${ENDPOINTS.clientes}/${c.id}`, { method:'DELETE' }); await cargarClientes(); }
+    catch(e){ alert('No se pudo eliminar'); }
+  }
+
+  function buildClienteForm(c={}){
+    const n = el('div', {class:'grid'}, [
+      el('div', {}, [ el('label', {for:'c_nombre', text:'Nombre / Razón social'}), el('input', {id:'c_nombre', value:c.nombre||c.razon_social||''}) ]),
+      el('div', {}, [ el('label', {for:'c_nif', text:'NIF/CIF'}), el('input', {id:'c_nif', value:c.nif||''}) ]),
+      el('div', {class:'full'}, [ el('label', {for:'c_dir', text:'Dirección'}), el('input', {id:'c_dir', value:c.direccion||''}) ]),
+      el('div', {}, [ el('label', {for:'c_tel', text:'Teléfono'}), el('input', {id:'c_tel', value:c.telefono||''}) ]),
+      el('div', {}, [ el('label', {for:'c_email', text:'Email'}), el('input', {id:'c_email', type:'email', value:c.email||''}) ])
+    ]);
+    return {
+      node:n,
+      getData(){
+        return {
+          nombre: qs('#c_nombre', n).value.trim(),
+          nif: qs('#c_nif', n).value.trim(),
+          direccion: qs('#c_dir', n).value.trim(),
+          telefono: qs('#c_tel', n).value.trim(),
+          email: qs('#c_email', n).value.trim()
+        }
+      }
+    }
+  }
+
+  // ====== AVISOS ======
+  const $avisosCards = qs('#avisosCards');
+  let avisosCache = [];
+  let tecnicosCache = [];
+
+  async function cargarTecnicos(){
+    // si tu API expone técnicos aparte, ajusta aquí. Si vienen de usuarios con rol Tecnico, filtra:
+    try{
+      if (!usuariosCache.length) await cargarUsuarios();
+      tecnicosCache = usuariosCache.filter(u => (u.rol||u.role)==='Tecnico' || (u.rol||u.role)==='Técnico');
+    }catch(e){ console.warn('No se pudieron cargar técnicos'); }
+  }
+
+  async function cargarAvisos(){
+    try{
+      const data = await apiFetch(ENDPOINTS.avisos);
+      avisosCache = Array.isArray(data) ? data : (data.items || data.results || []);
+      pintarAvisos();
+    }catch(e){ console.error(e); alert('No se pudieron cargar avisos'); }
+  }
+
+  function pintarAvisos(){
+    $avisosCards.innerHTML = '';
+    avisosCache.forEach(a => $avisosCards.append(renderAvisoCard(a)));
+  }
+
+  function nuevoAviso(){
+    const form = buildAvisoForm();
+    abrirModal('Nuevo aviso', form.node, async () => {
+      await apiFetch(ENDPOINTS.avisos, { method:'POST', data: form.getData() });
+      await cargarAvisos();
+    });
+  }
+  window.nuevoAviso = nuevoAviso;
+
+  function editarAviso(a){
+    const form = buildAvisoForm(a);
+    abrirModal('Editar aviso', form.node, async () => {
+      await apiFetch(`${ENDPOINTS.avisos}/${a.id}`, { method:'PUT', data: form.getData() });
+      await cargarAvisos();
+    });
+  }
+
+  async function eliminarAviso(a){
+    if (!confirm(`¿Eliminar aviso #${a.id}?`)) return;
+    try{ await apiFetch(`${ENDPOINTS.avisos}/${a.id}`, { method:'DELETE' }); await cargarAvisos(); }
+    catch(e){ alert('No se pudo eliminar'); }
+  }
+
+  function buildAvisoForm(a={}){
+    const n = el('div', {class:'grid'}, [
+      el('div', {class:'full'}, [ el('label', {for:'a_titulo', text:'Título'}), el('input', {id:'a_titulo', value:a.titulo||''}) ]),
+      el('div', {class:'full'}, [ el('label', {for:'a_desc', text:'Descripción'}), el('textarea', {id:'a_desc', rows:4}, a.descripcion||'') ]),
+      el('div', {}, [ el('label', {for:'a_cliente', text:'Cliente'}), buildClienteSelect('a_cliente', a.clienteId) ]),
+      el('div', {}, [ el('label', {for:'a_tecnico', text:'Técnico'}), buildTecnicoSelect('a_tecnico', a.tecnicoId) ]),
+      el('div', {}, [ el('label', {for:'a_fecha', text:'Fecha'}), el('input', {id:'a_fecha', type:'date', value: a.fecha ? new Date(a.fecha).toISOString().slice(0,10) : ''}) ]),
+      el('div', {}, [ el('label', {for:'a_estado', text:'Estado'}), buildEstadoSelect('a_estado', a.estado) ])
+    ]);
+    return {
+      node:n,
+      getData(){
+        return {
+          titulo: qs('#a_titulo', n).value.trim(),
+          descripcion: qs('#a_desc', n).value.trim(),
+          clienteId: qs('#a_cliente', n).value || null,
+          tecnicoId: qs('#a_tecnico', n).value || null,
+          fecha: qs('#a_fecha', n).value || null,
+          estado: qs('#a_estado', n).value || 'Pendiente'
+        }
+      }
+    }
+  }
+
+  function buildClienteSelect(id, selected){
+    const sel = el('select', {id});
+    for (const c of clientesCache){
+      sel.append(el('option', {value:c.id, text:c.nombre||c.razon_social||('ID '+c.id)}));
+    }
+    if (selected!=null) setTimeout(()=> sel.value = selected, 0);
+    return sel;
+  }
+  function buildTecnicoSelect(id, selected){
+    const sel = el('select', {id});
+    sel.append(el('option', {value:'', text:'— Sin asignar —'}));
+    for (const t of tecnicosCache){ sel.append(el('option', {value:t.id, text:t.nombre||t.email||('ID '+t.id)})); }
+    if (selected!=null) setTimeout(()=> sel.value = selected, 0);
+    return sel;
+  }
+  function buildEstadoSelect(id, selected){
+    const opts = ['Pendiente','En curso','Resuelto','Cancelado'];
+    const sel = el('select', {id});
+    for (const s of opts) sel.append(el('option', {value:s, text:s}));
+    if (selected) setTimeout(()=> sel.value = selected, 0);
+    return sel;
+  }
+
+  // ====== EVENTOS ======
+  $filtroUsuario.addEventListener('input', pintarUsuarios);
+  $filtroCliente.addEventListener('input', pintarClientes);
+  qs('#btnNuevoUsuario')?.addEventListener('click', nuevoUsuario);
+  qs('#btnNuevoCliente')?.addEventListener('click', nuevoCliente);
+  qs('#btnNuevoAviso')?.addEventListener('click', nuevoAviso);
+
+  // ====== INICIO ======
+  // Carga ligera para que la home no esté vacía si el usuario pasa
+  // directamente a una sección.
+  cargarUsuarios().catch(()=>{});
+  cargarClientes(true).catch(()=>{});
+})();
+</script>
 </body>
 </html>
