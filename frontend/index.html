@@ -22,7 +22,7 @@
     }
     .topbar h2 { margin: 0; font-size: 1.6rem; }
 
-    /* Botón hamburguesa mejorado (solo cambio visual del botón) */
+    /* Botón hamburguesa mejorado (solo el botón) */
     .menu-btn{
       display:inline-flex; align-items:center; justify-content:center;
       width:56px; height:56px; border:none; background:none; color:#fff;
@@ -42,6 +42,9 @@
       padding: 40px;
       transition: left 0.3s ease;
       z-index: 1001;
+
+      /* NUEVO: para poder empujar el logout al fondo */
+      display:flex; flex-direction:column;
     }
     .sidebar.active { left: 0; }
 
@@ -58,26 +61,25 @@
       font-size: 48px;        /* letras enormes */
       cursor: pointer;
     }
+
+    /* Logout al fondo con icono */
     .logout {
       background: #dc3545;
       color: white;
       border: none;
       padding: 32px;
       border-radius: 8px;
-      margin-bottom: 30px;
+      margin-bottom: 0;
       cursor: pointer;
       width: 100%;
       font-size: 48px;        /* letras enormes */
-    }
+      display:flex; align-items:center; gap:16px;
 
-    /* Botón cerrar dentro del sidebar (nuevo) */
-    .close-sidebar{
-      display:flex; align-items:center; gap:12px;
-      width:100%; padding:24px;
-      background:#343a40; color:#fff; border:none; border-radius:10px;
-      font-size:28px; cursor:pointer; margin-top:24px;
+      /* Empujar al fondo del sidebar */
+      margin-top: auto;
+      border-bottom: none;
     }
-    .close-sidebar:hover{ filter:brightness(1.08); }
+    .logout svg{ flex:0 0 auto }
 
     .overlay {
       position: fixed; top:0; left:0; width:100%; height:100%;
@@ -170,7 +172,7 @@
 
   <!-- Topbar -->
   <div class="topbar">
-    <!-- Botón hamburguesa con SVG (solo esta línea cambia respecto a tu versión) -->
+    <!-- Botón hamburguesa (SVG profesional) -->
     <button class="menu-btn" aria-label="Abrir menú" onclick="toggleSidebar()">
       <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">
         <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -185,17 +187,20 @@
 
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
-    <button class="logout" onclick="logout()">Cerrar sesión</button>
+    <!-- Botones del menú -->
     <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
     <button onclick="mostrar('clientes')">Clientes</button>
     <button onclick="mostrar('avisos')">Avisos</button>
 
-    <!-- Botón para cerrar el menú dentro del sidebar (nuevo) -->
-    <button class="close-sidebar" onclick="toggleSidebar()" aria-label="Cerrar menú">
-      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
-        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <!-- Cerrar sesión al fondo con icono -->
+    <button class="logout" onclick="logout()" aria-label="Cerrar sesión">
+      <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">
+        <!-- Flecha de salida -->
+        <path d="M10 17l-1.5-1.5L12 12 8.5 8.5 10 7l5 5-5 5z" fill="currentColor"/>
+        <!-- Puerta -->
+        <path d="M4 4h8v3H7v10h5v3H4z" fill="currentColor" opacity=".85"/>
       </svg>
-      Cerrar menú
+      Cerrar sesión
     </button>
   </div>
 
@@ -236,13 +241,24 @@
   </div>
 
   <script>
+    // ====== AUTH ======
     const token = localStorage.getItem('token');
     if (!token) window.location.href = 'login.html';
-    const payload = JSON.parse(atob(token.split('.')[1] || 'e30='));
-    const rol = payload.rol;
-    const api = "https://sat-idacas.onrender.com/api";
+    // Base64url safe decode
+    function decodeJwt(seg){ try{ return JSON.parse(atob(seg.replace(/-/g,'+').replace(/_/g,'/'))); }catch(e){ return {}; } }
+    const payload = decodeJwt((token.split('.')[1]||''));
+    if (payload.exp && Date.now()/1000 > payload.exp) {
+      alert('Sesión expirada. Inicia sesión de nuevo.');
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
+    const rol = payload.rol || payload.role || 'Usuario';
+
+    // ====== API CONFIG ======
+    const api = "https://sat-idacas.onrender.com/api"; // Ajusta si tus rutas son otras
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 
+    // ====== MENU BEHAVIOR ======
     function toggleSidebar(){
       document.getElementById('sidebar').classList.toggle('active');
       document.getElementById('overlay').classList.toggle('active');
@@ -260,15 +276,170 @@
       document.getElementById('sidebar').classList.remove('active');
       document.getElementById('overlay').classList.remove('active');
       document.body.classList.remove('shifted');
+
       if (seccion==='usuarios') cargarUsuarios();
       if (seccion==='clientes') cargarClientes();
-      if (seccion==='avisos') { cargarClientes(); cargarTecnicos(); cargarAvisos(); }
+      if (seccion==='avisos') { cargarClientes(true); cargarTecnicos(); cargarAvisos(); }
     }
 
     function abrirModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.style.display='block'; }
     function cerrarModal(){ document.getElementById('modal').style.display='none'; }
 
-    // (Resto de funciones: cargarUsuarios, cargarClientes, cargarAvisos, etc...)
+    // ====== FETCH HELPERS ======
+    async function apiGet(path){
+      const res = await fetch(api + path, { headers });
+      if (!res.ok) throw new Error(`GET ${path} -> ${res.status}`);
+      const ct = res.headers.get('content-type') || '';
+      return ct.includes('application/json') ? res.json() : res.text();
+    }
+    async function apiSend(path, method='POST', data=null){
+      const res = await fetch(api + path, {
+        method, headers,
+        body: data ? JSON.stringify(data) : null
+      });
+      if (!res.ok) throw new Error(`${method} ${path} -> ${res.status}`);
+      const ct = res.headers.get('content-type') || '';
+      return ct.includes('application/json') ? res.json() : res.text();
+    }
+
+    // ====== USUARIOS ======
+    let USUARIOS = [];
+    async function cargarUsuarios(){
+      try{
+        const d = await apiGet('/usuarios'); // Cambia a tu ruta real si difiere
+        USUARIOS = Array.isArray(d) ? d : (d.items || d.results || []);
+        pintarUsuarios();
+      }catch(e){ console.error(e); alert('No se pudieron cargar los usuarios'); }
+    }
+    function pintarUsuarios(){
+      const cont = document.getElementById('usuariosCards');
+      const q = (document.getElementById('filtroUsuario').value || '').toLowerCase();
+      cont.innerHTML = '';
+      USUARIOS
+        .filter(u => JSON.stringify(u).toLowerCase().includes(q))
+        .forEach(u => {
+          cont.innerHTML += `
+            <div class="card">
+              <div class="title">${u.nombre || u.name || 'Usuario'}</div>
+              <div class="meta">
+                <span>Email: ${u.email || '-'}</span>
+                <span>Rol: ${u.rol || u.role || '-'}</span>
+                <span>Tel: ${u.telefono || u.phone || '-'}</span>
+                <span>Activo: ${u.activo!==false ? 'Sí' : 'No'}</span>
+              </div>
+              <div class="actions">
+                <button onclick='editarUsuario(${JSON.stringify(u.id)})'>Editar</button>
+                <button class="danger" onclick='eliminarUsuario(${JSON.stringify(u.id)})'>Eliminar</button>
+              </div>
+            </div>
+          `;
+        });
+    }
+    function filtrarUsuarios(){ pintarUsuarios(); }
+    function nuevoUsuario(){ alert('Implementa POST /usuarios en tu modal'); }
+    function editarUsuario(id){ alert('Implementa PUT /usuarios/'+id+' en tu modal'); }
+    async function eliminarUsuario(id){
+      if (!confirm('¿Eliminar usuario?')) return;
+      try{ await apiSend('/usuarios/'+id, 'DELETE'); await cargarUsuarios(); }
+      catch(e){ alert('No se pudo eliminar'); }
+    }
+
+    // ====== CLIENTES ======
+    let CLIENTES = [];
+    async function cargarClientes(silencioso=false){
+      try{
+        const d = await apiGet('/clientes'); // Cambia si tu ruta es distinta
+        CLIENTES = Array.isArray(d) ? d : (d.items || d.results || []);
+        if (!silencioso) pintarClientes();
+      }catch(e){ console.error(e); if(!silencioso) alert('No se pudieron cargar los clientes'); }
+    }
+    function pintarClientes(){
+      const cont = document.getElementById('clientesCards');
+      const q = (document.getElementById('filtroCliente').value || '').toLowerCase();
+      cont.innerHTML = '';
+      CLIENTES
+        .filter(c => JSON.stringify(c).toLowerCase().includes(q))
+        .forEach(c => {
+          cont.innerHTML += `
+            <div class="card">
+              <div class="title">${c.nombre || c.razon_social || 'Cliente'}</div>
+              <div class="meta">
+                <span>NIF: ${c.nif || '-'}</span>
+                <span>Tel: ${c.telefono || '-'}</span>
+                <span class="full">Dirección: ${c.direccion || '-'}</span>
+              </div>
+              <div class="actions">
+                <button onclick='editarCliente(${JSON.stringify(c.id)})'>Editar</button>
+                <button class="danger" onclick='eliminarCliente(${JSON.stringify(c.id)})'>Eliminar</button>
+              </div>
+            </div>
+          `;
+        });
+    }
+    function filtrarClientes(){ pintarClientes(); }
+    function nuevoCliente(){ alert('Implementa POST /clientes en tu modal'); }
+    function editarCliente(id){ alert('Implementa PUT /clientes/'+id+' en tu modal'); }
+    async function eliminarCliente(id){
+      if (!confirm('¿Eliminar cliente?')) return;
+      try{ await apiSend('/clientes/'+id, 'DELETE'); await cargarClientes(); }
+      catch(e){ alert('No se pudo eliminar'); }
+    }
+
+    // ====== AVISOS ======
+    let AVISOS = [], TECNICOS = [];
+    async function cargarTecnicos(){
+      if (!USUARIOS.length) await cargarUsuarios();
+      TECNICOS = USUARIOS.filter(u => (u.rol||u.role)==='Tecnico' || (u.rol||u.role)==='Técnico');
+    }
+    async function cargarAvisos(){
+      try{
+        const d = await apiGet('/avisos'); // Cambia si tu ruta es distinta
+        AVISOS = Array.isArray(d) ? d : (d.items || d.results || []);
+        pintarAvisos();
+      }catch(e){ console.error(e); alert('No se pudieron cargar los avisos'); }
+    }
+    function pintarAvisos(){
+      const cont = document.getElementById('avisosCards');
+      cont.innerHTML = '';
+      AVISOS.forEach(a => {
+        const clienteNombre = (CLIENTES.find(c => c.id===a.clienteId)?.nombre) || a.cliente_nombre || a.clienteId || '-';
+        const tecnicoNombre = (TECNICOS.find(t => t.id===a.tecnicoId)?.nombre) || a.tecnico_nombre || a.tecnicoId || '-';
+        cont.innerHTML += `
+          <div class="card">
+            <div class="title">${a.titulo || `Aviso #${a.id}`}</div>
+            <div class="meta">
+              <span>Cliente: ${clienteNombre}</span>
+              <span>Estado: ${a.estado || 'Pendiente'}</span>
+              <span>Técnico: ${tecnicoNombre}</span>
+              <span>Fecha: ${a.fecha ? new Date(a.fecha).toLocaleDateString() : '-'}</span>
+            </div>
+            <p>${a.descripcion || ''}</p>
+            <div class="actions">
+              <button onclick='editarAviso(${JSON.stringify(a.id)})'>Editar</button>
+              <button class="danger" onclick='eliminarAviso(${JSON.stringify(a.id)})'>Eliminar</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+    function nuevoAviso(){ alert('Implementa POST /avisos en tu modal'); }
+    function editarAviso(id){ alert('Implementa PUT /avisos/'+id+' en tu modal'); }
+    async function eliminarAviso(id){
+      if (!confirm('¿Eliminar aviso?')) return;
+      try{ await apiSend('/avisos/'+id, 'DELETE'); await cargarAvisos(); }
+      catch(e){ alert('No se pudo eliminar'); }
+    }
+
+    // Exponer filtros
+    window.filtrarUsuarios = filtrarUsuarios;
+    window.filtrarClientes = filtrarClientes;
+
+    // ====== Precarga mínima ======
+    // Para que al ir a cada pestaña ya esté el cache cargado
+    (async () => {
+      try { await cargarUsuarios(); } catch {}
+      try { await cargarClientes(true); } catch {}
+    })();
   </script>
 </body>
 </html>
