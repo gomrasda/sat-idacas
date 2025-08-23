@@ -10,30 +10,27 @@
       --card-b:#cfd8e6; --alt-bg:#f6f8fb;
       --paused:#facc15; --closed:#22c55e; --billed:#3b82f6;
     }
-    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
-    .container { max-width: 980px; margin: auto; padding: 16px; }
-    h2 { margin-top: 0; text-align: center; text-transform: uppercase; }
-    label, select, input { display: block; width: 100%; margin: 10px 0; }
-    .btn { background: #007bff; color: white; border: none; padding: 14px 20px; cursor: pointer; border-radius: 8px; font-size: 18px; }
-    .btn:hover { background: #0056b3; }
+    body { margin:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--ink); }
+    .container { max-width:980px; margin:auto; padding:16px; }
+    h2 { margin-top:0; text-align:center; text-transform:uppercase; }
+    label, select, input { display:block; width:100%; margin:10px 0; }
+    .btn { background:#007bff; color:white; border:none; padding:14px 20px; cursor:pointer; border-radius:8px; font-size:18px; }
+    .btn:hover { background:#0056b3; }
     .btn-grey { background:#6c757d; }
     .btn-grey:hover { background:#5a6268; }
 
     .table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
-    table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-    th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
+    table { width:100%; border-collapse:collapse; background:white; margin-top:20px; }
+    th, td { padding:10px; border:1px solid #ccc; text-align:left; }
+    th { background:#f7f9fc; font-weight:600; color:#4a5568; }
 
     td textarea{ resize:none; overflow:hidden; min-height:56px; line-height:1.4; width:100%; }
 
-    .actions-row{
-      display:flex; gap:12px; justify-content:space-between; margin:8px 0 10px;
-    }
+    .actions-row{ display:flex; gap:12px; justify-content:space-between; margin:8px 0 10px; }
     .actions-row .btn { flex:1 1 50%; text-align:center; font-size:20px; }
 
     /* Resumen horas/materiales */
-    #resumen {
-      display:flex; justify-content:space-between; align-items:center;
+    #resumen { display:flex; justify-content:space-between; align-items:center;
       font-size:18px; font-weight:700; color:#1f2937;
       margin:10px 0 20px; background:#eef2f7; padding:10px 14px; border-radius:8px;
     }
@@ -58,11 +55,11 @@
 
     .chip{ background:var(--chip); border:1px solid var(--b); padding:6px 10px; border-radius:999px; font-size:14px; white-space:nowrap; }
 
-    /* Estado con colores */
-    .estado select{ padding:8px 10px; border-radius:8px; }
-    .estado select option[value="Pausado"]{ background:var(--paused); color:#000; }
-    .estado select option[value="Cerrado"]{ background:var(--closed); color:#fff; }
-    .estado select option[value="Facturado"]{ background:var(--billed); color:#fff; }
+    /* Estado con colores dinámicos */
+    .estado select{ padding:10px 12px; border-radius:8px; font-size:16px; font-weight:600; color:#fff; }
+    .estado.paused select{ background:var(--paused); color:#000; }
+    .estado.closed select{ background:var(--closed); }
+    .estado.billed select{ background:var(--billed); }
 
     /* Acciones */
     .acciones { display:flex; flex-direction:row; gap:10px; justify-content:flex-end; align-items:center; }
@@ -73,12 +70,11 @@
     }
 
     /* Modal */
-    .modal {
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px;
-      z-index: 1000; width: 90%; max-width: 420px;
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+      background:#fff; border:1px solid #ccc; padding:20px; border-radius:10px;
+      z-index:1000; width:90%; max-width:420px;
     }
-    .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
+    .modal input, .modal select, .modal textarea { width:100%; margin:8px 0; padding:8px; }
 
     /* ====== MÓVIL ====== */
     @media (max-width: 1024px){
@@ -87,8 +83,8 @@
       #filtroEstado{ font-size: 40px !important; height: 64px; }
       .chip{ font-size: 32px; }
       #ticketsBody tr.r2 textarea{ font-size: 35px !important; min-height: 220px; }
-      #ticketsBody tr.r3 input{ font-size: 32px !important; }
-      .estado select{ font-size: 32px !important; }
+      #ticketsBody tr.r3 input{ font-size: 40px !important; font-weight:600; height:60px; }
+      .estado select{ font-size: 40px !important; height:70px; }
       .actions-row .btn { font-size: 36px; padding: 20px; }
       #resumen{ font-size:32px; }
       .acciones button{ width:70px; height:70px; font-size:40px; }
@@ -158,15 +154,16 @@ async function cargarTickets(){
   ts.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha)).forEach((t,i)=>{
     if(filtroEstado.value!=="Todos"&&t.estado!==filtroEstado.value)return;
     const dis=t.estado==="Pausado"?"":"disabled",f=t.fecha?new Date(t.fecha).toLocaleDateString("es-ES"):"",d=t.description||"",alt=i%2?" alt":"";
+    let claseEstado=t.estado==="Pausado"?"paused":t.estado==="Cerrado"?"closed":"billed";
     body.innerHTML+=`
       <tr class="r1${alt}"><td><span class="chip">${f}</span></td><td><span class="chip">${t.tecnico||""}</span></td></tr>
       <tr class="r2${alt}"><td data-label="Descripción" style="grid-column:1/-1;"><textarea onchange="actualizarCampo(${t.id},'description',this.value)" ${dis}>${d}</textarea></td></tr>
-      <tr class="r3${alt}"><td data-label="Horas"><input value="${t.horas_totales||0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${dis}></td>
-      <td data-label="Materiales"><input value="${t.precio_materiales||0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${dis}></td></tr>
-      <tr class="r4${alt}"><td class="estado" data-label="Estado"><select onchange="cambiarEstadoTicket(${t.id},this.value,this)">
-        <option ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-        <option ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-        <option ${t.estado==="Facturado"?"selected":""}>Facturado</option></select></td>
+      <tr class="r3${alt}"><td data-label="Horas"><input type="number" value="${t.horas_totales||0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${dis}></td>
+      <td data-label="Materiales"><input type="number" value="${t.precio_materiales||0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${dis}></td></tr>
+      <tr class="r4${alt}"><td class="estado ${claseEstado}" data-label="Estado"><select onchange="cambiarEstadoTicket(${t.id},this.value,this)">
+        <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+        <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+        <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option></select></td>
       <td class="acciones"><button onclick=editarTicket(${t.id})>✏️</button><button onclick=borrarTicket(${t.id})>🗑️</button></td></tr>`
   });ajustarTodos();actualizarResumen();
 }
@@ -181,7 +178,9 @@ function actualizarResumen(){
 async function borrarTicket(id){if(confirm("¿Eliminar?")){await apiFetch(api+"/tickets/"+id,{method:"DELETE",headers});cargarTickets()}}
 async function cambiarEstadoTicket(id,e,s){const t=ticketsLista.find(x=>x.id===id);if(!t)return;
   if((e==="Cerrado"||e==="Facturado")&&(!t.horas_totales||t.horas_totales<=0)){alert("Horas requeridas");s.value=t.estado;return}
-  await apiFetch(api+"/tickets/"+id,{method:"PUT",headers,body:JSON.stringify({...t,estado:e})});cargarTickets()}
+  await apiFetch(api+"/tickets/"+id,{method:"PUT",headers,body:JSON.stringify({...t,estado:e})});
+  cargarTickets();
+}
 
 function abrirModal(){modal.innerHTML=`<div class=modal><h3>Nuevo Ticket</h3>
   <input id=fecha type=date><select id=tecnico>${tecnicos.map(t=>`<option>${t.nombre}</option>`).join("")}</select>
