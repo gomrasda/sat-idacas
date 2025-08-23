@@ -12,157 +12,49 @@
     *{box-sizing:border-box}
     body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
 
-    /* ===== Topbar ===== */
-    .topbar {
-      background: #003366; color: white;
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 16px;
-      position: fixed; top:0; left:0; right:0; z-index: 900;
-      transition: transform 0.3s ease;
-    }
-    .topbar h2 { margin: 0; font-size: 1.6rem; }
-    .topbar button { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; }
+    .topbar { background:#003366; color:#fff; display:flex; justify-content:space-between; align-items:center; padding:12px 16px; position:fixed; top:0; left:0; right:0; z-index:900 }
+    .topbar h2 { margin:0 }
+    .topbar button { background:none; border:0; color:#fff; font-size:2rem; cursor:pointer }
 
-    /* ===== Sidebar ===== */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -75%;         /* oculto inicialmente */
-      width: 75%;         /* 3/4 de la pantalla */
-      height: 100%;
-      background: #222;
-      color: white;
-      padding: 40px;
-      transition: left 0.3s ease;
-      z-index: 1001;
-    }
-    .sidebar.active { left: 0; }
+    .sidebar { position:fixed; top:0; left:-75%; width:75%; height:100%; background:#222; color:#fff; padding:40px; transition:.3s; z-index:1001 }
+    .sidebar.active { left:0 }
+    .sidebar button { display:block; width:100%; text-align:left; padding:20px; background:none; border:0; color:#fff; border-bottom:1px solid #444; margin:10px 0; font-size:1.5rem; cursor:pointer }
+    .logout { background:#dc3545; border-radius:8px; margin-bottom:20px }
 
-    .sidebar button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 32px;          /* grande para el dedo */
-      background: none;
-      border: none;
-      color: white;
-      border-bottom: 1px solid #444;
-      margin: 16px 0;
-      font-size: 48px;        /* letras enormes */
-      cursor: pointer;
-    }
-    .logout {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 32px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 48px;        /* letras enormes */
-    }
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; z-index:1000 }
+    .overlay.active { display:block }
 
-    .overlay {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.4);
-      display: none; z-index: 1000;
-    }
-    .overlay.active { display: block; }
+    .main { padding:16px; margin-top:60px }
 
-    /* ===== Main ===== */
-    .main {
-      padding: 16px 16px 16px 24px;
-      margin-top: 60px;
-      transition: transform 0.3s ease;
-    }
+    #inicio{ min-height:calc(100vh - 60px); display:flex; flex-direction:column; justify-content:center; align-items:center; gap:14px }
+    #inicio img{ width:220px; max-width:420px }
 
-    /* Desplazar contenido al abrir sidebar */
-    body.shifted .topbar,
-    body.shifted .main {
-      transform: translateX(75%);
-    }
-
-    /* ===== HERO ===== */
-    #inicio{
-      min-height: calc(100vh - 60px);
-      display:flex; flex-direction:column;
-      justify-content:center; align-items:center;
-      text-align:center; gap:14px; padding:24px;
-    }
-    #inicio img{ width: clamp(220px, 55vw, 420px); height:auto; object-fit:contain; }
-    #inicio h2{
-      margin: 6px 0 0; font-weight: 800;
-      color:#1f2937;
-      font-size: clamp(22px, 6.5vw, 42px);
-    }
-
-    /* ===== Modal ===== */
-    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-      background:#fff; padding:20px; border-radius:12px; border: 1px solid #ccc;
-      z-index:1002; width:90%; max-width:460px;
-    }
-    .modal h3{ margin:0 0 8px }
-    .modal input, .modal select, .modal textarea {
-      width: 100%; padding: 10px 12px; margin: 6px 0;
-      border: 1px solid var(--b); border-radius: 10px; font: inherit;
-    }
-
-    /* ===== Cards ===== */
-    .cards{ display:flex; flex-direction:column; gap:24px; margin-top:16px; } /* separación 24px */
-    .card{
-      background:#fff; border:2px solid var(--card-b); padding:16px;
-      box-shadow:0 2px 8px rgba(0,0,0,.06);
-      font-size:20px;
-    }
-    .card .title{ font-size:26px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
-    .meta{ display:grid; grid-template-columns: repeat(2,1fr); gap:8px; margin:8px 0; }
-    .meta > span{ background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:8px 10px; }
-    .actions{ display:flex; gap:12px; align-items:center; justify-content:flex-end; margin-top:12px }
-    .actions .ico{ font-size:2em; }
-    .actions button{ font-size:20px; padding:14px 18px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer }
+    .cards{ display:flex; flex-direction:column; gap:16px; margin-top:12px }
+    .card{ background:#fff; border:1px solid var(--card-b); padding:14px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.06) }
+    .card .title{ font-size:20px; font-weight:bold; margin-bottom:6px }
+    .meta{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px }
+    .meta span{ background:var(--chip); padding:6px 8px; border-radius:999px }
+    .actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:8px }
+    .actions button{ padding:6px 10px; border:1px solid var(--b); border-radius:6px; background:#fff; cursor:pointer }
     .actions button:hover{ background:#f1f5fb }
+    .danger{ color:#b91c1c; border-color:#f6c8ce }
 
-    /* ===== Sección acciones ===== */
-    .section-actions{
-      display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center;
-      gap:16px; margin:8px 0 14px;
-    }
-    .section-actions input[type="text"], .section-actions select{
-      min-width:380px; font-size:22px; height:52px;
-      padding:12px 16px; border-radius:12px; border:1px solid var(--b);
-    }
-    .section-actions .primary-btn{
-      font-size:22px; padding:12px 20px; min-height:52px;
-      border-radius:12px; border:none; cursor:pointer;
-      background:var(--primary); color:#fff;
-    }
-    .section-actions .primary-btn:hover{ background:var(--primary-h) }
-
-    @media (max-width:1024px){
-      .card{ font-size:22px }
-      .card .title{ font-size:30px }
-      .section-actions{
-        display:grid !important; grid-template-columns: 1fr 1fr; gap:14px;
-      }
-      .section-actions input[type="text"], .section-actions select{ font-size:28px; height:64px; padding:16px 18px; }
-      .section-actions .primary-btn{ font-size:28px; min-height:64px; padding:16px 24px; }
-    }
+    .section-actions{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px }
+    .section-actions input{ padding:8px; border:1px solid var(--b); border-radius:6px; font-size:1rem }
+    .primary-btn{ background:var(--primary); color:#fff; border:0; border-radius:6px; padding:8px 12px; cursor:pointer }
+    .primary-btn:hover{ background:var(--primary-h) }
   </style>
 </head>
 <body>
 
-  <!-- Topbar -->
   <div class="topbar">
     <button onclick="toggleSidebar()">☰</button>
     <h2>SAT Control</h2>
     <span></span>
   </div>
 
-  <!-- Overlay -->
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-  <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <button class="logout" onclick="logout()">Cerrar sesión</button>
     <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
@@ -170,7 +62,6 @@
     <button onclick="mostrar('avisos')">Avisos</button>
   </div>
 
-  <!-- Main -->
   <div class="main">
     <div id="inicio">
       <img src="logo.jpg" alt="Logo de la empresa">
@@ -202,44 +93,62 @@
       </div>
       <div id="avisosCards" class="cards"></div>
     </div>
-
-    <div id="modal" style="display:none;"></div>
   </div>
 
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = 'login.html';
-    const payload = JSON.parse(atob(token.split('.')[1] || 'e30='));
-    const rol = payload.rol;
-    const api = "https://sat-idacas.onrender.com/api";
-    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+<script>
+  // ====== AUTH / CONFIG ======
+  const token = localStorage.getItem('token');
+  if (!token) location.href = 'login.html';
+  const payload = JSON.parse(atob(token.split('.')[1] || 'e30='));
+  const rol = payload.rol || 'Usuario';
 
-    function toggleSidebar(){
-      document.getElementById('sidebar').classList.toggle('active');
-      document.getElementById('overlay').classList.toggle('active');
-      document.body.classList.toggle('shifted');
-    }
-    function logout(){ localStorage.removeItem('token'); window.location.href = 'login.html'; }
-    if (rol !== "Gestor") { const el = document.getElementById('btnUsuarios'); if (el) el.style.display = 'none'; }
+  const api = "https://sat-idacas.onrender.com/api"; // Cambia si tus endpoints son diferentes
+  const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 
-    function mostrar(seccion){
-      ['inicio','usuarios','clientes','avisos'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-      });
-      document.getElementById(seccion).style.display = 'block';
-      document.getElementById('sidebar').classList.remove('active');
-      document.getElementById('overlay').classList.remove('active');
-      document.body.classList.remove('shifted');
-      if (seccion==='usuarios') cargarUsuarios();
-      if (seccion==='clientes') cargarClientes();
-      if (seccion==='avisos') { cargarClientes(); cargarTecnicos(); cargarAvisos(); }
-    }
+  function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
+  function logout(){ localStorage.removeItem('token'); location.href = 'login.html'; }
+  if (rol !== "Gestor") document.getElementById('btnUsuarios').style.display = 'none';
 
-    function abrirModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.style.display='block'; }
-    function cerrarModal(){ document.getElementById('modal').style.display='none'; }
+  function mostrar(seccion){
+    ['inicio','usuarios','clientes','avisos'].forEach(id => document.getElementById(id).style.display='none');
+    document.getElementById(seccion).style.display='block';
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('overlay').classList.remove('active');
+    if (seccion==='usuarios') cargarUsuarios();
+    if (seccion==='clientes') cargarClientes();
+    if (seccion==='avisos'){ cargarClientes(true); cargarTecnicos(); cargarAvisos(); }
+  }
 
-    // (Resto de funciones: cargarUsuarios, cargarClientes, cargarAvisos, etc...)
-  </script>
+  async function apiGet(path){ const r=await fetch(api+path,{headers}); if(!r.ok) throw Error(r.status); return r.json(); }
+  async function apiSend(path,method,data){ const r=await fetch(api+path,{method,headers,body:data?JSON.stringify(data):null}); if(!r.ok) throw Error(r.status); return r.json(); }
+
+  // ====== USUARIOS ======
+  let USUARIOS=[];
+  async function cargarUsuarios(){ const d=await apiGet('/usuarios'); USUARIOS=d; pintarUsuarios(); }
+  function pintarUsuarios(){ const q=document.getElementById('filtroUsuario').value.toLowerCase(); const cont=document.getElementById('usuariosCards'); cont.innerHTML=''; USUARIOS.filter(u=>JSON.stringify(u).toLowerCase().includes(q)).forEach(u=>{ cont.innerHTML+=`<div class=\"card\"><div class=\"title\">${u.nombre||'Usuario'}</div><div class=\"meta\"><span>Email: ${u.email||''}</span><span>Rol: ${u.rol||''}</span></div><div class=\"actions\"><button onclick='editarUsuario(${JSON.stringify(u.id)})'>Editar</button><button class=\"danger\" onclick='eliminarUsuario(${JSON.stringify(u.id)})'>Eliminar</button></div></div>`; }); }
+  function filtrarUsuarios(){ pintarUsuarios(); }
+  function nuevoUsuario(){ alert('Implementa POST /usuarios'); }
+  function editarUsuario(id){ alert('Implementa PUT /usuarios/'+id); }
+  async function eliminarUsuario(id){ if(confirm('¿Eliminar usuario?')){ await apiSend('/usuarios/'+id,'DELETE'); cargarUsuarios(); } }
+
+  // ====== CLIENTES ======
+  let CLIENTES=[];
+  async function cargarClientes(silencioso=false){ const d=await apiGet('/clientes'); CLIENTES=d; if(!silencioso) pintarClientes(); }
+  function pintarClientes(){ const q=document.getElementById('filtroCliente').value.toLowerCase(); const cont=document.getElementById('clientesCards'); cont.innerHTML=''; CLIENTES.filter(c=>JSON.stringify(c).toLowerCase().includes(q)).forEach(c=>{ cont.innerHTML+=`<div class=\"card\"><div class=\"title\">${c.nombre||'Cliente'}</div><div class=\"meta\"><span>NIF: ${c.nif||''}</span><span>Tel: ${c.telefono||''}</span></div><div class=\"actions\"><button onclick='editarCliente(${JSON.stringify(c.id)})'>Editar</button><button class=\"danger\" onclick='eliminarCliente(${JSON.stringify(c.id)})'>Eliminar</button></div></div>`; }); }
+  function filtrarClientes(){ pintarClientes(); }
+  function nuevoCliente(){ alert('Implementa POST /clientes'); }
+  function editarCliente(id){ alert('Implementa PUT /clientes/'+id); }
+  async function eliminarCliente(id){ if(confirm('¿Eliminar cliente?')){ await apiSend('/clientes/'+id,'DELETE'); cargarClientes(); } }
+
+  // ====== AVISOS ======
+  let AVISOS=[], TECNICOS=[];
+  async function cargarTecnicos(){ if(!USUARIOS.length) await cargarUsuarios(); TECNICOS=USUARIOS.filter(u=>(u.rol||'')==='Tecnico'); }
+  async function cargarAvisos(){ const d=await apiGet('/avisos'); AVISOS=d; pintarAvisos(); }
+  function pintarAvisos(){ const cont=document.getElementById('avisosCards'); cont.innerHTML=''; AVISOS.forEach(a=>{ cont.innerHTML+=`<div class=\"card\"><div class=\"title\">${a.titulo||'Aviso'}</div><div class=\"meta\"><span>Cliente: ${a.cliente_nombre||a.clienteId||''}</span><span>Estado: ${a.estado||'Pendiente'}</span></div><p>${a.descripcion||''}</p><div class=\"actions\"><button onclick='editarAviso(${JSON.stringify(a.id)})'>Editar</button><button class=\"danger\" onclick='eliminarAviso(${JSON.stringify(a.id)})'>Eliminar</button></div></div>`; }); }
+  function nuevoAviso(){ alert('Implementa POST /avisos'); }
+  function editarAviso(id){ alert('Implementa PUT /avisos/'+id); }
+  async function eliminarAviso(id){ if(confirm('¿Eliminar aviso?')){ await apiSend('/avisos/'+id,'DELETE'); cargarAvisos(); } }
+
+</script>
 </body>
 </html>
