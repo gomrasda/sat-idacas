@@ -20,10 +20,9 @@
     table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
     th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
     th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
+
     /* Forzar mayúsculas al título principal */
-    #tituloCliente {
-      text-transform: uppercase;
-    }
+    #tituloCliente { text-transform: uppercase; }
 
     /* Base inputs escritorio */
     input, select, textarea, button { font-size:16px; }
@@ -46,11 +45,105 @@
     }
     .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
 
+    /* ====== BARRA SUPERIOR / TOGGLE DE VISTA ====== */
+    .actions-row{
+      display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; margin: 8px 0 14px;
+      align-items:center;
+    }
+    .view-toggle{
+      display:flex; align-items:center; gap:8px; margin-left:auto;
+      font-size:14px; color:#4b5563;
+    }
+    .switch{
+      position:relative; width:46px; height:26px; background:#cfd8e6; border-radius:999px; cursor:pointer; flex-shrink:0;
+    }
+    .switch input{ display:none; }
+    .switch span{
+      position:absolute; top:3px; left:3px; width:20px; height:20px; background:white; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:all .2s;
+    }
+    .switch input:checked + span{ transform:translateX(20px); background:white; }
+    .switch input:checked ~ .track{ background:#007bff; }
+    .track{ position:absolute; inset:0; border-radius:999px; background:#cfd8e6; transition:background .2s; }
+
+    /* ====== VISTA TARJETAS TAMBIÉN EN ESCRITORIO ====== */
+    /* Cuando el body tenga la clase .cards ocultar cabecera y renderizar como en móvil (con tamaños razonables) */
+    body.cards thead { display: none; }
+    body.cards #ticketsBody tr { border:0; }
+
+    body.cards #ticketsBody tr.r1,
+    body.cards #ticketsBody tr.r2,
+    body.cards #ticketsBody tr.r3,
+    body.cards #ticketsBody tr.r4{
+      display:grid; gap:10px; padding:12px;
+      background:#fff; border:2px solid var(--card-b);
+      box-shadow:0 2px 8px rgba(0,0,0,.06);
+    }
+    body.cards #ticketsBody tr.r1{ grid-template-columns: 1fr 1fr; border-bottom:0; border-radius:12px 12px 0 0; margin-top:14px; }
+    body.cards #ticketsBody tr.r2{ grid-template-columns: 1fr; border-top:0; border-bottom:0; }
+    body.cards #ticketsBody tr.r3{ grid-template-columns: 1fr 1fr; border-top:0; border-bottom:0; }
+    body.cards #ticketsBody tr.r4{ grid-template-columns: 0.7fr auto; border-top:0; border-radius:0 0 12px 12px; margin-bottom:14px; }
+    body.cards #ticketsBody tr.alt { background: var(--alt-bg); }
+
+    body.cards #ticketsBody td{
+      display:flex; flex-direction: column; align-items:flex-start;
+      gap:6px; padding:0; border:0;
+    }
+    body.cards #ticketsBody td::before{
+      content:attr(data-label);
+      font-weight:600; color:#6b7280;
+      font-size:14px;
+      margin-bottom: 2px;
+    }
+    body.cards #ticketsBody tr.r1 .chip{
+      display:flex; align-items:center;
+      background:var(--chip); border:1px solid var(--b);
+      padding:8px 12px; border-radius:999px;
+      height:36px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
+      font-size:14px;
+    }
+    body.cards #ticketsBody tr.r1 select {
+      height: 38px; padding: 8px 12px;
+    }
+    /* Descripción más alta + sin scroll en tarjetas escritorio */
+    body.cards #ticketsBody tr.r2 textarea,
+    body.cards #ticketsBody tr.r2 textarea:disabled {
+      min-height: 140px;
+      padding: 12px 14px;
+      line-height: 1.4;
+      font-family: inherit !important;
+      background-color: #fff;
+      opacity: 1;
+      resize: none;
+      overflow: hidden;
+    }
+    body.cards #ticketsBody tr.r3 td input{
+      background:var(--chip);
+      border:1px solid var(--b);
+      border-radius:10px;
+      padding:12px 14px;
+      height:40px;
+      text-align:center;
+      width:100%;
+      font-weight:600;
+    }
+    body.cards #ticketsBody tr.r4 select{
+      min-height: 44px;
+      padding: 10px 12px;
+      width:100%;
+      line-height: 1.3;
+      border-radius: 10px;
+    }
+    body.cards #ticketsBody td.acciones{
+      display:flex; flex-direction: row; align-items:center; justify-content:flex-end; gap:8px;
+    }
+    body.cards #ticketsBody td.acciones button{
+      width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;
+      border:1px solid var(--b); background:#fff; border-radius:10px; cursor:pointer;
+    }
+
     /* ====== MÓVIL/TABLET ====== */
     @media (max-width: 1024px){
       .container { max-width: 100%; padding: 12px; }
-      thead { display: none; }
-      #ticketsBody tr { border:0; }
 
       /* Título MUY grande */
       #tituloCliente{
@@ -61,10 +154,6 @@
         font-weight: 800;
       }
 
-      /* Fila de botones (Crear y Volver) */
-      .actions-row{
-        display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; margin: 8px 0 14px;
-      }
       #btnNuevo, #btnVolver{
         flex:1 1 48%;
         font-size: 40px !important;
@@ -73,7 +162,6 @@
       }
       #btnVolver{ background:#6c757d; }
 
-      /* Label y select del FILTRO grandes */
       .container > label { font-size: 32px; font-weight: 600; color: var(--muted); margin-bottom:6px; }
       #filtroEstado{
         font-size: 40px !important;
@@ -82,7 +170,10 @@
         border-radius: 12px;
       }
 
-      /* Tarjeta por ticket en 4 filas */
+      /* Tarjetas móvil: usamos la misma estructura que en .cards */
+      thead { display: none; }
+      #ticketsBody tr { border:0; }
+
       #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4{
         display:grid; gap:10px; padding:12px;
         background:#fff; border:2px solid var(--card-b);
@@ -98,7 +189,6 @@
         display:flex; flex-direction: column; align-items:flex-start;
         gap:4px; padding:0; border:0;
       }
-      /* Etiquetas (Fecha, Técnico, Horas, Materiales, Estado, Acciones) */
       #ticketsBody td::before{
         content:attr(data-label);
         font-weight:600; color:#6b7280;
@@ -106,7 +196,6 @@
         margin-bottom: 2px;
       }
 
-      /* Chips Fecha/Técnico (cuando no es editable) */
       #ticketsBody tr.r1 .chip{
         display:flex; align-items:center;
         background:var(--chip); border:1px solid var(--b);
@@ -114,14 +203,12 @@
         height:52px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
         font-size: 40px !important;
       }
-      /* Select Técnico en r1 (cuando es editable) */
       #ticketsBody tr.r1 select {
         font-size: 40px !important;
         height: 52px;
         padding: 10px 16px;
       }
 
-      /* Descripción editable y deshabilitada IGUAL y más alta + sin scroll */
       #ticketsBody tr.r2 textarea,
       #ticketsBody tr.r2 textarea:disabled {
         min-height: 220px;
@@ -133,12 +220,10 @@
         color: var(--ink);
         background-color: #fff;
         opacity: 1;
-
-        resize: none;       /* sin tirador */
-        overflow: hidden;   /* sin scroll interno */
+        resize: none;
+        overflow: hidden;
       }
 
-      /* Horas / Materiales */
       #ticketsBody tr.r3 td input{
         background:var(--chip);
         border:1px solid var(--b);
@@ -151,7 +236,6 @@
         font-weight: 600;
       }
 
-      /* Estado: más alto para que no corte texto */
       #ticketsBody tr.r4 select{
         font-size: 40px !important;
         min-height: 70px;
@@ -161,7 +245,6 @@
         border-radius: 12px;
       }
 
-      /* Acciones en fila y grandes */
       #ticketsBody td.acciones{
         display:flex; flex-direction: row; align-items:center; justify-content:flex-end; gap:10px;
       }
@@ -173,7 +256,7 @@
     }
   </style>
 </head>
-<body>
+<body class="cards"><!-- por defecto activamos tarjetas en escritorio -->
 
 <div class="container">
   <h2 id="tituloCliente">Tickets del Aviso</h2>
@@ -186,10 +269,20 @@
     <option value="Facturado">Facturado</option>
   </select>
 
-  <!-- Botones: Crear y Volver en la misma fila -->
+  <!-- Botones: Crear y Volver + toggle vista -->
   <div class="actions-row">
-    <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
-    <button class="btn" id="btnVolver">🔙 Volver a Avisos</button>
+    <div style="display:flex; gap:12px;">
+      <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
+      <button class="btn" id="btnVolver">🔙 Volver a Avisos</button>
+    </div>
+    <div class="view-toggle" title="Cambiar entre Tarjetas y Tabla">
+      <span id="labelVista">Vista: Tarjetas</span>
+      <label class="switch">
+        <input id="toggleVista" type="checkbox" checked>
+        <span></span>
+        <div class="track"></div>
+      </label>
+    </div>
   </div>
 
   <div class="table-wrap">
@@ -238,11 +331,9 @@ function autoResize(el) {
   el.style.height = 'auto';
   el.style.height = el.scrollHeight + 'px';
 }
-// Ajustar todos los textareas presentes (tras render)
 function ajustarTodos() {
   document.querySelectorAll('textarea').forEach(autoResize);
 }
-// Autoajustar mientras se escribe (delegado global)
 document.addEventListener('input', (e) => {
   if (e.target && e.target.tagName === 'TEXTAREA') autoResize(e.target);
 });
@@ -271,6 +362,21 @@ document.getElementById('btnNuevo').addEventListener('click', async () => {
 document.getElementById('btnVolver').addEventListener('click', () => {
   window.location.href = 'index.html#avisos';
 });
+
+/* ======= TOGGLE VISTA TARJETAS/TABLA ======= */
+const toggleVista = document.getElementById('toggleVista');
+const labelVista = document.getElementById('labelVista');
+function aplicarVista(){
+  if (toggleVista.checked) {
+    document.body.classList.add('cards');
+    labelVista.textContent = 'Vista: Tarjetas';
+  } else {
+    document.body.classList.remove('cards');
+    labelVista.textContent = 'Vista: Tabla';
+  }
+  cargarTickets();
+}
+toggleVista.addEventListener('change', aplicarVista);
 
 /* ================== ACTUALIZAR CAMPOS EN LÍNEA ================== */
 async function actualizarCampo(id, campo, valor){
@@ -312,9 +418,11 @@ async function cargarTickets() {
   const filtro = document.getElementById('filtroEstado').value;
   body.innerHTML = "";
 
-  // Permite forzar móvil con ?mobile=1
   const forceMobile = new URLSearchParams(location.search).get('mobile') === '1';
-  const isMobile = forceMobile || window.matchMedia('(max-width: 1024px)').matches;
+  const isNarrow = forceMobile || window.matchMedia('(max-width: 1024px)').matches;
+
+  // ¿Usamos tarjetas? -> en móvil siempre sí; en escritorio depende del toggle
+  const useCards = isNarrow || toggleVista.checked;
 
   // Ordenar por fecha (desc)
   const sorted = ticketsLista.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
@@ -324,15 +432,15 @@ async function cargarTickets() {
     .forEach((t, idx) => {
       const editable = t.estado === "Pausado";
       const disabledCampos = editable ? "" : "disabled";
-      const disabledEstado = ""; // estado siempre cambiable (con validación)
+      const disabledEstado = "";
       const fechaFormateada = t.fecha
         ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
         : "";
       const desc = (t.description ?? t.descripcion ?? "");
       const alt = (idx % 2 ? ' alt' : '');
 
-      if (!isMobile) {
-        // ===== ESCRITORIO =====
+      if (!useCards) {
+        /* ====== TABLA (vista clásica) ====== */
         body.innerHTML += `
           <tr>
             <td>${fechaFormateada}</td>
@@ -364,15 +472,13 @@ async function cargarTickets() {
             </td>
           </tr>`;
       } else {
-        // ===== MÓVIL/TABLET: 4 FILAS =====
+        /* ====== TARJETAS (igual que móvil, también en PC) ====== */
         body.innerHTML += `
-          <!-- r1: Fecha + Técnico -->
           <tr class="r1${alt}" data-id="${t.id}">
             <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
             <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
           </tr>
 
-          <!-- r2: Descripción -->
           <tr class="r2${alt}" data-id="${t.id}">
             <td class="desc" data-label="Descripción">
               <textarea data-field="description"
@@ -380,7 +486,6 @@ async function cargarTickets() {
             </td>
           </tr>
 
-          <!-- r3: Horas + Materiales -->
           <tr class="r3${alt}" data-id="${t.id}">
             <td class="horas" data-label="Horas">
               <input data-field="horas_totales" type="number" step="0.1" min="0"
@@ -394,7 +499,6 @@ async function cargarTickets() {
             </td>
           </tr>
 
-          <!-- r4: Estado (estrecho) + Acciones (derecha) -->
           <tr class="r4${alt}" data-id="${t.id}">
             <td class="estado" data-label="Estado">
               <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
@@ -411,8 +515,7 @@ async function cargarTickets() {
       }
     });
 
-  // Autoajustar alturas cuando termina de renderizar
-  ajustarTodos();
+  ajustarTodos(); // autoajuste de descripciones
 }
 
 // Re-render al cambiar tamaño/orientación
@@ -445,7 +548,6 @@ function abrirModal(){
       </div>
     </div>`;
   modal.style.display = "block";
-  // Ajustar el textarea del modal tras pintarlo
   setTimeout(() => autoResize(document.getElementById('descripcion')), 0);
 }
 
@@ -588,7 +690,6 @@ async function editarTicket(id) {
       </div>
     </div>`;
   modal.style.display = "block";
-  // Ajustar el textarea del modal tras pintarlo
   setTimeout(() => autoResize(document.getElementById('descripcion')), 0);
 }
 
@@ -618,7 +719,9 @@ async function guardarEdicion(id){
 
 /* ================== INICIO ================== */
 cargarTitulo();
-cargarTecnicos().then(cargarTickets);
+cargarTecnicos().then(() => {
+  aplicarVista(); // establece clase .cards según toggle y carga tickets
+});
 </script>
 
 </body>
