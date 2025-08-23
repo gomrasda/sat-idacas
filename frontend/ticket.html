@@ -1,75 +1,46 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tickets del Aviso</title>
   <style>
     :root{
       --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7;
       --card-b:#cfd8e6; --alt-bg:#f6f8fb;
+      --paused:#facc15; --closed:#22c55e; --billed:#3b82f6;
     }
     body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
     .container { max-width: 980px; margin: auto; padding: 16px; }
-    h2 { margin-top: 0; text-align: center; }
+    h2 { margin-top: 0; text-align: center; text-transform: uppercase; }
     label, select, input { display: block; width: 100%; margin: 10px 0; }
-    .btn { background: #007bff; color: white; border: none; padding: 10px 16px; margin-top: 10px; cursor: pointer; border-radius: 5px; }
+    .btn { background: #007bff; color: white; border: none; padding: 14px 20px; cursor: pointer; border-radius: 8px; font-size: 18px; }
     .btn:hover { background: #0056b3; }
+    .btn-grey { background:#6c757d; }
+    .btn-grey:hover { background:#5a6268; }
 
     .table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
     table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
     th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
     th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
 
-    #tituloCliente { text-transform: uppercase; }
+    td textarea{ resize:none; overflow:hidden; min-height:56px; line-height:1.4; }
 
-    input, select, textarea, button { font-size:16px; }
-    td input, td select, td textarea{
-      width:100%; font:inherit; padding:8px; border:1px solid var(--b); border-radius:8px; background:#fff;
-    }
-
-    /* TEXTAREA sin scroll y autoajuste */
-    td textarea{
-      resize: none;
-      overflow: hidden;
-      min-height: 56px;
-      line-height: 1.4;
-    }
-
-    .modal {
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px;
-      z-index: 1000; width: 90%; max-width: 420px;
-    }
-    .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
-
-    /* Barra superior y toggle de vista (oculto en móvil) */
     .actions-row{
-      display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; margin: 8px 0 14px;
-      align-items:center;
+      display:flex; gap:12px; justify-content:space-between; margin:8px 0 10px;
     }
-    .view-toggle{
-      display:flex; align-items:center; gap:8px; margin-left:auto;
-      font-size:14px; color:#4b5563;
-    }
-    @media (max-width: 1024px){
-      .view-toggle{ display:none !important; }
-    }
-    .switch{
-      position:relative; width:46px; height:26px; background:#cfd8e6; border-radius:999px; cursor:pointer; flex-shrink:0;
-    }
-    .switch input{ display:none; }
-    .switch span{
-      position:absolute; top:3px; left:3px; width:20px; height:20px; background:white; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:all .2s;
-    }
-    .switch input:checked + span{ transform:translateX(20px); background:white; }
-    .switch input:checked ~ .track{ background:#007bff; }
-    .track{ position:absolute; inset:0; border-radius:999px; background:#cfd8e6; transition:background .2s; }
+    .actions-row .btn { flex:1 1 50%; text-align:center; font-size:20px; }
 
-    /* ====== Vista tarjetas (también en escritorio cuando body.cards) ====== */
-    body.cards thead { display: none; }
-    body.cards #ticketsBody tr { border:0; }
+    /* Resumen horas/materiales */
+    #resumen {
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:18px; font-weight:700; color:#1f2937;
+      margin:10px 0 20px; background:#eef2f7; padding:10px 14px; border-radius:8px;
+    }
 
+    /* Vista Tarjetas */
+    body.cards thead{display:none;}
+    body.cards #ticketsBody tr{border:0;}
     body.cards #ticketsBody tr.r1,
     body.cards #ticketsBody tr.r2,
     body.cards #ticketsBody tr.r3,
@@ -78,111 +49,44 @@
       background:#fff; border:2px solid var(--card-b);
       box-shadow:0 2px 8px rgba(0,0,0,.06);
     }
-    body.cards #ticketsBody tr.r1{ grid-template-columns: 1fr 1fr; border-bottom:0; border-radius:12px 12px 0 0; margin-top:14px; }
-    body.cards #ticketsBody tr.r2{ grid-template-columns: 1fr; border-top:0; border-bottom:0; }
-    body.cards #ticketsBody tr.r3{ grid-template-columns: 1fr 1fr; border-top:0; border-bottom:0; }
-    body.cards #ticketsBody tr.r4{ grid-template-columns: 0.7fr auto; border-top:0; border-radius:0 0 12px 12px; margin-bottom:14px; }
-    body.cards #ticketsBody tr.alt { background: var(--alt-bg); }
+    body.cards #ticketsBody tr.r1{ grid-template-columns:1fr 1fr; border-bottom:0; border-radius:12px 12px 0 0; margin-top:14px; align-items:center; }
+    body.cards #ticketsBody tr.r2{ grid-template-columns:1fr; border-top:0; border-bottom:0; }
+    body.cards #ticketsBody tr.r3{ grid-template-columns:1fr 1fr; border-top:0; border-bottom:0; }
+    body.cards #ticketsBody tr.r4{ grid-template-columns:0.7fr auto; border-top:0; border-radius:0 0 12px 12px; margin-bottom:14px; }
+    body.cards #ticketsBody td{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:0; border:0; }
+    body.cards #ticketsBody td::before{ content:attr(data-label); font-weight:600; color:#6b7280; font-size:14px; margin-bottom:2px; }
 
-    body.cards #ticketsBody td{
-      display:flex; flex-direction: column; align-items:flex-start;
-      gap:6px; padding:0; border:0;
-    }
-    body.cards #ticketsBody td::before{
-      content:attr(data-label);
-      font-weight:600; color:#6b7280;
-      font-size:14px;
-      margin-bottom: 2px;
-    }
-    body.cards #ticketsBody .chip{
-      display:flex; align-items:center;
-      background:var(--chip); border:1px solid var(--b);
-      padding:8px 12px; border-radius:999px;
-      height:36px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
-      font-size:14px;
-    }
-    body.cards #ticketsBody tr.r2 textarea,
-    body.cards #ticketsBody tr.r2 textarea:disabled {
-      min-height: 140px;
-      padding: 12px 14px;
-      line-height: 1.4;
-      font-family: inherit !important;
-      background-color: #fff;
-      opacity: 1;
-      resize: none;
-      overflow: hidden;
-    }
-    body.cards #ticketsBody tr.r3 td input{
-      background:var(--chip);
-      border:1px solid var(--b);
-      border-radius:10px;
-      padding:12px 14px;
-      height:40px;
-      text-align:center;
-      width:100%;
-      font-weight:600;
-    }
-    body.cards #ticketsBody tr.r4 select{
-      min-height: 44px;
-      padding: 10px 12px;
-      width:100%;
-      line-height: 1.3;
-      border-radius: 10px;
-    }
-    body.cards #ticketsBody td.acciones{
-      display:flex; flex-direction: row; align-items:center; justify-content:flex-end; gap:8px;
-    }
-    body.cards #ticketsBody td.acciones button{
-      width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;
-      border:1px solid var(--b); background:#fff; border-radius:10px; cursor:pointer;
-    }
+    .chip{ background:var(--chip); border:1px solid var(--b); padding:6px 10px; border-radius:999px; font-size:14px; white-space:nowrap; }
 
-    /* ====== MÓVIL / TABLET ====== */
+    /* Estado con colores */
+    .estado select{ padding:8px 10px; border-radius:8px; }
+    .estado select option[value="Pausado"]{ background:var(--paused); color:#000; }
+    .estado select option[value="Cerrado"]{ background:var(--closed); color:#fff; }
+    .estado select option[value="Facturado"]{ background:var(--billed); color:#fff; }
+
+    /* Modal */
+    .modal {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: #fff; border: 1px solid #ccc; padding: 20px; border-radius: 10px;
+      z-index: 1000; width: 90%; max-width: 420px;
+    }
+    .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
+
+    /* ====== MÓVIL ====== */
     @media (max-width: 1024px){
       .container { max-width: 100%; padding: 12px; }
-      thead { display: none; }
-      #ticketsBody tr { border:0; }
-
-      #tituloCliente{
-        font-size: 54px !important;
-        line-height: 1.2;
-        margin: 8px 0 22px;
-        text-align: center;
-        font-weight: 800;
-      }
-
-      #btnNuevo, #btnVolver{
-        flex:1 1 48%;
-        font-size: 40px !important;
-        padding: 14px 28px;
-        border-radius: 12px;
-      }
-      #btnVolver{ background:#6c757d; }
-
-      .container > label { font-size: 32px; font-weight: 600; color: var(--muted); margin-bottom:6px; }
-      #filtroEstado{
-        font-size: 40px !important;
-        height: 64px;
-        padding: 10px 16px;
-        border-radius: 12px;
-      }
-
-      #ticketsBody td::before{
-        font-size:40px;
-      }
-      #ticketsBody tr.r2 textarea,
-      #ticketsBody tr.r2 textarea:disabled {
-        min-height: 220px;
-        padding: 14px 16px;
-        font-size: 35px !important;
-      }
-      #ticketsBody tr.r3 td input{ font-size: 40px !important; }
-      #ticketsBody tr.r4 select{ font-size: 40px !important; }
-      #ticketsBody td.acciones button{ font-size: 40px; }
+      #tituloCliente{ font-size: 54px !important; }
+      #filtroEstado{ font-size: 40px !important; height: 64px; }
+      .chip{ font-size: 32px; }
+      #ticketsBody tr.r2 textarea{ font-size: 35px !important; min-height: 220px; }
+      #ticketsBody tr.r3 input{ font-size: 32px !important; }
+      .estado select{ font-size: 32px !important; }
+      .actions-row .btn { font-size: 36px; padding: 20px; }
+      #resumen{ font-size:32px; }
     }
   </style>
 </head>
-<body class="cards"><!-- Móvil siempre tarjetas; en escritorio el switch alterna -->
+<body class="cards">
 
 <div class="container">
   <h2 id="tituloCliente">Tickets del Aviso</h2>
@@ -196,27 +100,19 @@
   </select>
 
   <div class="actions-row">
-    <div style="display:flex; gap:12px;">
-      <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
-      <button class="btn" id="btnVolver">🔙 Volver a Avisos</button>
-    </div>
-    <div class="view-toggle" title="Cambiar entre Tarjetas y Tabla">
-      <span id="labelVista">Vista: Tarjetas</span>
-      <label class="switch">
-        <input id="toggleVista" type="checkbox" checked />
-        <span></span>
-        <div class="track"></div>
-      </label>
-    </div>
+    <button class="btn btn-grey" id="btnVolver">🔙 Volver a Avisos</button>
+    <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
+  </div>
+
+  <div id="resumen">
+    <span id="resumenHoras">Horas totales: 0</span>
+    <span id="resumenMateriales">Materiales: 0 €</span>
   </div>
 
   <div class="table-wrap">
     <table>
       <thead>
-        <tr>
-          <th>Fecha</th><th>Técnico</th><th>Horas</th><th>Materiales</th>
-          <th>Estado</th><th>Descripción</th><th>Acciones</th>
-        </tr>
+        <tr><th>Fecha</th><th>Técnico</th><th>Horas</th><th>Materiales</th><th>Estado</th><th>Descripción</th><th>Acciones</th></tr>
       </thead>
       <tbody id="ticketsBody"></tbody>
     </table>
@@ -230,436 +126,176 @@
 const api = "https://sat-idacas.onrender.com/api";
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'login.html';
-
-const headers = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer ' + token
-};
-
+const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 const urlParams = new URLSearchParams(window.location.search);
 const avisoId = parseInt(urlParams.get('avisoId'), 10);
 
 let tecnicos = [];
 let ticketsLista = [];
 
-/* ================== fetch con control de errores ================== */
+/* ================== HELPERS ================== */
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, options);
   if (!res.ok) {
-    const txt = await res.text().catch(() => '');
-    console.error('API error', res.status, url, txt);
-    throw new Error(`API ${res.status}: ${url} -> ${txt}`);
+    throw new Error(`API ${res.status}: ${url}`);
   }
   try { return await res.json(); } catch { return null; }
 }
 
-/* ================== AUTO-RESIZE TEXTAREAS ================== */
-function autoResize(el) {
-  if (!el) return;
-  el.style.height = 'auto';
-  el.style.height = el.scrollHeight + 'px';
-}
-function ajustarTodos() {
-  document.querySelectorAll('textarea').forEach(autoResize);
-}
-document.addEventListener('input', (e) => {
-  if (e.target && e.target.tagName === 'TEXTAREA') autoResize(e.target);
-});
+function autoResize(el){ if(!el)return; el.style.height="auto"; el.style.height=el.scrollHeight+"px"; }
+function ajustarTodos(){ document.querySelectorAll("textarea").forEach(autoResize); }
+document.addEventListener("input",e=>{ if(e.target.tagName==="TEXTAREA") autoResize(e.target) });
 
-/* ================== DATOS INICIALES ================== */
+/* ================== INIT ================== */
 async function cargarTecnicos() {
   const usuarios = await apiFetch(api + '/usuarios', { headers });
-  tecnicos = (usuarios || []).filter(u => (u.rol || '').toLowerCase() === 'técnico' || (u.rol || '').toLowerCase() === 'tecnico');
+  tecnicos = (usuarios || []).filter(u => (u.rol||"").toLowerCase().includes("tec"));
 }
 
 async function cargarTitulo(){
   try {
     const aviso = await apiFetch(`${api}/avisos/${avisoId}`, { headers });
-    document.getElementById('tituloCliente').innerText =
-      aviso && aviso.cliente ? ("Tickets de " + aviso.cliente) : ("Tickets del Aviso (ID: " + avisoId + ")");
-  } catch(e){
-    console.error("Error cargando título:", e);
-    document.getElementById('tituloCliente').innerText = "Tickets del Aviso (ID: "+avisoId+")";
+    tituloCliente.innerText = aviso?.cliente ? ("Tickets de " + aviso.cliente) : ("Tickets del Aviso (ID: " + avisoId + ")");
+  } catch {
+    tituloCliente.innerText = "Tickets del Aviso (ID: "+avisoId+")";
   }
 }
 
-document.getElementById('btnNuevo').addEventListener('click', async () => {
-  await cargarTecnicos();
-  abrirModal();
-});
-document.getElementById('btnVolver').addEventListener('click', () => {
-  window.location.href = 'index.html#avisos';
-});
+btnNuevo.onclick = async()=>{ await cargarTecnicos(); abrirModal(); }
+btnVolver.onclick = ()=> location.href = 'index.html#avisos';
 
-/* ======= TOGGLE VISTA TARJETAS/TABLA ======= */
-const toggleVista = document.getElementById('toggleVista');
-const labelVista = document.getElementById('labelVista');
-function aplicarVista(){
-  const isMobile = window.matchMedia('(max-width: 1024px)').matches;
-  if (isMobile){
-    // en móvil siempre tarjetas
-    document.body.classList.add('cards');
-    if (toggleVista) toggleVista.checked = true;
-    if (labelVista) labelVista.textContent = 'Vista: Tarjetas';
-  } else {
-    if (toggleVista && toggleVista.checked) {
-      document.body.classList.add('cards');
-      if (labelVista) labelVista.textContent = 'Vista: Tarjetas';
-    } else {
-      document.body.classList.remove('cards');
-      if (labelVista) labelVista.textContent = 'Vista: Tabla';
-    }
-  }
-  cargarTickets();
-}
-if (toggleVista) toggleVista.addEventListener('change', aplicarVista);
-
-/* ================== ACTUALIZAR CAMPOS EN LÍNEA ================== */
+/* ================== CAMPOS INLINE ================== */
 async function actualizarCampo(id, campo, valor){
   const t = ticketsLista.find(x => x.id === id);
   if (!t) return;
-
-  const payload = {
-    fecha: t.fecha || null,
-    tecnico: t.tecnico || "",
-    horas_totales: Number(t.horas_totales) || 0,
-    precio_materiales: Number(t.precio_materiales) || 0,
-    estado: t.estado || "Pausado",
-    description: t.description ?? t.descripcion ?? ""
-  };
-
-  if (['horas_totales','precio_materiales'].includes(campo)) {
-    payload[campo] = parseFloat(valor) || 0;
-  } else if (campo === 'description') {
-    payload.description = (valor ?? "") + "";
-  } else {
-    payload[campo] = valor;
-  }
-
+  const payload = { ...t };
+  if (campo==="description") payload.description = valor;
+  else payload[campo] = parseFloat(valor)||0;
   await apiFetch(`${api}/tickets/${id}`, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify(payload)
+    method: 'PUT', headers, body: JSON.stringify(payload)
   });
-
   Object.assign(t, payload);
+  actualizarResumen();
 }
 
-/* ================== RENDER TICKETS ================== */
+/* ================== RENDER ================== */
 async function cargarTickets() {
   const tickets = await apiFetch(`${api}/tickets?aviso_id=${avisoId}`, { headers });
   ticketsLista = tickets || [];
-
   const body = document.getElementById('ticketsBody');
   const filtro = document.getElementById('filtroEstado').value;
   body.innerHTML = "";
 
-  const isMobile = window.matchMedia('(max-width: 1024px)').matches;
-  const useCards = isMobile || (toggleVista && toggleVista.checked);
-
-  const sorted = ticketsLista.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-  sorted
-    .filter(t => filtro === "Todos" || t.estado === filtro)
-    .forEach((t, idx) => {
-      const editable = t.estado === "Pausado";
+  ticketsLista
+    .slice().sort((a,b)=> new Date(b.fecha)-new Date(a.fecha))
+    .filter(t => filtro==="Todos" || t.estado===filtro)
+    .forEach((t, idx)=>{
+      const editable = t.estado==="Pausado";
       const disabledCampos = editable ? "" : "disabled";
-      const disabledEstado = ""; // el estado se puede cambiar (con validación)
-      const fechaFormateada = t.fecha
-        ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
-        : "";
-      const desc = (t.description ?? t.descripcion ?? "");
-      const alt = (idx % 2 ? ' alt' : '');
+      const fecha = t.fecha ? new Date(t.fecha).toLocaleDateString('es-ES') : "";
+      const desc = t.description ?? "";
+      const alt = (idx%2?' alt':'');
 
-      if (!useCards) {
-        /* ====== TABLA (escritorio clásico) ====== */
-        body.innerHTML += `
-          <tr>
-            <td>${fechaFormateada}</td>
-            <td>${t.tecnico || ""}</td>
-            <td>
-              <input data-field="horas_totales" type="number"
-                     value="${t.horas_totales ?? 0}"
-                     onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
-            </td>
-            <td>
-              <input data-field="precio_materiales" type="number"
-                     value="${t.precio_materiales ?? 0}"
-                     onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
-            </td>
-            <td>
-              <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
-                <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-                <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-                <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
-              </select>
-            </td>
-            <td>
-              <textarea data-field="description"
-                        onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
-            </td>
-            <td>
-              <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
-              <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
-            </td>
-          </tr>`;
-      } else {
-        /* ====== TARJETAS (móvil y PC en modo tarjetas) ====== */
-        body.innerHTML += `
-          <!-- r1: Fecha + Técnico -->
-          <tr class="r1${alt}" data-id="${t.id}">
-            <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
-            <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
-          </tr>
-
-          <!-- r2: Descripción -->
-          <tr class="r2${alt}" data-id="${t.id}">
-            <td class="desc" data-label="Descripción">
-              <textarea data-field="description"
-                        onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea>
-            </td>
-          </tr>
-
-          <!-- r3: Horas + Materiales -->
-          <tr class="r3${alt}" data-id="${t.id}">
-            <td class="horas" data-label="Horas">
-              <input data-field="horas_totales" type="number" step="0.1" min="0"
-                     value="${t.horas_totales ?? 0}"
-                     onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}>
-            </td>
-            <td class="materiales" data-label="Materiales">
-              <input data-field="precio_materiales" type="number" step="0.01" min="0"
-                     value="${t.precio_materiales ?? 0}"
-                     onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}>
-            </td>
-          </tr>
-
-          <!-- r4: Estado + Acciones -->
-          <tr class="r4${alt}" data-id="${t.id}">
-            <td class="estado" data-label="Estado">
-              <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
-                <option value="Pausado"   ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-                <option value="Cerrado"   ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-                <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
-              </select>
-            </td>
-            <td class="acciones" data-label="Acciones">
-              <button onclick='editarTicket(${t.id})' title="Editar">✏️</button>
-              <button onclick="borrarTicket(${t.id})" title="Borrar">🗑️</button>
-            </td>
-          </tr>`;
-      }
+      body.innerHTML+=`
+        <tr class="r1${alt}"><td><span class="chip">${fecha}</span></td><td><span class="chip">${t.tecnico||""}</span></td></tr>
+        <tr class="r2${alt}"><td data-label="Descripción"><textarea onchange="actualizarCampo(${t.id},'description',this.value)" ${disabledCampos}>${desc}</textarea></td></tr>
+        <tr class="r3${alt}">
+          <td data-label="Horas"><input type="number" value="${t.horas_totales||0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${disabledCampos}></td>
+          <td data-label="Materiales"><input type="number" value="${t.precio_materiales||0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${disabledCampos}></td>
+        </tr>
+        <tr class="r4${alt}">
+          <td class="estado" data-label="Estado">
+            <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)">
+              <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
+              <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+              <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+            </select>
+          </td>
+          <td class="acciones"><button onclick=editarTicket(${t.id})>✏️</button><button onclick=borrarTicket(${t.id})>🗑️</button></td>
+        </tr>`;
     });
-
   ajustarTodos();
+  actualizarResumen();
 }
 
-/* ================== BORRAR / CAMBIAR ESTADO ================== */
+/* ================== RESUMEN ================== */
+function actualizarResumen(){
+  const horas = ticketsLista.reduce((s,t)=> s+(+t.horas_totales||0),0);
+  const mats = ticketsLista.reduce((s,t)=> s+(+t.precio_materiales||0),0);
+  resumenHoras.textContent="Horas totales: "+horas;
+  resumenMateriales.textContent="Materiales: "+mats.toFixed(2)+" €";
+}
+
+/* ================== CRUD ================== */
 async function borrarTicket(id){
-  if (confirm("¿Eliminar ticket?")) {
-    await apiFetch(`${api}/tickets/${id}`, { method: 'DELETE', headers });
+  if(confirm("¿Eliminar ticket?")){
+    await apiFetch(`${api}/tickets/${id}`, { method:'DELETE', headers });
     cargarTickets();
   }
 }
 
-async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
-  try {
-    const t = ticketsLista.find(x => x.id === id);
-    if (!t) return;
-
-    // Capturar valores recientes del DOM (por si no han perdido foco)
-    let desc = t.description ?? t.descripcion ?? "";
-    let horas = t.horas_totales ?? 0;
-    let mats  = t.precio_materiales ?? 0;
-
-    if (selectEl) {
-      const ticketIdAttr = selectEl.closest('tr')?.dataset?.id;
-      if (ticketIdAttr) {
-        const scope = document.querySelectorAll(`#ticketsBody tr[data-id="${ticketIdAttr}"] [data-field]`);
-        scope.forEach(el => {
-          if (el.dataset.field === 'description') desc = el.value ?? desc;
-          if (el.dataset.field === 'horas_totales') horas = parseFloat(el.value) || horas;
-          if (el.dataset.field === 'precio_materiales') mats = parseFloat(el.value) || mats;
-        });
-      } else {
-        const tr  = selectEl.closest('tr');
-        const dEl = tr.querySelector('[data-field="description"]');
-        const hEl = tr.querySelector('[data-field="horas_totales"]');
-        const mEl = tr.querySelector('[data-field="precio_materiales"]');
-        if (dEl) desc  = dEl.value ?? desc;
-        if (hEl) horas = parseFloat(hEl.value) || horas;
-        if (mEl) mats  = parseFloat(mEl.value) || mats;
-      }
-    }
-
-    // Validación
-    if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') && (!horas || horas <= 0)) {
-      alert('No puedes cerrar o facturar un ticket sin horas.');
-      if (selectEl) selectEl.value = t.estado;
-      return;
-    }
-
-    // Guardar posibles cambios antes de cambiar el estado
-    const payload = {
-      fecha: t.fecha || null,
-      tecnico: t.tecnico || "",
-      horas_totales: horas,
-      precio_materiales: mats,
-      estado: t.estado,
-      description: (desc ?? "") + ""
-    };
-    await apiFetch(`${api}/tickets/${id}`, { method: 'PUT', headers, body: JSON.stringify(payload) });
-    Object.assign(t, payload);
-
-    // Cambiar estado
-    await apiFetch(`${api}/tickets/${id}/estado`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({ estado: nuevoEstado })
-    });
-
-  } catch (e) {
-    alert('No se pudo cambiar el estado. Revisa la consola.');
-    if (selectEl) {
-      const t = ticketsLista.find(x => x.id === id);
-      if (t) selectEl.value = t.estado;
-    }
-  } finally {
-    cargarTickets();
+async function cambiarEstadoTicket(id,nuevo,sel){
+  const t = ticketsLista.find(x=>x.id===id);
+  if(!t)return;
+  if((nuevo==="Cerrado"||nuevo==="Facturado")&&(!t.horas_totales||t.horas_totales<=0)){
+    alert("No puedes cerrar o facturar sin horas");
+    sel.value=t.estado;
+    return;
   }
-}
-
-/* ================== MODALES ================== */
-function abrirModal(){
-  const modal = document.getElementById("modal");
-  modal.innerHTML = `
-    <div class='modal'>
-      <h3>Nuevo Ticket</h3>
-      <input id='fecha' type='date' required><br>
-      <select id='tecnico'>
-        ${tecnicos.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join("")}
-      </select><br>
-      <input id='horas_totales' type='number' placeholder='Horas Totales' min='0' step='0.1'><br>
-      <input id='precio_materiales' type='number' placeholder='Precio Materiales' min='0' step='0.01'><br>
-      <select id='estado'>
-        <option value="Pausado">Pausado</option>
-        <option value="Cerrado">Cerrado</option>
-        <option value="Facturado">Facturado</option>
-      </select><br><br>
-      <textarea id='descripcion' placeholder='Descripción' rows="3" style="resize:none; overflow:hidden;"></textarea><br><br>
-      <div style="display:flex; gap:8px; justify-content:flex-end;">
-        <button onclick='guardarTicket()' class="btn">Guardar</button>
-        <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
-      </div>
-    </div>`;
-  modal.style.display = "block";
-  setTimeout(() => autoResize(document.getElementById('descripcion')), 0);
-}
-
-function cerrarModal(){
-  document.getElementById("modal").style.display = "none";
-}
-
-async function guardarTicket(){
-  const data = {
-    aviso_id: avisoId,
-    fecha: document.getElementById('fecha').value,
-    tecnico: document.getElementById('tecnico').value,
-    horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
-    precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
-    estado: document.getElementById('estado').value,
-    description: document.getElementById('descripcion').value
-  };
-
-  await apiFetch(`${api}/tickets`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(data)
-  });
-  cerrarModal();
+  await apiFetch(`${api}/tickets/${id}`, { method:"PUT", headers, body: JSON.stringify({...t, estado:nuevo}) });
   cargarTickets();
 }
 
-async function editarTicket(id) {
-  await cargarTecnicos();
-  const t = ticketsLista.find(ticket => ticket.id === id);
-  if (!t) return alert("No se encontró el ticket");
-
-  const esPausado = t.estado === 'Pausado';
-  const disabledCampos = esPausado ? "" : "disabled";
-
-  const modal = document.getElementById("modal");
-  modal.innerHTML = `
+function abrirModal(){
+  modal.innerHTML=`
     <div class='modal'>
-      <h3>Editar Ticket</h3>
+      <h3>Nuevo Ticket</h3>
+      <input id='fecha' type='date'>
+      <select id='tecnico'>${tecnicos.map(t=>`<option>${t.nombre}</option>`).join("")}</select>
+      <input id='horas_totales' type='number'><input id='precio_materiales' type='number'>
+      <select id='estado'><option>Pausado</option><option>Cerrado</option><option>Facturado</option></select>
+      <textarea id='descripcion'></textarea>
+      <button onclick='guardarTicket()'>Guardar</button>
+      <button onclick='cerrarModal()'>Cancelar</button>
+    </div>`;
+  modal.style.display="block";
+}
+function cerrarModal(){ modal.style.display="none"; }
 
-      <label>Fecha</label>
-      <input id='fecha' type='date' value='${t.fecha ?? ""}' ${disabledCampos}><br>
+async function guardarTicket(){
+  const data={aviso_id:avisoId,fecha:fecha.value,tecnico:tecnico.value,horas_totales:+horas_totales.value||0,precio_materiales:+precio_materiales.value||0,estado:estado.value,description:descripcion.value};
+  await apiFetch(`${api}/tickets`,{method:"POST",headers,body:JSON.stringify(data)});
+  cerrarModal(); cargarTickets();
+}
 
-      <label>Técnico</label>
-      <select id='tecnico' ${disabledCampos}>
-        ${tecnicos.map(te => `<option value="${te.nombre}" ${te.nombre === t.tecnico ? 'selected' : ''}>${te.nombre}</option>`).join("")}
-      </select><br>
-
-      <label>Horas Totales</label>
-      <input id='horas_totales' type='number' value='${t.horas_totales || 0}' min='0' step='0.1' ${disabledCampos}><br>
-
-      <label>Precio Materiales</label>
-      <input id='precio_materiales' type='number' value='${t.precio_materiales || 0}' min='0' step='0.01' ${disabledCampos}><br>
-
-      <label>Estado</label>
+async function editarTicket(id){
+  const t=ticketsLista.find(x=>x.id===id);
+  modal.innerHTML=`
+    <div class='modal'><h3>Editar</h3>
+      <input id='fecha' type='date' value='${t.fecha??""}'>
+      <input id='horas_totales' type='number' value='${t.horas_totales||0}'>
+      <input id='precio_materiales' type='number' value='${t.precio_materiales||0}'>
       <select id='estado'>
         <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
         <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
         <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
-      </select><br><br>
-
-      <label>Descripción</label>
-      <textarea id='descripcion' placeholder='Descripción' rows="3" ${disabledCampos} style="resize:none; overflow:hidden;">${t.description ?? t.descripcion ?? ""}</textarea><br><br>
-
-      <div style="display:flex; gap:8px; justify-content:flex-end;">
-        <button onclick='guardarEdicion(${t.id})' class="btn">Guardar</button>
-        <button onclick='cerrarModal()' class="btn" style="background:#6c757d;">Cancelar</button>
-      </div>
+      </select>
+      <textarea id='descripcion'>${t.description||""}</textarea>
+      <button onclick='guardarEdicion(${t.id})'>Guardar</button>
+      <button onclick='cerrarModal()'>Cancelar</button>
     </div>`;
-  modal.style.display = "block";
-  setTimeout(() => autoResize(document.getElementById('descripcion')), 0);
+  modal.style.display="block";
 }
 
 async function guardarEdicion(id){
-  const t = ticketsLista.find(x => x.id === id);
-  if (!t) return;
-
-  const data = {
-    fecha: document.getElementById('fecha').value || null,
-    tecnico: document.getElementById('tecnico').value,
-    horas_totales: parseFloat(document.getElementById('horas_totales').value) || 0,
-    precio_materiales: parseFloat(document.getElementById('precio_materiales').value) || 0,
-    estado: document.getElementById('estado').value,
-    description: document.getElementById('descripcion').value
-  };
-
-  await apiFetch(`${api}/tickets/${id}`, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify(data)
-  });
-
-  Object.assign(t, data);
-  cerrarModal();
-  cargarTickets();
+  const data={fecha:fecha.value,horas_totales:+horas_totales.value||0,precio_materiales:+precio_materiales.value||0,estado:estado.value,description:descripcion.value};
+  await apiFetch(`${api}/tickets/${id}`,{method:"PUT",headers,body:JSON.stringify(data)});
+  cerrarModal(); cargarTickets();
 }
 
 /* ================== INICIO ================== */
 cargarTitulo();
-cargarTecnicos().then(() => {
-  aplicarVista(); // fuerza tarjetas en móvil; en escritorio respeta el switch
-});
-window.addEventListener('resize', () => {
-  clearTimeout(window._rt);
-  window._rt = setTimeout(aplicarVista, 150);
-});
+cargarTecnicos().then(cargarTickets);
 </script>
-
 </body>
 </html>
