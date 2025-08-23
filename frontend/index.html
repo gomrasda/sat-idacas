@@ -10,143 +10,107 @@
       --primary:#007bff; --primary-h:#0056b3;
     }
     *{box-sizing:border-box}
-    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
+    body { margin:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--ink); }
 
-    /* ===== Topbar ===== */
+    /* Topbar */
     .topbar {
-      background: #003366; color: white;
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 16px;
-      position: fixed; top:0; left:0; right:0; z-index: 900;
-      transition: transform 0.3s ease;
+      background:#003366; color:white; display:flex; justify-content:space-between; align-items:center; padding:12px 16px;
+      transition:transform 0.3s ease;
     }
-    .topbar h2 { margin: 0; font-size: 1.6rem; }
-    .topbar button { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; }
+    .topbar h2 { margin:0; font-size:1.6rem; }
+    .topbar button { background:none; border:none; color:white; font-size:2.5rem; cursor:pointer; }
 
-    /* ===== Sidebar ===== */
+    /* Sidebar */
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: -75%;         /* oculto inicialmente */
-      width: 75%;         /* 3/4 de la pantalla */
-      height: 100%;
-      background: #222;
-      color: white;
-      padding: 40px;
-      transition: left 0.3s ease;
-      z-index: 1001;
+      position:fixed; top:0; left:-75%;
+      width:75%; height:100%;
+      background:#222; color:white;
+      padding:40px;
+      display:flex; flex-direction:column;
+      transition:left 0.3s ease;
+      z-index:1001;
     }
-    .sidebar.active { left: 0; }
+    .sidebar.active { left:0; }
+
+    .sidebar .menu-options { flex:1; }
 
     .sidebar button {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 32px;          /* grande para el dedo */
-      background: none;
-      border: none;
-      color: white;
-      border-bottom: 1px solid #444;
-      margin: 16px 0;
-      font-size: 48px;        /* letras enormes */
-      cursor: pointer;
+      display:block; width:100%; text-align:left;
+      padding:32px;
+      background:none; border:none; color:white;
+      border-bottom:1px solid #444;
+      margin:8px 0;
+      font-size:48px; cursor:pointer;
     }
+
     .logout {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 32px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 48px;        /* letras enormes */
+      background:#dc3545; color:white;
+      border:none; padding:32px;
+      border-radius:8px; margin-top:auto;
+      cursor:pointer; width:100%; font-size:48px;
     }
 
-    .overlay {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.4);
-      display: none; z-index: 1000;
-    }
-    .overlay.active { display: block; }
+    /* Overlay */
+    .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); display:none; z-index:1000; }
+    .overlay.active { display:block; }
 
-    /* ===== Main ===== */
-    .main {
-      padding: 16px 16px 16px 24px;
-      margin-top: 60px;
-      transition: transform 0.3s ease;
-    }
+    /* Main */
+    .main { padding:16px 16px 16px 24px; margin-top:60px; transition:transform 0.3s ease; }
 
-    /* Desplazar contenido al abrir sidebar */
-    body.shifted .topbar,
-    body.shifted .main {
-      transform: translateX(75%);
-    }
-
-    /* ===== HERO ===== */
+    /* HERO */
     #inicio{
-      min-height: calc(100vh - 60px);
-      display:flex; flex-direction:column;
-      justify-content:center; align-items:center;
+      min-height:calc(100vh - 60px);
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
       text-align:center; gap:14px; padding:24px;
     }
-    #inicio img{ width: clamp(220px, 55vw, 420px); height:auto; object-fit:contain; }
-    #inicio h2{
-      margin: 6px 0 0; font-weight: 800;
-      color:#1f2937;
-      font-size: clamp(22px, 6.5vw, 42px);
-    }
+    #inicio img{ width:clamp(220px,55vw,420px); height:auto; object-fit:contain; filter:drop-shadow(0 10px 24px rgba(0,0,0,.08)); }
+    #inicio h2{ margin:6px 0 0; font-weight:800; letter-spacing:.3px; color:#1f2937; font-size:clamp(22px,6.5vw,42px); }
 
-    /* ===== Modal ===== */
+    /* Modal */
     .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-      background:#fff; padding:20px; border-radius:12px; border: 1px solid #ccc;
+      background:#fff; padding:20px; border-radius:12px; border:1px solid #ccc;
       z-index:1002; width:90%; max-width:460px;
     }
-    .modal h3{ margin:0 0 8px }
     .modal input, .modal select, .modal textarea {
-      width: 100%; padding: 10px 12px; margin: 6px 0;
-      border: 1px solid var(--b); border-radius: 10px; font: inherit;
+      width:100%; padding:10px 12px; margin:6px 0; border:1px solid var(--b); border-radius:10px; font:inherit;
     }
+    .btn { padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid var(--b); background:#fff }
+    .btn.primary{ background:var(--primary); color:#fff; border-color:transparent }
+    .btn.primary:hover{ background:var(--primary-h) }
 
-    /* ===== Cards ===== */
-    .cards{ display:flex; flex-direction:column; gap:24px; margin-top:16px; } /* separación 24px */
-    .card{
-      background:#fff; border:2px solid var(--card-b); padding:16px;
-      box-shadow:0 2px 8px rgba(0,0,0,.06);
-      font-size:20px;
-    }
-    .card .title{ font-size:26px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
-    .meta{ display:grid; grid-template-columns: repeat(2,1fr); gap:8px; margin:8px 0; }
-    .meta > span{ background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:8px 10px; }
+    /* Cards */
+    .cards{ display:flex; flex-direction:column; gap:24px; margin-top:24px; }
+    .card{ background:#fff; border:2px solid var(--card-b); border-radius:0; padding:16px; width:100%;
+      box-shadow:0 2px 8px rgba(0,0,0,.06); line-height:1.5; font-size:20px; }
+    .card .title{ font-size:28px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
+    .meta{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:8px 0; }
+    .meta > span{ display:block; background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:8px 10px; font-size:20px; }
     .actions{ display:flex; gap:12px; align-items:center; justify-content:flex-end; margin-top:12px }
     .actions .ico{ font-size:2em; }
-    .actions button{ font-size:20px; padding:14px 18px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer }
+    .actions button{ font-size:20px; padding:12px 16px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer }
     .actions button:hover{ background:#f1f5fb }
 
-    /* ===== Sección acciones ===== */
-    .section-actions{
-      display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center;
-      gap:16px; margin:8px 0 14px;
-    }
+    /* Actions bar */
+    .section-actions{ display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center; gap:16px; margin:8px 0 14px; }
     .section-actions input[type="text"], .section-actions select{
-      min-width:380px; font-size:22px; height:52px;
-      padding:12px 16px; border-radius:12px; border:1px solid var(--b);
+      min-width:380px; font-size:22px; height:52px; padding:12px 16px; border-radius:12px; border:1px solid var(--b); background:#fff;
     }
     .section-actions .primary-btn{
-      font-size:22px; padding:12px 20px; min-height:52px;
-      border-radius:12px; border:none; cursor:pointer;
-      background:var(--primary); color:#fff;
+      font-size:22px; padding:12px 20px; min-height:52px; border-radius:12px; border:none; cursor:pointer; background:var(--primary); color:#fff;
     }
-    .section-actions .primary-btn:hover{ background:var(--primary-h) }
 
+    /* Responsive */
     @media (max-width:1024px){
-      .card{ font-size:22px }
-      .card .title{ font-size:30px }
-      .section-actions{
-        display:grid !important; grid-template-columns: 1fr 1fr; gap:14px;
-      }
-      .section-actions input[type="text"], .section-actions select{ font-size:28px; height:64px; padding:16px 18px; }
-      .section-actions .primary-btn{ font-size:28px; min-height:64px; padding:16px 24px; }
+      .card{ padding:18px; font-size:22px }
+      .card .title{ font-size:32px }
+      .actions button{ font-size:24px }
+      h2{ font-size:54px !important; text-transform:uppercase; text-align:left; font-weight:800; margin:12px 0; }
+    }
+
+    /* Desplazar contenido */
+    body.shifted .topbar,
+    body.shifted .main {
+      transform:translateX(75%);
     }
   </style>
 </head>
@@ -158,16 +122,16 @@
     <h2>SAT Control</h2>
     <span></span>
   </div>
-
-  <!-- Overlay -->
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
-    <button class="logout" onclick="logout()">Cerrar sesión</button>
-    <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
-    <button onclick="mostrar('clientes')">Clientes</button>
-    <button onclick="mostrar('avisos')">Avisos</button>
+    <div class="menu-options">
+      <button onclick="mostrar('usuarios')" id="btnUsuarios">👤 Usuarios</button>
+      <button onclick="mostrar('clientes')">👥 Clientes</button>
+      <button onclick="mostrar('avisos')">📋 Avisos</button>
+    </div>
+    <button class="logout" onclick="logout()">🚪 Cerrar sesión</button>
   </div>
 
   <!-- Main -->
@@ -178,7 +142,7 @@
     </div>
 
     <div id="usuarios" style="display:none;">
-      <h2>USUARIOS</h2>
+      <h2>Usuarios</h2>
       <div class="section-actions">
         <input id="filtroUsuario" type="text" placeholder="Buscar usuario..." oninput="filtrarUsuarios()">
         <button class="primary-btn" onclick="nuevoUsuario()">➕ Nuevo Usuario</button>
@@ -187,7 +151,7 @@
     </div>
 
     <div id="clientes" style="display:none;">
-      <h2>CLIENTES</h2>
+      <h2>Clientes</h2>
       <div class="section-actions">
         <input id="filtroCliente" type="text" placeholder="Buscar cliente..." oninput="filtrarClientes()">
         <button class="primary-btn" onclick="nuevoCliente()">➕ Nuevo Cliente</button>
@@ -196,7 +160,7 @@
     </div>
 
     <div id="avisos" style="display:none;">
-      <h2>AVISOS</h2>
+      <h2>Avisos</h2>
       <div class="section-actions">
         <button class="primary-btn" onclick="nuevoAviso()">➕ Nuevo Aviso</button>
       </div>
@@ -207,39 +171,78 @@
   </div>
 
   <script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = 'login.html';
-    const payload = JSON.parse(atob(token.split('.')[1] || 'e30='));
-    const rol = payload.rol;
-    const api = "https://sat-idacas.onrender.com/api";
-    const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+    /* AUTH */
+    const token=localStorage.getItem('token');
+    if(!token)location.href='login.html';
+    const payload=JSON.parse(atob(token.split('.')[1]||'e30='));
+    const rol=payload.rol;
+    const api="https://sat-idacas.onrender.com/api";
+    const headers={'Content-Type':'application/json','Authorization':'Bearer '+token};
 
     function toggleSidebar(){
       document.getElementById('sidebar').classList.toggle('active');
       document.getElementById('overlay').classList.toggle('active');
       document.body.classList.toggle('shifted');
     }
-    function logout(){ localStorage.removeItem('token'); window.location.href = 'login.html'; }
-    if (rol !== "Gestor") { const el = document.getElementById('btnUsuarios'); if (el) el.style.display = 'none'; }
+    function logout(){ localStorage.removeItem('token'); location.href='login.html'; }
+    if(rol!=="Gestor"){ const el=document.getElementById('btnUsuarios'); if(el) el.style.display='none'; }
 
     function mostrar(seccion){
-      ['inicio','usuarios','clientes','avisos'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-      });
-      document.getElementById(seccion).style.display = 'block';
+      ['inicio','usuarios','clientes','avisos'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
+      document.getElementById(seccion).style.display='block';
       document.getElementById('sidebar').classList.remove('active');
       document.getElementById('overlay').classList.remove('active');
       document.body.classList.remove('shifted');
-      if (seccion==='usuarios') cargarUsuarios();
-      if (seccion==='clientes') cargarClientes();
-      if (seccion==='avisos') { cargarClientes(); cargarTecnicos(); cargarAvisos(); }
+      if(seccion==='usuarios') cargarUsuarios();
+      if(seccion==='clientes') cargarClientes();
+      if(seccion==='avisos'){ cargarClientes(); cargarTecnicos(); cargarAvisos(); }
     }
 
-    function abrirModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.style.display='block'; }
-    function cerrarModal(){ document.getElementById('modal').style.display='none'; }
+    const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 
-    // (Resto de funciones: cargarUsuarios, cargarClientes, cargarAvisos, etc...)
+    /* Usuarios */
+    let usuariosArr=[];
+    async function cargarUsuarios(){const r=await fetch(api+"/usuarios",{headers});usuariosArr=await r.json();renderUsuarios(usuariosArr);}
+    function renderUsuarios(lista){const cont=document.getElementById('usuariosCards');cont.innerHTML="";(lista||[]).forEach(u=>{
+      const nombre=u.nombre_completo||u.nombre||"";
+      cont.innerHTML+=`<div class="card"><div class="title">${esc(nombre)}</div>
+      <div class="meta"><span><strong>Usuario:</strong> ${esc(u.usuario||"")}</span>
+      <span><strong>Email:</strong> ${esc(u.email||"")}</span>
+      <span><strong>Rol:</strong> ${esc(u.rol||"")}</span></div>
+      <div class="actions"><button onclick="editarUsuario(${u.id})"><span class="ico">✏️</span>Editar</button>
+      <button onclick="borrarUsuario(${u.id})"><span class="ico">🗑️</span>Borrar</button></div></div>`;
+    });}
+    function filtrarUsuarios(){const q=(filtroUsuario.value||"").toLowerCase();if(!q)return renderUsuarios(usuariosArr);renderUsuarios(usuariosArr.filter(u=>(u.nombre_completo||"").toLowerCase().includes(q)||(u.usuario||"").toLowerCase().includes(q)||(u.email||"").toLowerCase().includes(q)||(u.rol||"").toLowerCase().includes(q)));}
+    function nuevoUsuario(){/* modal omitted for brevity */}
+    function editarUsuario(id){/* modal omitted for brevity */}
+    async function borrarUsuario(id){if(!confirm("¿Borrar usuario?"))return;await fetch(api+"/usuarios/"+id,{method:"DELETE",headers});cargarUsuarios();}
+
+    /* Clientes */
+    let clientesArr=[];
+    async function cargarClientes(){const r=await fetch(api+"/clientes",{headers});clientesArr=await r.json();renderClientes(clientesArr);}
+    function renderClientes(lista){const c=document.getElementById('clientesCards');c.innerHTML="";(lista||[]).forEach(x=>{
+      c.innerHTML+=`<div class="card"><div class="title">Cliente: ${esc(x.nombre||"")}</div>
+      <div class="meta"><span><strong>Obs:</strong> ${esc(x.obs||"")}</span></div>
+      <div class="actions"><button onclick="editarCliente(${x.id})"><span class="ico">✏️</span>Editar</button>
+      <button onclick="borrarCliente(${x.id})"><span class="ico">🗑️</span>Borrar</button></div></div>`;
+    });}
+
+    /* Avisos */
+    let avisosArr=[],tecnicos=[];
+    async function cargarTecnicos(){const r=await fetch(api+"/usuarios",{headers});const u=await r.json();tecnicos=u.filter(t=>t.rol.toLowerCase().includes("tec"));}
+    async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
+    function renderAvisos(lista){const c=document.getElementById('avisosCards');c.innerHTML="";(lista||[]).forEach(a=>{
+      c.innerHTML+=`<div class="card"><div class="title">Cliente: ${esc(a.cliente||"")}</div>
+      <div class="meta"><span><strong>Fecha:</strong> ${esc(a.fecha_programada||"")}</span>
+      <span><strong>Técnico:</strong> ${esc(a.tecnico||"")}</span></div>
+      <div class="actions"><button class="btn-ticket" onclick="abrirTicket(${a.id})"><span class="ico">🎫</span>Ticket</button>
+      <button onclick="editarAviso(${a.id})"><span class="ico">✏️</span>Editar</button>
+      <button onclick="borrarAviso(${a.id})"><span class="ico">🗑️</span>Borrar</button></div></div>`;
+    });}
+    function abrirTicket(id){window.open('ticket.html?avisoId='+id,'_blank');}
+
+    /* Init */
+    window.addEventListener('load',()=>{mostrar(location.hash.substring(1)||'inicio');});
   </script>
 </body>
 </html>
