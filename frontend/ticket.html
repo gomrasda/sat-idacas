@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tickets del Aviso</title>
   <style>
     :root{
@@ -21,20 +21,18 @@
     th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
     th { background: #f7f9fc; font-weight: 600; color: #4a5568; }
 
-    /* Forzar mayúsculas al título principal */
     #tituloCliente { text-transform: uppercase; }
 
-    /* Base inputs escritorio */
     input, select, textarea, button { font-size:16px; }
     td input, td select, td textarea{
-      width:100%; font:inherit; padding:8px; border:1px solid var(--b); border-radius:8px; background:#fff
+      width:100%; font:inherit; padding:8px; border:1px solid var(--b); border-radius:8px; background:#fff;
     }
 
-    /* TEXTAREA: autoajuste sin scroll (escritorio) */
+    /* TEXTAREA sin scroll y autoajuste */
     td textarea{
-      resize: none;          /* sin tirador */
-      overflow: hidden;      /* sin scroll interno */
-      min-height: 56px;      /* alto mínimo */
+      resize: none;
+      overflow: hidden;
+      min-height: 56px;
       line-height: 1.4;
     }
 
@@ -45,7 +43,7 @@
     }
     .modal input, .modal select, .modal textarea { width: 100%; margin: 8px 0; padding: 8px; }
 
-    /* ====== BARRA SUPERIOR / TOGGLE DE VISTA ====== */
+    /* Barra superior y toggle de vista (oculto en móvil) */
     .actions-row{
       display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; margin: 8px 0 14px;
       align-items:center;
@@ -53,6 +51,9 @@
     .view-toggle{
       display:flex; align-items:center; gap:8px; margin-left:auto;
       font-size:14px; color:#4b5563;
+    }
+    @media (max-width: 1024px){
+      .view-toggle{ display:none !important; }
     }
     .switch{
       position:relative; width:46px; height:26px; background:#cfd8e6; border-radius:999px; cursor:pointer; flex-shrink:0;
@@ -65,8 +66,7 @@
     .switch input:checked ~ .track{ background:#007bff; }
     .track{ position:absolute; inset:0; border-radius:999px; background:#cfd8e6; transition:background .2s; }
 
-    /* ====== VISTA TARJETAS TAMBIÉN EN ESCRITORIO ====== */
-    /* Cuando el body tenga la clase .cards ocultar cabecera y renderizar como en móvil (con tamaños razonables) */
+    /* ====== Vista tarjetas (también en escritorio cuando body.cards) ====== */
     body.cards thead { display: none; }
     body.cards #ticketsBody tr { border:0; }
 
@@ -94,17 +94,13 @@
       font-size:14px;
       margin-bottom: 2px;
     }
-    body.cards #ticketsBody tr.r1 .chip{
+    body.cards #ticketsBody .chip{
       display:flex; align-items:center;
       background:var(--chip); border:1px solid var(--b);
       padding:8px 12px; border-radius:999px;
       height:36px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
       font-size:14px;
     }
-    body.cards #ticketsBody tr.r1 select {
-      height: 38px; padding: 8px 12px;
-    }
-    /* Descripción más alta + sin scroll en tarjetas escritorio */
     body.cards #ticketsBody tr.r2 textarea,
     body.cards #ticketsBody tr.r2 textarea:disabled {
       min-height: 140px;
@@ -141,11 +137,12 @@
       border:1px solid var(--b); background:#fff; border-radius:10px; cursor:pointer;
     }
 
-    /* ====== MÓVIL/TABLET ====== */
+    /* ====== MÓVIL / TABLET ====== */
     @media (max-width: 1024px){
       .container { max-width: 100%; padding: 12px; }
+      thead { display: none; }
+      #ticketsBody tr { border:0; }
 
-      /* Título MUY grande */
       #tituloCliente{
         font-size: 54px !important;
         line-height: 1.2;
@@ -170,93 +167,22 @@
         border-radius: 12px;
       }
 
-      /* Tarjetas móvil: usamos la misma estructura que en .cards */
-      thead { display: none; }
-      #ticketsBody tr { border:0; }
-
-      #ticketsBody tr.r1, #ticketsBody tr.r2, #ticketsBody tr.r3, #ticketsBody tr.r4{
-        display:grid; gap:10px; padding:12px;
-        background:#fff; border:2px solid var(--card-b);
-        box-shadow:0 2px 8px rgba(0,0,0,.06);
-      }
-      #ticketsBody tr.r1{ grid-template-columns: 1fr 1fr; border-bottom:0; border-radius:12px 12px 0 0; margin-top:14px; }
-      #ticketsBody tr.r2{ grid-template-columns: 1fr; border-top:0; border-bottom:0; }
-      #ticketsBody tr.r3{ grid-template-columns: 1fr 1fr; border-top:0; border-bottom:0; }
-      #ticketsBody tr.r4{ grid-template-columns: 0.6fr auto; border-top:0; border-radius:0 0 12px 12px; margin-bottom:14px; }
-      #ticketsBody tr.alt { background: var(--alt-bg); }
-
-      #ticketsBody td{
-        display:flex; flex-direction: column; align-items:flex-start;
-        gap:4px; padding:0; border:0;
-      }
       #ticketsBody td::before{
-        content:attr(data-label);
-        font-weight:600; color:#6b7280;
         font-size:40px;
-        margin-bottom: 2px;
       }
-
-      #ticketsBody tr.r1 .chip{
-        display:flex; align-items:center;
-        background:var(--chip); border:1px solid var(--b);
-        padding:10px 16px; border-radius:999px;
-        height:52px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;
-        font-size: 40px !important;
-      }
-      #ticketsBody tr.r1 select {
-        font-size: 40px !important;
-        height: 52px;
-        padding: 10px 16px;
-      }
-
       #ticketsBody tr.r2 textarea,
       #ticketsBody tr.r2 textarea:disabled {
         min-height: 220px;
         padding: 14px 16px;
         font-size: 35px !important;
-        line-height: 1.4;
-        font-family: inherit !important;
-        font-weight: inherit !important;
-        color: var(--ink);
-        background-color: #fff;
-        opacity: 1;
-        resize: none;
-        overflow: hidden;
       }
-
-      #ticketsBody tr.r3 td input{
-        background:var(--chip);
-        border:1px solid var(--b);
-        border-radius:10px;
-        padding:14px 16px;
-        height:54px;
-        text-align:center;
-        width:100%;
-        font-size: 40px !important;
-        font-weight: 600;
-      }
-
-      #ticketsBody tr.r4 select{
-        font-size: 40px !important;
-        min-height: 70px;
-        padding: 16px 18px;
-        width:100%;
-        line-height: 1.4;
-        border-radius: 12px;
-      }
-
-      #ticketsBody td.acciones{
-        display:flex; flex-direction: row; align-items:center; justify-content:flex-end; gap:10px;
-      }
-      #ticketsBody td.acciones button{
-        width:52px; height:52px; font-size: 40px;
-        display:inline-flex; align-items:center; justify-content:center;
-        border:1px solid var(--b); background:#fff; border-radius:14px; cursor:pointer;
-      }
+      #ticketsBody tr.r3 td input{ font-size: 40px !important; }
+      #ticketsBody tr.r4 select{ font-size: 40px !important; }
+      #ticketsBody td.acciones button{ font-size: 40px; }
     }
   </style>
 </head>
-<body class="cards"><!-- por defecto activamos tarjetas en escritorio -->
+<body class="cards"><!-- Móvil siempre tarjetas; en escritorio el switch alterna -->
 
 <div class="container">
   <h2 id="tituloCliente">Tickets del Aviso</h2>
@@ -269,7 +195,6 @@
     <option value="Facturado">Facturado</option>
   </select>
 
-  <!-- Botones: Crear y Volver + toggle vista -->
   <div class="actions-row">
     <div style="display:flex; gap:12px;">
       <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
@@ -278,7 +203,7 @@
     <div class="view-toggle" title="Cambiar entre Tarjetas y Tabla">
       <span id="labelVista">Vista: Tarjetas</span>
       <label class="switch">
-        <input id="toggleVista" type="checkbox" checked>
+        <input id="toggleVista" type="checkbox" checked />
         <span></span>
         <div class="track"></div>
       </label>
@@ -288,7 +213,10 @@
   <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>Fecha</th><th>Técnico</th><th>Horas</th><th>Materiales</th><th>Estado</th><th>Descripción</th><th>Acciones</th></tr>
+        <tr>
+          <th>Fecha</th><th>Técnico</th><th>Horas</th><th>Materiales</th>
+          <th>Estado</th><th>Descripción</th><th>Acciones</th>
+        </tr>
       </thead>
       <tbody id="ticketsBody"></tbody>
     </table>
@@ -314,7 +242,7 @@ const avisoId = parseInt(urlParams.get('avisoId'), 10);
 let tecnicos = [];
 let ticketsLista = [];
 
-/* ================== UTIL: fetch con control de errores ================== */
+/* ================== fetch con control de errores ================== */
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, options);
   if (!res.ok) {
@@ -341,7 +269,7 @@ document.addEventListener('input', (e) => {
 /* ================== DATOS INICIALES ================== */
 async function cargarTecnicos() {
   const usuarios = await apiFetch(api + '/usuarios', { headers });
-  tecnicos = (usuarios || []).filter(u => u.rol === 'Técnico' || u.rol === 'tecnico');
+  tecnicos = (usuarios || []).filter(u => (u.rol || '').toLowerCase() === 'técnico' || (u.rol || '').toLowerCase() === 'tecnico');
 }
 
 async function cargarTitulo(){
@@ -367,16 +295,24 @@ document.getElementById('btnVolver').addEventListener('click', () => {
 const toggleVista = document.getElementById('toggleVista');
 const labelVista = document.getElementById('labelVista');
 function aplicarVista(){
-  if (toggleVista.checked) {
+  const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+  if (isMobile){
+    // en móvil siempre tarjetas
     document.body.classList.add('cards');
-    labelVista.textContent = 'Vista: Tarjetas';
+    if (toggleVista) toggleVista.checked = true;
+    if (labelVista) labelVista.textContent = 'Vista: Tarjetas';
   } else {
-    document.body.classList.remove('cards');
-    labelVista.textContent = 'Vista: Tabla';
+    if (toggleVista && toggleVista.checked) {
+      document.body.classList.add('cards');
+      if (labelVista) labelVista.textContent = 'Vista: Tarjetas';
+    } else {
+      document.body.classList.remove('cards');
+      if (labelVista) labelVista.textContent = 'Vista: Tabla';
+    }
   }
   cargarTickets();
 }
-toggleVista.addEventListener('change', aplicarVista);
+if (toggleVista) toggleVista.addEventListener('change', aplicarVista);
 
 /* ================== ACTUALIZAR CAMPOS EN LÍNEA ================== */
 async function actualizarCampo(id, campo, valor){
@@ -418,13 +354,9 @@ async function cargarTickets() {
   const filtro = document.getElementById('filtroEstado').value;
   body.innerHTML = "";
 
-  const forceMobile = new URLSearchParams(location.search).get('mobile') === '1';
-  const isNarrow = forceMobile || window.matchMedia('(max-width: 1024px)').matches;
+  const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+  const useCards = isMobile || (toggleVista && toggleVista.checked);
 
-  // ¿Usamos tarjetas? -> en móvil siempre sí; en escritorio depende del toggle
-  const useCards = isNarrow || toggleVista.checked;
-
-  // Ordenar por fecha (desc)
   const sorted = ticketsLista.slice().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
   sorted
@@ -432,7 +364,7 @@ async function cargarTickets() {
     .forEach((t, idx) => {
       const editable = t.estado === "Pausado";
       const disabledCampos = editable ? "" : "disabled";
-      const disabledEstado = "";
+      const disabledEstado = ""; // el estado se puede cambiar (con validación)
       const fechaFormateada = t.fecha
         ? new Date(t.fecha).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
         : "";
@@ -440,7 +372,7 @@ async function cargarTickets() {
       const alt = (idx % 2 ? ' alt' : '');
 
       if (!useCards) {
-        /* ====== TABLA (vista clásica) ====== */
+        /* ====== TABLA (escritorio clásico) ====== */
         body.innerHTML += `
           <tr>
             <td>${fechaFormateada}</td>
@@ -472,13 +404,15 @@ async function cargarTickets() {
             </td>
           </tr>`;
       } else {
-        /* ====== TARJETAS (igual que móvil, también en PC) ====== */
+        /* ====== TARJETAS (móvil y PC en modo tarjetas) ====== */
         body.innerHTML += `
+          <!-- r1: Fecha + Técnico -->
           <tr class="r1${alt}" data-id="${t.id}">
             <td data-label="Fecha"><span class="chip">${fechaFormateada}</span></td>
             <td data-label="Técnico"><span class="chip">${t.tecnico || ""}</span></td>
           </tr>
 
+          <!-- r2: Descripción -->
           <tr class="r2${alt}" data-id="${t.id}">
             <td class="desc" data-label="Descripción">
               <textarea data-field="description"
@@ -486,6 +420,7 @@ async function cargarTickets() {
             </td>
           </tr>
 
+          <!-- r3: Horas + Materiales -->
           <tr class="r3${alt}" data-id="${t.id}">
             <td class="horas" data-label="Horas">
               <input data-field="horas_totales" type="number" step="0.1" min="0"
@@ -499,6 +434,7 @@ async function cargarTickets() {
             </td>
           </tr>
 
+          <!-- r4: Estado + Acciones -->
           <tr class="r4${alt}" data-id="${t.id}">
             <td class="estado" data-label="Estado">
               <select onchange="cambiarEstadoTicket(${t.id}, this.value, this)" ${disabledEstado}>
@@ -515,16 +451,85 @@ async function cargarTickets() {
       }
     });
 
-  ajustarTodos(); // autoajuste de descripciones
+  ajustarTodos();
 }
 
-// Re-render al cambiar tamaño/orientación
-window.addEventListener('resize', () => {
-  clearTimeout(window._rt);
-  window._rt = setTimeout(cargarTickets, 150);
-});
+/* ================== BORRAR / CAMBIAR ESTADO ================== */
+async function borrarTicket(id){
+  if (confirm("¿Eliminar ticket?")) {
+    await apiFetch(`${api}/tickets/${id}`, { method: 'DELETE', headers });
+    cargarTickets();
+  }
+}
 
-/* ================== MODAL NUEVO TICKET ================== */
+async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
+  try {
+    const t = ticketsLista.find(x => x.id === id);
+    if (!t) return;
+
+    // Capturar valores recientes del DOM (por si no han perdido foco)
+    let desc = t.description ?? t.descripcion ?? "";
+    let horas = t.horas_totales ?? 0;
+    let mats  = t.precio_materiales ?? 0;
+
+    if (selectEl) {
+      const ticketIdAttr = selectEl.closest('tr')?.dataset?.id;
+      if (ticketIdAttr) {
+        const scope = document.querySelectorAll(`#ticketsBody tr[data-id="${ticketIdAttr}"] [data-field]`);
+        scope.forEach(el => {
+          if (el.dataset.field === 'description') desc = el.value ?? desc;
+          if (el.dataset.field === 'horas_totales') horas = parseFloat(el.value) || horas;
+          if (el.dataset.field === 'precio_materiales') mats = parseFloat(el.value) || mats;
+        });
+      } else {
+        const tr  = selectEl.closest('tr');
+        const dEl = tr.querySelector('[data-field="description"]');
+        const hEl = tr.querySelector('[data-field="horas_totales"]');
+        const mEl = tr.querySelector('[data-field="precio_materiales"]');
+        if (dEl) desc  = dEl.value ?? desc;
+        if (hEl) horas = parseFloat(hEl.value) || horas;
+        if (mEl) mats  = parseFloat(mEl.value) || mats;
+      }
+    }
+
+    // Validación
+    if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') && (!horas || horas <= 0)) {
+      alert('No puedes cerrar o facturar un ticket sin horas.');
+      if (selectEl) selectEl.value = t.estado;
+      return;
+    }
+
+    // Guardar posibles cambios antes de cambiar el estado
+    const payload = {
+      fecha: t.fecha || null,
+      tecnico: t.tecnico || "",
+      horas_totales: horas,
+      precio_materiales: mats,
+      estado: t.estado,
+      description: (desc ?? "") + ""
+    };
+    await apiFetch(`${api}/tickets/${id}`, { method: 'PUT', headers, body: JSON.stringify(payload) });
+    Object.assign(t, payload);
+
+    // Cambiar estado
+    await apiFetch(`${api}/tickets/${id}/estado`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ estado: nuevoEstado })
+    });
+
+  } catch (e) {
+    alert('No se pudo cambiar el estado. Revisa la consola.');
+    if (selectEl) {
+      const t = ticketsLista.find(x => x.id === id);
+      if (t) selectEl.value = t.estado;
+    }
+  } finally {
+    cargarTickets();
+  }
+}
+
+/* ================== MODALES ================== */
 function abrirModal(){
   const modal = document.getElementById("modal");
   modal.innerHTML = `
@@ -575,78 +580,6 @@ async function guardarTicket(){
   cargarTickets();
 }
 
-/* ================== BORRAR / CAMBIAR ESTADO ================== */
-async function borrarTicket(id){
-  if (confirm("¿Eliminar ticket?")) {
-    await apiFetch(`${api}/tickets/${id}`, { method: 'DELETE', headers });
-    cargarTickets();
-  }
-}
-
-async function cambiarEstadoTicket(id, nuevoEstado, selectEl){
-  try {
-    const t = ticketsLista.find(x => x.id === id);
-    if (!t) return;
-
-    let desc = t.description ?? t.descripcion ?? "";
-    let horas = t.horas_totales ?? 0;
-    let mats  = t.precio_materiales ?? 0;
-
-    if (selectEl) {
-      const ticketIdAttr = selectEl.closest('tr')?.dataset?.id;
-      if (ticketIdAttr) {
-        const scope = document.querySelectorAll(`#ticketsBody tr[data-id="${ticketIdAttr}"] [data-field]`);
-        scope.forEach(el => {
-          if (el.dataset.field === 'description') desc = el.value ?? desc;
-          if (el.dataset.field === 'horas_totales') horas = parseFloat(el.value) || horas;
-          if (el.dataset.field === 'precio_materiales') mats = parseFloat(el.value) || mats;
-        });
-      } else {
-        const tr  = selectEl.closest('tr');
-        const dEl = tr.querySelector('[data-field="description"]');
-        const hEl = tr.querySelector('[data-field="horas_totales"]');
-        const mEl = tr.querySelector('[data-field="precio_materiales"]');
-        if (dEl) desc  = dEl.value ?? desc;
-        if (hEl) horas = parseFloat(hEl.value) || horas;
-        if (mEl) mats  = parseFloat(mEl.value) || mats;
-      }
-    }
-
-    if ((nuevoEstado === 'Cerrado' || nuevoEstado === 'Facturado') && (!horas || horas <= 0)) {
-      alert('No puedes cerrar o facturar un ticket sin horas.');
-      if (selectEl) selectEl.value = t.estado;
-      return;
-    }
-
-    const payload = {
-      fecha: t.fecha || null,
-      tecnico: t.tecnico || "",
-      horas_totales: horas,
-      precio_materiales: mats,
-      estado: t.estado,
-      description: (desc ?? "") + ""
-    };
-    await apiFetch(`${api}/tickets/${id}`, { method: 'PUT', headers, body: JSON.stringify(payload) });
-    Object.assign(t, payload);
-
-    await apiFetch(`${api}/tickets/${id}/estado`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({ estado: nuevoEstado })
-    });
-
-  } catch (e) {
-    alert('No se pudo cambiar el estado. Revisa la consola.');
-    if (selectEl) {
-      const t = ticketsLista.find(x => x.id === id);
-      if (t) selectEl.value = t.estado;
-    }
-  } finally {
-    cargarTickets();
-  }
-}
-
-/* ================== EDITAR TICKET ================== */
 async function editarTicket(id) {
   await cargarTecnicos();
   const t = ticketsLista.find(ticket => ticket.id === id);
@@ -720,7 +653,11 @@ async function guardarEdicion(id){
 /* ================== INICIO ================== */
 cargarTitulo();
 cargarTecnicos().then(() => {
-  aplicarVista(); // establece clase .cards según toggle y carga tickets
+  aplicarVista(); // fuerza tarjetas en móvil; en escritorio respeta el switch
+});
+window.addEventListener('resize', () => {
+  clearTimeout(window._rt);
+  window._rt = setTimeout(aplicarVista, 150);
 });
 </script>
 
