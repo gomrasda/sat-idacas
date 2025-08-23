@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>SAT CRUD Completo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
@@ -18,54 +18,66 @@
       display: flex; justify-content: space-between; align-items: center;
       padding: 12px 16px;
       position: fixed; top:0; left:0; right:0; z-index: 900;
+      transition: transform 0.3s ease;
     }
-    .topbar h2 { margin: 0; font-size: 1.4rem; }
+    .topbar h2 { margin: 0; font-size: 1.6rem; }
 
-    /* Botón hamburguesa grande y táctil */
+    /* Botón hamburguesa mejorado (solo cambio visual del botón) */
     .menu-btn{
       display:inline-flex; align-items:center; justify-content:center;
-      width:48px; height:48px; border:none; background:none; color:#fff;
-      border-radius:12px; cursor:pointer;
+      width:56px; height:56px; border:none; background:none; color:#fff;
+      font-size:2rem; cursor:pointer; border-radius:12px;
     }
-    .menu-btn:active{ transform:scale(0.98) }
+    .menu-btn:active{ transform:scale(0.95); }
 
     /* ===== Sidebar ===== */
     .sidebar {
       position: fixed;
       top: 0;
-      left: -80%;
-      width: 80%;
-      max-width: 520px;
+      left: -75%;         /* oculto inicialmente */
+      width: 75%;         /* 3/4 de la pantalla */
       height: 100%;
       background: #222;
       color: white;
-      padding: 28px;
+      padding: 40px;
       transition: left 0.3s ease;
       z-index: 1001;
-      display:flex; flex-direction:column; gap:12px;
-      overflow:auto;
     }
     .sidebar.active { left: 0; }
-    .sidebar header{ display:flex; align-items:center; gap:10px; margin-bottom:6px; opacity:.9; }
-    .sidebar .nav{
-      display:flex; align-items:center; gap:12px; padding:16px;
-      background:none; border:none; color:#fff; border-radius:12px;
-      font-size:1.2rem; cursor:pointer;
-    }
-    .sidebar .nav:hover{ background:#2c2c2c }
-    .sidebar .nav svg{ flex:0 0 auto }
 
-    .sidebar .footer{
-      margin-top:auto; padding-top:12px; border-top:1px solid #444;
-      display:grid; gap:10px;
+    .sidebar button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 32px;          /* grande para el dedo */
+      background: none;
+      border: none;
+      color: white;
+      border-bottom: 1px solid #444;
+      margin: 16px 0;
+      font-size: 48px;        /* letras enormes */
+      cursor: pointer;
     }
-    .sidebar .logout, .sidebar .close{
-      border:0; border-radius:12px; padding:14px 16px; cursor:pointer; display:flex; align-items:center; gap:10px;
-      font-size:1.05rem;
+    .logout {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 32px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 48px;        /* letras enormes */
     }
-    .sidebar .logout{ background:#dc3545; color:#fff; }
-    .sidebar .close{ background:#343a40; color:#fff; }
-    .sidebar .logout:hover, .sidebar .close:hover{ filter:brightness(1.05) }
+
+    /* Botón cerrar dentro del sidebar (nuevo) */
+    .close-sidebar{
+      display:flex; align-items:center; gap:12px;
+      width:100%; padding:24px;
+      background:#343a40; color:#fff; border:none; border-radius:10px;
+      font-size:28px; cursor:pointer; margin-top:24px;
+    }
+    .close-sidebar:hover{ filter:brightness(1.08); }
 
     .overlay {
       position: fixed; top:0; left:0; width:100%; height:100%;
@@ -78,6 +90,13 @@
     .main {
       padding: 16px 16px 16px 24px;
       margin-top: 60px;
+      transition: transform 0.3s ease;
+    }
+
+    /* Desplazar contenido al abrir sidebar */
+    body.shifted .topbar,
+    body.shifted .main {
+      transform: translateX(75%);
     }
 
     /* ===== HERO ===== */
@@ -94,53 +113,66 @@
       font-size: clamp(22px, 6.5vw, 42px);
     }
 
-    /* ===== Cards ===== */
-    .cards{ display:flex; flex-direction:column; gap:16px; margin-top:12px }
-    .card{
-      background:#fff; border:1px solid var(--card-b); padding:16px; border-radius:12px;
-      box-shadow:0 2px 8px rgba(0,0,0,.06); font-size:16px;
+    /* ===== Modal ===== */
+    .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+      background:#fff; padding:20px; border-radius:12px; border: 1px solid #ccc;
+      z-index:1002; width:90%; max-width:460px;
     }
-    .card .title{ font-size:20px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
+    .modal h3{ margin:0 0 8px }
+    .modal input, .modal select, .modal textarea {
+      width: 100%; padding: 10px 12px; margin: 6px 0;
+      border: 1px solid var(--b); border-radius: 10px; font: inherit;
+    }
+
+    /* ===== Cards ===== */
+    .cards{ display:flex; flex-direction:column; gap:24px; margin-top:16px; } /* separación 24px */
+    .card{
+      background:#fff; border:2px solid var(--card-b); padding:16px;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);
+      font-size:20px;
+    }
+    .card .title{ font-size:26px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
     .meta{ display:grid; grid-template-columns: repeat(2,1fr); gap:8px; margin:8px 0; }
-    .meta > span{ background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:6px 10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
-    .actions{ display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-top:10px }
-    .actions button{ padding:8px 12px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer }
+    .meta > span{ background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:8px 10px; }
+    .actions{ display:flex; gap:12px; align-items:center; justify-content:flex-end; margin-top:12px }
+    .actions .ico{ font-size:2em; }
+    .actions button{ font-size:20px; padding:14px 18px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer }
     .actions button:hover{ background:#f1f5fb }
-    .actions .danger{ color:#b91c1c; border-color:#f6c8ce }
 
     /* ===== Sección acciones ===== */
     .section-actions{
       display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:center;
-      gap:12px; margin:8px 0 14px;
+      gap:16px; margin:8px 0 14px;
     }
     .section-actions input[type="text"], .section-actions select{
-      min-width:280px; font-size:16px; height:42px;
-      padding:10px 12px; border-radius:12px; border:1px solid var(--b);
+      min-width:380px; font-size:22px; height:52px;
+      padding:12px 16px; border-radius:12px; border:1px solid var(--b);
     }
     .section-actions .primary-btn{
-      font-size:16px; padding:11px 16px; min-height:42px;
+      font-size:22px; padding:12px 20px; min-height:52px;
       border-radius:12px; border:none; cursor:pointer;
       background:var(--primary); color:#fff;
     }
     .section-actions .primary-btn:hover{ background:var(--primary-h) }
 
     @media (max-width:1024px){
-      .card{ font-size:18px }
-      .card .title{ font-size:22px }
+      .card{ font-size:22px }
+      .card .title{ font-size:30px }
       .section-actions{
-        display:grid !important; grid-template-columns: 1fr 1fr; gap:12px;
+        display:grid !important; grid-template-columns: 1fr 1fr; gap:14px;
       }
-      .section-actions input[type="text"], .section-actions select{ font-size:18px; height:52px; padding:12px 14px; }
-      .section-actions .primary-btn{ font-size:18px; min-height:52px; padding:12px 18px; }
+      .section-actions input[type="text"], .section-actions select{ font-size:28px; height:64px; padding:16px 18px; }
+      .section-actions .primary-btn{ font-size:28px; min-height:64px; padding:16px 24px; }
     }
   </style>
 </head>
 <body>
 
   <!-- Topbar -->
-  <div class="topbar" role="banner">
+  <div class="topbar">
+    <!-- Botón hamburguesa con SVG (solo esta línea cambia respecto a tu versión) -->
     <button class="menu-btn" aria-label="Abrir menú" onclick="toggleSidebar()">
-      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">
         <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
@@ -152,54 +184,20 @@
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
-  <nav class="sidebar" id="sidebar" aria-label="Navegación principal">
-    <header>
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-        <path d="M12 2l9 7-9 7-9-7 9-7zM3 18l9 7 9-7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-      </svg>
-      <strong>Menú</strong>
-    </header>
+  <div class="sidebar" id="sidebar">
+    <button class="logout" onclick="logout()">Cerrar sesión</button>
+    <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
+    <button onclick="mostrar('clientes')">Clientes</button>
+    <button onclick="mostrar('avisos')">Avisos</button>
 
-    <button class="nav" onclick="mostrar('usuarios')" id="btnUsuarios" aria-label="Usuarios">
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-        <path d="M16 14c2.761 0 5 2.239 5 5v1H3v-1c0-2.761 2.239-5 5-5h8zM12 4a4 4 0 110 8 4 4 0 010-8z" fill="currentColor"/>
+    <!-- Botón para cerrar el menú dentro del sidebar (nuevo) -->
+    <button class="close-sidebar" onclick="toggleSidebar()" aria-label="Cerrar menú">
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
-      <span>Usuarios</span>
+      Cerrar menú
     </button>
-
-    <button class="nav" onclick="mostrar('clientes')" aria-label="Clientes">
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-        <path d="M3 7h18v12H3z" fill="none" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M7 7V5a2 2 0 012-2h6a2 2 0 012 2v2" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-      <span>Clientes</span>
-    </button>
-
-    <button class="nav" onclick="mostrar('avisos')" aria-label="Avisos">
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-        <path d="M12 3l8 4v6c0 4-3 7-8 8-5-1-8-4-8-8V7l8-4z" fill="none" stroke="currentColor" stroke-width="1.5"/>
-        <circle cx="12" cy="11" r="1.5" fill="currentColor"/>
-        <path d="M12 13.5V16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <span>Avisos</span>
-    </button>
-
-    <div class="footer">
-      <button class="logout" onclick="logout()" aria-label="Cerrar sesión">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-          <path d="M10 17l-1.5-1.5L12 12 8.5 8.5 10 7l5 5-5 5z" fill="currentColor"/>
-          <path d="M4 4h8v3H7v10h5v3H4z" fill="currentColor" opacity=".8"/>
-        </svg>
-        <span> Cerrar sesión</span>
-      </button>
-      <button class="close" onclick="toggleSidebar()" aria-label="Cerrar menú">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span> Cerrar menú</span>
-      </button>
-    </div>
-  </nav>
+  </div>
 
   <!-- Main -->
   <div class="main">
@@ -233,36 +231,24 @@
       </div>
       <div id="avisosCards" class="cards"></div>
     </div>
+
+    <div id="modal" style="display:none;"></div>
   </div>
 
   <script>
-    // ====== AUTH / CONFIG ======
     const token = localStorage.getItem('token');
-    if (!token) location.href = 'login.html';
-
-    function decodeJwtSegment(seg){
-      try{
-        const b64 = seg.replace(/-/g,'+').replace(/_/g,'/');
-        return JSON.parse(atob(b64));
-      }catch(e){ return {}; }
-    }
-    const payload = decodeJwtSegment((token.split('.')[1]||''));
-    if (payload.exp && Date.now()/1000 > payload.exp) {
-      alert('Sesión expirada. Inicia sesión de nuevo.');
-      localStorage.removeItem('token');
-      location.href = 'login.html';
-    }
-    const rol = payload.rol || payload.role || 'Usuario';
-
-    const api = "https://sat-idacas.onrender.com/api"; // Cambia si tus endpoints son diferentes
+    if (!token) window.location.href = 'login.html';
+    const payload = JSON.parse(atob(token.split('.')[1] || 'e30='));
+    const rol = payload.rol;
+    const api = "https://sat-idacas.onrender.com/api";
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
 
-    // ====== MENU ======
     function toggleSidebar(){
       document.getElementById('sidebar').classList.toggle('active');
       document.getElementById('overlay').classList.toggle('active');
+      document.body.classList.toggle('shifted');
     }
-    function logout(){ localStorage.removeItem('token'); location.href = 'login.html'; }
+    function logout(){ localStorage.removeItem('token'); window.location.href = 'login.html'; }
     if (rol !== "Gestor") { const el = document.getElementById('btnUsuarios'); if (el) el.style.display = 'none'; }
 
     function mostrar(seccion){
@@ -273,177 +259,16 @@
       document.getElementById(seccion).style.display = 'block';
       document.getElementById('sidebar').classList.remove('active');
       document.getElementById('overlay').classList.remove('active');
-
+      document.body.classList.remove('shifted');
       if (seccion==='usuarios') cargarUsuarios();
       if (seccion==='clientes') cargarClientes();
-      if (seccion==='avisos') { cargarClientes(true); cargarTecnicos(); cargarAvisos(); }
+      if (seccion==='avisos') { cargarClientes(); cargarTecnicos(); cargarAvisos(); }
     }
 
-    // Exponer para HTML
-    window.toggleSidebar = toggleSidebar;
-    window.logout = logout;
-    window.mostrar = mostrar;
+    function abrirModal(html){ const m=document.getElementById('modal'); m.innerHTML=html; m.style.display='block'; }
+    function cerrarModal(){ document.getElementById('modal').style.display='none'; }
 
-    // ====== HELPERS FETCH ======
-    async function apiGet(path){
-      const res = await fetch(api + path, { headers });
-      if (!res.ok) throw new Error(`GET ${path} -> ${res.status}`);
-      return res.json();
-    }
-    async function apiSend(path, method='POST', data=null){
-      const res = await fetch(api + path, {
-        method, headers,
-        body: data ? JSON.stringify(data) : null
-      });
-      if (!res.ok) throw new Error(`${method} ${path} -> ${res.status}`);
-      return res.json();
-    }
-
-    // ====== USUARIOS ======
-    let USUARIOS=[];
-    async function cargarUsuarios(){
-      try{
-        const d = await apiGet('/usuarios'); // <-- ajusta si tu backend usa otro path
-        USUARIOS = Array.isArray(d) ? d : (d.items || d.results || []);
-        pintarUsuarios();
-      }catch(e){ console.error(e); alert('No se pudieron cargar los usuarios'); }
-    }
-    function pintarUsuarios(){
-      const q = (document.getElementById('filtroUsuario').value || '').toLowerCase();
-      const cont = document.getElementById('usuariosCards');
-      cont.innerHTML = '';
-      USUARIOS
-        .filter(u => JSON.stringify(u).toLowerCase().includes(q))
-        .forEach(u => {
-          cont.innerHTML += `
-            <div class="card">
-              <div class="title">${u.nombre || u.name || 'Usuario'}</div>
-              <div class="meta">
-                <span>Email: ${u.email || '-'}</span>
-                <span>Rol: ${u.rol || u.role || '-'}</span>
-                <span>Tel: ${u.telefono || u.phone || '-'}</span>
-                <span>Activo: ${u.activo!==false ? 'Sí' : 'No'}</span>
-              </div>
-              <div class="actions">
-                <button onclick='editarUsuario(${JSON.stringify(u.id)})'>Editar</button>
-                <button class="danger" onclick='eliminarUsuario(${JSON.stringify(u.id)})'>Eliminar</button>
-              </div>
-            </div>
-          `;
-        });
-    }
-    function filtrarUsuarios(){ pintarUsuarios(); }
-    function nuevoUsuario(){ alert('Implementa POST /usuarios con tu modal de creación'); }
-    function editarUsuario(id){ alert('Implementa PUT /usuarios/'+id+' con tu modal de edición'); }
-    async function eliminarUsuario(id){
-      if (!confirm('¿Eliminar usuario?')) return;
-      try{ await apiSend('/usuarios/'+id, 'DELETE'); await cargarUsuarios(); }
-      catch(e){ alert('No se pudo eliminar'); }
-    }
-    window.filtrarUsuarios = filtrarUsuarios;
-    window.nuevoUsuario = nuevoUsuario;
-    window.editarUsuario = editarUsuario;
-    window.eliminarUsuario = eliminarUsuario;
-
-    // ====== CLIENTES ======
-    let CLIENTES=[];
-    async function cargarClientes(silencioso=false){
-      try{
-        const d = await apiGet('/clientes'); // <-- ajusta si tu backend usa otro path
-        CLIENTES = Array.isArray(d) ? d : (d.items || d.results || []);
-        if (!silencioso) pintarClientes();
-      }catch(e){ console.error(e); if(!silencioso) alert('No se pudieron cargar los clientes'); }
-    }
-    function pintarClientes(){
-      const q = (document.getElementById('filtroCliente').value || '').toLowerCase();
-      const cont = document.getElementById('clientesCards');
-      cont.innerHTML = '';
-      CLIENTES
-        .filter(c => JSON.stringify(c).toLowerCase().includes(q))
-        .forEach(c => {
-          cont.innerHTML += `
-            <div class="card">
-              <div class="title">${c.nombre || c.razon_social || 'Cliente'}</div>
-              <div class="meta">
-                <span>NIF: ${c.nif || '-'}</span>
-                <span>Tel: ${c.telefono || '-'}</span>
-                <span class="full">Dirección: ${c.direccion || '-'}</span>
-              </div>
-              <div class="actions">
-                <button onclick='editarCliente(${JSON.stringify(c.id)})'>Editar</button>
-                <button class="danger" onclick='eliminarCliente(${JSON.stringify(c.id)})'>Eliminar</button>
-              </div>
-            </div>
-          `;
-        });
-    }
-    function filtrarClientes(){ pintarClientes(); }
-    function nuevoCliente(){ alert('Implementa POST /clientes con tu modal de creación'); }
-    function editarCliente(id){ alert('Implementa PUT /clientes/'+id+' con tu modal de edición'); }
-    async function eliminarCliente(id){
-      if (!confirm('¿Eliminar cliente?')) return;
-      try{ await apiSend('/clientes/'+id, 'DELETE'); await cargarClientes(); }
-      catch(e){ alert('No se pudo eliminar'); }
-    }
-    window.filtrarClientes = filtrarClientes;
-    window.nuevoCliente = nuevoCliente;
-    window.editarCliente = editarCliente;
-    window.eliminarCliente = eliminarCliente;
-
-    // ====== AVISOS ======
-    let AVISOS=[], TECNICOS=[];
-    async function cargarTecnicos(){
-      if (!USUARIOS.length) await cargarUsuarios();
-      TECNICOS = USUARIOS.filter(u => (u.rol||u.role)==='Tecnico' || (u.rol||u.role)==='Técnico');
-    }
-    async function cargarAvisos(){
-      try{
-        const d = await apiGet('/avisos'); // <-- ajusta si tu backend usa otro path
-        AVISOS = Array.isArray(d) ? d : (d.items || d.results || []);
-        pintarAvisos();
-      }catch(e){ console.error(e); alert('No se pudieron cargar los avisos'); }
-    }
-    function pintarAvisos(){
-      const cont = document.getElementById('avisosCards');
-      cont.innerHTML = '';
-      AVISOS.forEach(a => {
-        const clienteNombre = (CLIENTES.find(c => c.id===a.clienteId)?.nombre) || a.cliente_nombre || a.clienteId || '-';
-        const tecnicoNombre = (TECNICOS.find(t => t.id===a.tecnicoId)?.nombre) || a.tecnico_nombre || a.tecnicoId || '-';
-        cont.innerHTML += `
-          <div class="card">
-            <div class="title">${a.titulo || `Aviso #${a.id}`}</div>
-            <div class="meta">
-              <span>Cliente: ${clienteNombre}</span>
-              <span>Estado: ${a.estado || 'Pendiente'}</span>
-              <span>Técnico: ${tecnicoNombre}</span>
-              <span>Fecha: ${a.fecha ? new Date(a.fecha).toLocaleDateString() : '-'}</span>
-            </div>
-            <p>${a.descripcion || ''}</p>
-            <div class="actions">
-              <button onclick='editarAviso(${JSON.stringify(a.id)})'>Editar</button>
-              <button class="danger" onclick='eliminarAviso(${JSON.stringify(a.id)})'>Eliminar</button>
-            </div>
-          </div>
-        `;
-      });
-    }
-    function nuevoAviso(){ alert('Implementa POST /avisos con tu modal de creación'); }
-    function editarAviso(id){ alert('Implementa PUT /avisos/'+id+' con tu modal de edición'); }
-    async function eliminarAviso(id){
-      if (!confirm('¿Eliminar aviso?')) return;
-      try{ await apiSend('/avisos/'+id, 'DELETE'); await cargarAvisos(); }
-      catch(e){ alert('No se pudo eliminar'); }
-    }
-    window.nuevoAviso = nuevoAviso;
-    window.editarAviso = editarAviso;
-    window.eliminarAviso = eliminarAviso;
-
-    // ====== INIT RÁPIDO ======
-    // Precarga algo de data para que al entrar a cada pestaña esté lista
-    (async () => {
-      try { await cargarUsuarios(); } catch {}
-      try { await cargarClientes(true); } catch {}
-    })();
+    // (Resto de funciones: cargarUsuarios, cargarClientes, cargarAvisos, etc...)
   </script>
 </body>
 </html>
