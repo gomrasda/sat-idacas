@@ -60,7 +60,7 @@
     #ticketsBody tr.r2 textarea,
     #ticketsBody tr.r3 input,
     #ticketsBody tr.r4 select {
-      font-size:30px !important;
+      font-size:18px !important;
       font-weight:600;
     }
 
@@ -107,6 +107,14 @@
       .actions-row .btn { font-size: 36px; padding: 20px; }
       #resumen{ font-size:32px; }
       .acciones button{ width:70px; height:70px; font-size:40px; }
+
+      /* Labels grandes solo en Descripción, Horas, Materiales y Estado en móvil */
+      body.cards #ticketsBody td.desc::before,
+      body.cards #ticketsBody td.horas::before,
+      body.cards #ticketsBody td.materiales::before,
+      body.cards #ticketsBody td.estado::before {
+        font-size:30px !important;
+      }
     }
   </style>
 </head>
@@ -176,9 +184,9 @@ async function cargarTickets(){
     let claseEstado=t.estado==="Pausado"?"paused":t.estado==="Cerrado"?"closed":"billed";
     body.innerHTML+=`
       <tr class="r1${alt}"><td><span class="chip">${f}</span></td><td><span class="chip">${t.tecnico||""}</span></td></tr>
-      <tr class="r2${alt}"><td data-label="Descripción" style="grid-column:1/-1;"><textarea onchange="actualizarCampo(${t.id},'description',this.value)" ${dis}>${d}</textarea></td></tr>
-      <tr class="r3${alt}"><td data-label="Horas"><input type="number" value="${t.horas_totales||0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${dis}></td>
-      <td data-label="Materiales"><input type="number" value="${t.precio_materiales||0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${dis}></td></tr>
+      <tr class="r2${alt}"><td class="desc" data-label="Descripción" style="grid-column:1/-1;"><textarea onchange="actualizarCampo(${t.id},'description',this.value)" ${dis}>${d}</textarea></td></tr>
+      <tr class="r3${alt}"><td class="horas" data-label="Horas"><input type="number" value="${t.horas_totales||0}" onchange="actualizarCampo(${t.id},'horas_totales',this.value)" ${dis}></td>
+      <td class="materiales" data-label="Materiales"><input type="number" value="${t.precio_materiales||0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${dis}></td></tr>
       <tr class="r4${alt}">
         <td class="estado ${claseEstado}" data-label="Estado"><select onchange="cambiarEstadoTicket(${t.id},this.value,this)">
           <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
