@@ -19,7 +19,6 @@
     .btn-grey { background:#6c757d; }
     .btn-grey:hover { background:#5a6268; }
 
-    /* Label general */
     label { font-size:24px; font-weight:600; }
 
     .table-wrap { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.05); overflow-x:auto; }
@@ -32,13 +31,11 @@
     .actions-row{ display:flex; gap:12px; justify-content:space-between; margin:8px 0 10px; }
     .actions-row .btn { flex:1 1 50%; text-align:center; font-size:20px; }
 
-    /* Resumen horas/materiales */
     #resumen { display:flex; justify-content:space-between; align-items:center;
       font-size:24px; font-weight:700; color:#1f2937;
       margin:10px 0 20px; background:#eef2f7; padding:10px 14px; border-radius:8px;
     }
 
-    /* Vista Tarjetas */
     body.cards thead{display:none;}
     body.cards #ticketsBody tr{border:0;}
     body.cards #ticketsBody tr.r1,
@@ -59,7 +56,6 @@
 
     .chip{ background:var(--chip); border:1px solid var(--b); padding:6px 10px; border-radius:999px; font-size:18px; white-space:nowrap; font-weight:600; }
 
-    /* Igualar tamaños de letras */
     #ticketsBody tr.r2 textarea,
     #ticketsBody tr.r3 input,
     #ticketsBody tr.r4 select {
@@ -67,13 +63,11 @@
       font-weight:600;
     }
 
-    /* Estado con colores dinámicos */
     .estado select{ padding:10px 12px; border-radius:8px; color:#fff; width:100%; }
     .estado.paused select{ background:var(--paused); color:#000; }
     .estado.closed select{ background:var(--closed); }
     .estado.billed select{ background:var(--billed); }
 
-    /* Acciones en fila */
     .acciones {
       display:flex !important;
       flex-direction:row !important;
@@ -87,14 +81,12 @@
       border:1px solid var(--b); background:#fff; border-radius:14px; cursor:pointer;
     }
 
-    /* Modal */
     .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
       background:#fff; border:1px solid #ccc; padding:20px; border-radius:10px;
       z-index:1000; width:90%; max-width:420px;
     }
     .modal input, .modal select, .modal textarea { width:100%; margin:8px 0; padding:8px; }
 
-    /* ====== MÓVIL ====== */
     @media (max-width: 1024px){
       .container { max-width: 100%; padding: 12px; }
       #tituloCliente{ font-size: 54px !important; }
@@ -112,7 +104,6 @@
       #resumen{ font-size:35px; }
       .acciones button{ width:70px; height:70px; font-size:40px; }
 
-      /* Labels grandes solo en Descripción, Horas, Materiales y Estado en móvil */
       body.cards #ticketsBody td.desc::before,
       body.cards #ticketsBody td.horas::before,
       body.cards #ticketsBody td.materiales::before,
@@ -169,8 +160,36 @@ function autoResize(el){if(!el)return;el.style.height="auto";el.style.height=el.
 function ajustarTodos(){document.querySelectorAll("textarea").forEach(autoResize)}
 document.addEventListener("input",e=>{if(e.target.tagName==="TEXTAREA")autoResize(e.target)})
 
-async function cargarTecnicos(){const u=await apiFetch(api+"/usuarios",{headers});tecnicos=(u||[]).filter(x=>(x.rol||"").toLowerCase().includes("tec"))}
+// ✅ Nueva función robusta para cargar técnicos
+async function cargarTecnicos(){
+  const u = await apiFetch(api + "/usuarios", { headers });
+
+  const norm = s => (s ?? "")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+
+  const hasTecRole = (user) => {
+    const rRaw = user.rol ?? user.role ?? user.roles ?? "";
+    const roles = Array.isArray(rRaw) ? rRaw : [rRaw];
+    return roles.some(r => norm(r).includes("tecn"));
+  };
+
+  tecnicos = (u || [])
+    .filter(hasTecRole)
+    .map(t => ({
+      id: t.id ?? t._id ?? null,
+      nombre: t.nombre ?? t.name ?? t.usuario ?? "Sin nombre"
+    }));
+
+  console.log("Usuarios recibidos:", u);
+  console.log("Técnicos filtrados:", tecnicos);
+}
+
 async function cargarTitulo(){const a=await apiFetch(api+"/avisos/"+avisoId,{headers});tituloCliente.innerText=a?.cliente?`Tickets de ${a.cliente}`:`Tickets (ID:${avisoId})`}
+
+// Botones
 btnNuevo.onclick=async()=>{await cargarTecnicos();abrirModal()}
 btnVolver.onclick=()=>location.href="index.html#avisos"
 
@@ -216,14 +235,44 @@ async function cambiarEstadoTicket(id,e,s){const t=ticketsLista.find(x=>x.id===i
   cargarTickets();
 }
 
-function abrirModal(){modal.innerHTML=`<div class=modal><h3>Nuevo Ticket</h3>
-  <input id=fecha type=date><select id=tecnico>${tecnicos.map(t=>`<option>${t.nombre}</option>`).join("")}</select>
-  <input id=horas_totales type=number><input id=precio_materiales type=number>
-  <select id=estado><option>Pausado</option><option>Cerrado</option><option>Facturado</option></select>
-  <textarea id=descripcion></textarea>
-  <button onclick=guardarTicket()>Guardar</button><button onclick=cerrarModal()>Cancelar</button></div>`;modal.style.display="block"}
+// ✅ Modal actualizado
+function abrirModal(){
+  const opciones = tecnicos.length
+    ? tecnicos.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join("")
+    : `<option value="">-- No hay técnicos disponibles --</option>`;
+
+  modal.innerHTML = `<div class=modal><h3>Nuevo Ticket</h3>
+    <input id=fecha type=date>
+    <select id=tecnico>${opciones}</select>
+    <input id=horas_totales type=number>
+    <input id=precio_materiales type=number>
+    <select id=estado>
+      <option>Pausado</option><option>Cerrado</option><option>Facturado</option>
+    </select>
+    <textarea id=descripcion></textarea>
+    <button onclick=guardarTicket()>Guardar</button>
+    <button onclick=cerrarModal()>Cancelar</button></div>`;
+  modal.style.display = "block";
+}
+
 function cerrarModal(){modal.style.display="none"}
-async function guardarTicket(){await apiFetch(api+"/tickets",{method:"POST",headers,body:JSON.stringify({aviso_id:avisoId,fecha:fecha.value,tecnico:tecnico.value,horas_totales:+horas_totales.value||0,precio_materiales:+precio_materiales.value||0,estado:estado.value,description:descripcion.value})});cerrarModal();cargarTickets()}
+
+async function guardarTicket(){
+  await apiFetch(api+"/tickets",{
+    method:"POST",
+    headers,
+    body:JSON.stringify({
+      aviso_id:avisoId,
+      fecha:fecha.value,
+      tecnico:tecnico.value,
+      horas_totales:+horas_totales.value||0,
+      precio_materiales:+precio_materiales.value||0,
+      estado:estado.value,
+      description:descripcion.value
+    })
+  });
+  cerrarModal();cargarTickets()
+}
 
 async function editarTicket(id){const t=ticketsLista.find(x=>x.id===id);
   modal.innerHTML=`<div class=modal><h3>Editar</h3>
