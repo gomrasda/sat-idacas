@@ -155,7 +155,7 @@
       <div id="usuariosCards" class="cards"></div>
     </div>
 
-    <div id="clientes" style="display:none;">
+    <div id="clientes" style="display:none%;">
       <h2>Clientes</h2>
       <div class="section-actions">
         <input id="filtroCliente" type="text" placeholder="Buscar cliente..." oninput="filtrarClientes()">
@@ -272,13 +272,14 @@
         tecnicos = [];
       }
     }
+
     async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
     function renderAvisos(l){
       avisosCards.innerHTML="";
       l.forEach(a=>{
         avisosCards.innerHTML+=`
           <div class="card">
-            <div class="title">Cliente: ${esc(a.cliente||"")}</div>
+            <div class="title">Cliente: ${esc(a.cliente_nombre || a.cliente || "")}</div>
             <div class="meta">
               <span><b>Fecha:</b> ${esc(a.fecha_programada||"")}</span>
               <span><b>Técnico:</b> ${esc(a.tecnico||"")}</span>
@@ -345,7 +346,6 @@
     }
 
     /* ===== UTIL ===== */
-    // Solo fecha (como en tickets)
     function nowForDate(){
       const d=new Date();
       d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
@@ -362,8 +362,9 @@
         return;
       }
 
+      // Mostrar nombre, enviar ID
       const clientesOpts = clientesArr
-        .map(c=>`<option value="${esc(c.nombre||'')}">${esc(c.nombre||'')}</option>`).join('');
+        .map(c=>`<option value="${c.id}">${esc(c.nombre||'')}</option>`).join('');
       const tecnicosOpts = tecnicos
         .map(t=>{
           const name = t.nombre || t.nombre_completo || t.name || t.usuario || '';
@@ -383,8 +384,8 @@
         <textarea id="a_desc" placeholder="Descripción / detalle"></textarea>
       `, async () => {
         const data = {
-          cliente: (a_cliente.value||'').trim(),
-          fecha_programada: (a_fecha.value||'').trim(), // YYYY-MM-DD
+          cliente: parseInt(a_cliente.value,10),   // ID numérico
+          fecha_programada: (a_fecha.value||'').trim(),
           tecnico: (a_tecnico.value||'').trim(),
           descripcion: (a_desc.value||'').trim()
         };
@@ -409,7 +410,7 @@
       });
     }
 
-    /* ===== EDITAR / BORRAR AVISO (básico) ===== */
+    /* ===== EDITAR / BORRAR AVISO ===== */
     async function editarAviso(id){
       const a = avisosArr.find(x=>x.id===id);
       if(!a){ alert('Aviso no encontrado'); return; }
@@ -417,12 +418,13 @@
       if(!clientesArr.length) await cargarClientes();
       if(!tecnicos.length) await cargarTecnicos();
 
+      // En edición, marcamos selected comparando con id
       const clientesOpts = clientesArr
-        .map(c=>`<option ${ (a.cliente===c.nombre)?'selected':'' } value="${esc(c.nombre||'')}">${esc(c.nombre||'')}</option>`).join('');
+        .map(c=>`<option ${(a.cliente==c.id)?'selected':''} value="${c.id}">${esc(c.nombre||'')}</option>`).join('');
       const tecnicosOpts = tecnicos
         .map(t=>{
           const name = t.nombre || t.nombre_completo || t.name || t.usuario || '';
-          return `<option ${ (a.tecnico===name)?'selected':'' } value="${esc(name)}">${esc(name)}</option>`;
+          return `<option ${(a.tecnico===name)?'selected':''} value="${esc(name)}">${esc(name)}</option>`;
         }).join('');
       const fechaVal = (a.fecha_programada||'').slice(0,10); // YYYY-MM-DD
 
@@ -433,8 +435,8 @@
         <textarea id="e_desc" placeholder="Descripción / detalle">${esc(a.descripcion||'')}</textarea>
       `, async () => {
         const body = {
-          cliente: (e_cliente.value||'').trim(),
-          fecha_programada: (e_fecha.value||'').trim(), // YYYY-MM-DD
+          cliente: parseInt(e_cliente.value,10),   // ID numérico
+          fecha_programada: (e_fecha.value||'').trim(),
           tecnico: (e_tecnico.value||'').trim(),
           descripcion: (e_desc.value||'').trim()
         };
