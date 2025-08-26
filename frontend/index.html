@@ -196,6 +196,12 @@
 
     const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
+    /* ✅ NUEVO helper: normaliza texto (minúsculas + sin tildes) */
+    const norm = s => (s ?? '').toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
     /* Usuarios */
     let usuariosArr=[];
     async function cargarUsuarios(){const r=await fetch(api+"/usuarios",{headers});usuariosArr=await r.json();renderUsuarios(usuariosArr);}
@@ -246,7 +252,12 @@
 
     /* Avisos */
     let avisosArr=[],tecnicos=[];
-    async function cargarTecnicos(){const r=await fetch(api+"/usuarios",{headers});const u=await r.json();tecnicos=u.filter(t=>(t.rol||"").toLowerCase().includes("tec"));}
+    async function cargarTecnicos(){
+      const r=await fetch(api+"/usuarios",{headers});
+      const u=await r.json();
+      // 🔧 Cambio mínimo: acepta "Tecnico", "Técnico", "tec", "tecnico sat", etc.
+      tecnicos=u.filter(t=>norm(t.rol).includes("tec"));
+    }
     async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
     function renderAvisos(l){
       avisosCards.innerHTML="";
@@ -332,6 +343,12 @@
       // Asegurar datos para selects
       if(!clientesArr.length) await cargarClientes();
       if(!tecnicos.length) await cargarTecnicos();
+
+      // 🚧 Guardarraíl: si no encontramos técnicos, avisamos y salimos
+      if(!tecnicos.length){
+        alert('No se han encontrado usuarios con rol de Técnico. Revisa el rol en "Usuarios".');
+        return;
+      }
 
       const clientesOpts = clientesArr
         .map(c=>`<option value="${esc(c.nombre||'')}">${esc(c.nombre||'')}</option>`).join('');
