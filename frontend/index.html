@@ -51,7 +51,7 @@
     /* Caja modal */
     .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
       background:#fff; padding:20px; border-radius:12px; border:1px solid #ccc;
-      z-index:1002; width:90%; max-width:460px; }
+      z-index:1002; width:90%; max-width:520px; }
     .modal h3{ margin:0 0 8px }
     .modal input, .modal select, .modal textarea {
       width: 100%; padding: 10px 12px; margin: 6px 0; border: 1px solid var(--b); border-radius: 10px; font: inherit;
@@ -92,7 +92,7 @@
     .section-actions .primary-btn{
       font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px; border:none; cursor:pointer; background:var(--primary); color:#fff;
     }
-    .section-actions .primary-btn:hover{ background:var(--primary-h) }
+    .section-actions .primary-btn:hover{ background: var(--primary-h) }
 
     /* ===== Responsive ===== */
     @media (max-width:1024px){
@@ -318,6 +318,127 @@
           alert(err.message || 'Error creando el cliente');
         }
       });
+    }
+
+    /* ===== UTIL ===== */
+    function nowForDatetimeLocal(){
+      const d=new Date();
+      d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+      return d.toISOString().slice(0,16); // YYYY-MM-DDTHH:mm
+    }
+
+    /* ===== NUEVO AVISO ===== */
+    async function nuevoAviso() {
+      // Asegurar datos para selects
+      if(!clientesArr.length) await cargarClientes();
+      if(!tecnicos.length) await cargarTecnicos();
+
+      const clientesOpts = clientesArr
+        .map(c=>`<option value="${esc(c.nombre||'')}">${esc(c.nombre||'')}</option>`).join('');
+      const tecnicosOpts = tecnicos
+        .map(t=>{
+          const name = t.nombre || t.nombre_completo || t.usuario || '';
+          return `<option value="${esc(name)}">${esc(name)}</option>`;
+        }).join('');
+
+      openModal('Nuevo Aviso', `
+        <select id="a_cliente">
+          <option value="">-- Selecciona cliente --</option>
+          ${clientesOpts}
+        </select>
+        <input id="a_fecha" type="datetime-local" value="${nowForDatetimeLocal()}">
+        <select id="a_tecnico">
+          <option value="">-- Selecciona técnico --</option>
+          ${tecnicosOpts}
+        </select>
+        <textarea id="a_desc" placeholder="Descripción / detalle"></textarea>
+      `, async () => {
+        const data = {
+          cliente: (a_cliente.value||'').trim(),
+          fecha_programada: (a_fecha.value||'').trim(),
+          tecnico: (a_tecnico.value||'').trim(),
+          descripcion: (a_desc.value||'').trim()
+        };
+        if(!data.cliente || !data.fecha_programada || !data.tecnico){
+          alert('Cliente, fecha y técnico son obligatorios'); return;
+        }
+        try{
+          const r = await fetch(api + '/avisos', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(data)
+          });
+          if(!r.ok){
+            const txt = await r.text();
+            throw new Error(txt || 'No se pudo crear el aviso');
+          }
+          closeModal();
+          cargarAvisos();
+        }catch(err){
+          alert(err.message || 'Error creando el aviso');
+        }
+      });
+    }
+
+    /* ===== EDITAR / BORRAR AVISO (básico) ===== */
+    async function editarAviso(id){
+      const a = avisosArr.find(x=>x.id===id);
+      if(!a){ alert('Aviso no encontrado'); return; }
+
+      if(!clientesArr.length) await cargarClientes();
+      if(!tecnicos.length) await cargarTecnicos();
+
+      const clientesOpts = clientesArr
+        .map(c=>`<option ${ (a.cliente===c.nombre)?'selected':'' } value="${esc(c.nombre||'')}">${esc(c.nombre||'')}</option>`).join('');
+      const tecnicosOpts = tecnicos
+        .map(t=>{
+          const name = t.nombre || t.nombre_completo || t.usuario || '';
+          return `<option ${ (a.tecnico===name)?'selected':'' } value="${esc(name)}">${esc(name)}</option>`;
+        }).join('');
+      const fechaVal = (a.fecha_programada||'').slice(0,16);
+
+      openModal('Editar Aviso', `
+        <select id="e_cliente">${clientesOpts}</select>
+        <input id="e_fecha" type="datetime-local" value="${esc(fechaVal)}">
+        <select id="e_tecnico">${tecnicosOpts}</select>
+        <textarea id="e_desc" placeholder="Descripción / detalle">${esc(a.descripcion||'')}</textarea>
+      `, async () => {
+        const body = {
+          cliente: (e_cliente.value||'').trim(),
+          fecha_programada: (e_fecha.value||'').trim(),
+          tecnico: (e_tecnico.value||'').trim(),
+          descripcion: (e_desc.value||'').trim()
+        };
+        try{
+          const r = await fetch(api + '/avisos/' + id, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify(body)
+          });
+          if(!r.ok){
+            const txt = await r.text();
+            throw new Error(txt || 'No se pudo actualizar el aviso');
+          }
+          closeModal();
+          cargarAvisos();
+        }catch(err){
+          alert(err.message || 'Error actualizando el aviso');
+        }
+      });
+    }
+
+    async function borrarAviso(id){
+      if(!confirm('¿Borrar este aviso?')) return;
+      try{
+        const r = await fetch(api + '/avisos/' + id, { method:'DELETE', headers });
+        if(!r.ok){
+          const txt = await r.text();
+          throw new Error(txt || 'No se pudo borrar el aviso');
+        }
+        cargarAvisos();
+      }catch(err){
+        alert(err.message || 'Error borrando el aviso');
+      }
     }
 
     /* ===== NUEVO USUARIO ===== */
