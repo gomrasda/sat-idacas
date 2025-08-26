@@ -255,8 +255,16 @@
     async function cargarTecnicos(){
       const r=await fetch(api+"/usuarios",{headers});
       const u=await r.json();
-      // 🔧 Cambio mínimo: acepta "Tecnico", "Técnico", "tec", "tecnico sat", etc.
-      tecnicos=u.filter(t=>norm(t.rol).includes("tec"));
+
+      // ✅ Nuevo: acepta rol, role o roles (array); tildes/variantes ("Técnico", "Tecnico SAT", etc.)
+      const hasTecRole = (user) => {
+        const rRaw = user.rol ?? user.role ?? user.roles ?? "";
+        const roles = Array.isArray(rRaw) ? rRaw : [rRaw];
+        return roles.some(r => norm(r).includes("tecn"));
+      };
+
+      // mantenemos la misma forma de objeto (no mapeamos) para no romper nada
+      tecnicos = (u || []).filter(hasTecRole);
     }
     async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
     function renderAvisos(l){
@@ -294,7 +302,6 @@
       `;
       document.getElementById('btnCancel').onclick = closeModal;
       document.getElementById('btnSave').onclick = onSave;
-      // cerrar clicando fuera
       modal.onclick = (e) => { if (e.target === modal) closeModal(); };
     }
     function closeModal() {
@@ -340,11 +347,9 @@
 
     /* ===== NUEVO AVISO ===== */
     async function nuevoAviso() {
-      // Asegurar datos para selects
       if(!clientesArr.length) await cargarClientes();
       if(!tecnicos.length) await cargarTecnicos();
 
-      // 🚧 Guardarraíl: si no encontramos técnicos, avisamos y salimos
       if(!tecnicos.length){
         alert('No se han encontrado usuarios con rol de Técnico. Revisa el rol en "Usuarios".');
         return;
