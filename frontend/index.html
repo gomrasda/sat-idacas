@@ -247,40 +247,31 @@
 
     /* Avisos */
     let avisosArr=[],tecnicos=[];
-    // ✅ función robusta (igual filosofía que en ticket.html)
     async function cargarTecnicos(){
       try{
         const r = await fetch(api + "/usuarios", { headers });
         const u = await r.json();
-        const getRoles = user => {
+        const rolesOf = user => {
           const raw = user.rol ?? user.role ?? user.roles ?? '';
           return Array.isArray(raw) ? raw : [raw];
         };
-        const isTec = user => getRoles(user).some(r => norm(r).includes('tecn'));
+        const isTec = user => rolesOf(user).some(r => norm(r).includes('tecn'));
 
-        // 1) Técnicos por rol
         let list = (Array.isArray(u) ? u : []).filter(isTec);
-        // 2) Si no hay, usar no-gestores
         if(!list.length){
-          list = (Array.isArray(u)?u:[]).filter(user => !getRoles(user).some(r => norm(r)==='gestor'));
+          list = (Array.isArray(u)?u:[]).filter(user => !rolesOf(user).some(r => norm(r)==='gestor'));
         }
-        // 3) Último recurso: todos (para no dejar el select vacío)
         if(!list.length){ list = Array.isArray(u)?u:[]; }
 
-        // Unificar nombre visible
         tecnicos = list.map(t => ({
           id: t.id ?? t._id ?? t.usuario ?? (t.email || ''),
           nombre: t.nombre ?? t.nombre_completo ?? t.name ?? t.usuario ?? t.email ?? 'Sin nombre'
         }));
-
-        // (Opcional) logs de depuración
-        // console.log('Tecnicos ->', tecnicos);
       }catch(e){
         console.error('Error cargarTecnicos', e);
         tecnicos = [];
       }
     }
-
     async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
     function renderAvisos(l){
       avisosCards.innerHTML="";
@@ -354,10 +345,11 @@
     }
 
     /* ===== UTIL ===== */
-    function nowForDatetimeLocal(){
+    // Solo fecha (como en tickets)
+    function nowForDate(){
       const d=new Date();
       d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
-      return d.toISOString().slice(0,16); // YYYY-MM-DDTHH:mm
+      return d.toISOString().slice(0,10); // YYYY-MM-DD
     }
 
     /* ===== NUEVO AVISO ===== */
@@ -383,7 +375,7 @@
           <option value="">-- Selecciona cliente --</option>
           ${clientesOpts}
         </select>
-        <input id="a_fecha" type="datetime-local" value="${nowForDatetimeLocal()}">
+        <input id="a_fecha" type="date" value="${nowForDate()}">
         <select id="a_tecnico">
           <option value="">-- Selecciona técnico --</option>
           ${tecnicosOpts}
@@ -392,7 +384,7 @@
       `, async () => {
         const data = {
           cliente: (a_cliente.value||'').trim(),
-          fecha_programada: (a_fecha.value||'').trim(),
+          fecha_programada: (a_fecha.value||'').trim(), // YYYY-MM-DD
           tecnico: (a_tecnico.value||'').trim(),
           descripcion: (a_desc.value||'').trim()
         };
@@ -432,17 +424,17 @@
           const name = t.nombre || t.nombre_completo || t.name || t.usuario || '';
           return `<option ${ (a.tecnico===name)?'selected':'' } value="${esc(name)}">${esc(name)}</option>`;
         }).join('');
-      const fechaVal = (a.fecha_programada||'').slice(0,16);
+      const fechaVal = (a.fecha_programada||'').slice(0,10); // YYYY-MM-DD
 
       openModal('Editar Aviso', `
         <select id="e_cliente">${clientesOpts}</select>
-        <input id="e_fecha" type="datetime-local" value="${esc(fechaVal)}">
+        <input id="e_fecha" type="date" value="${esc(fechaVal)}">
         <select id="e_tecnico">${tecnicosOpts}</select>
         <textarea id="e_desc" placeholder="Descripción / detalle">${esc(a.descripcion||'')}</textarea>
       `, async () => {
         const body = {
           cliente: (e_cliente.value||'').trim(),
-          fecha_programada: (e_fecha.value||'').trim(),
+          fecha_programada: (e_fecha.value||'').trim(), // YYYY-MM-DD
           tecnico: (e_tecnico.value||'').trim(),
           descripcion: (e_desc.value||'').trim()
         };
