@@ -155,7 +155,8 @@
       <div id="usuariosCards" class="cards"></div>
     </div>
 
-    <div id="clientes" style="display:none%;">
+    <!-- 🔧 Quité el % erróneo -->
+    <div id="clientes" style="display:none;">
       <h2>Clientes</h2>
       <div class="section-actions">
         <input id="filtroCliente" type="text" placeholder="Buscar cliente..." oninput="filtrarClientes()">
@@ -210,10 +211,6 @@
               <span><b>Usuario:</b> ${esc(u.usuario||"")}</span>
               <span><b>Email:</b> ${esc(u.email||"")}</span>
               <span><b>Rol:</b> ${esc(u.rol||"")}</span>
-            </div>
-            <div class="actions">
-              <button onclick="editarUsuario(${u.id})"><span class="ico">✏️</span>Editar</button>
-              <button onclick="borrarUsuario(${u.id})"><span class="ico">🗑️</span>Borrar</button>
             </div>
           </div>`;
       });
@@ -283,6 +280,7 @@
             <div class="meta">
               <span><b>Fecha:</b> ${esc(a.fecha_programada||"")}</span>
               <span><b>Técnico:</b> ${esc(a.tecnico||"")}</span>
+              ${a.descripcion ? `<span><b>Observaciones:</b> ${esc(a.descripcion)}</span>` : '' }
             </div>
             <div class="actions">
               <button class="btn-ticket" onclick="abrirTicket(${a.id})"><span class="ico">🎫</span>Ticket</button>
