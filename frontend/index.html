@@ -195,12 +195,7 @@
     }
 
     const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-
-    /* ✅ NUEVO helper: normaliza texto (minúsculas + sin tildes) */
-    const norm = s => (s ?? '').toString()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
+    const norm = s => (s ?? '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
     /* Usuarios */
     let usuariosArr=[];
@@ -252,20 +247,40 @@
 
     /* Avisos */
     let avisosArr=[],tecnicos=[];
+    // ✅ función robusta (igual filosofía que en ticket.html)
     async function cargarTecnicos(){
-      const r=await fetch(api+"/usuarios",{headers});
-      const u=await r.json();
+      try{
+        const r = await fetch(api + "/usuarios", { headers });
+        const u = await r.json();
+        const getRoles = user => {
+          const raw = user.rol ?? user.role ?? user.roles ?? '';
+          return Array.isArray(raw) ? raw : [raw];
+        };
+        const isTec = user => getRoles(user).some(r => norm(r).includes('tecn'));
 
-      // ✅ Nuevo: acepta rol, role o roles (array); tildes/variantes ("Técnico", "Tecnico SAT", etc.)
-      const hasTecRole = (user) => {
-        const rRaw = user.rol ?? user.role ?? user.roles ?? "";
-        const roles = Array.isArray(rRaw) ? rRaw : [rRaw];
-        return roles.some(r => norm(r).includes("tecn"));
-      };
+        // 1) Técnicos por rol
+        let list = (Array.isArray(u) ? u : []).filter(isTec);
+        // 2) Si no hay, usar no-gestores
+        if(!list.length){
+          list = (Array.isArray(u)?u:[]).filter(user => !getRoles(user).some(r => norm(r)==='gestor'));
+        }
+        // 3) Último recurso: todos (para no dejar el select vacío)
+        if(!list.length){ list = Array.isArray(u)?u:[]; }
 
-      // mantenemos la misma forma de objeto (no mapeamos) para no romper nada
-      tecnicos = (u || []).filter(hasTecRole);
+        // Unificar nombre visible
+        tecnicos = list.map(t => ({
+          id: t.id ?? t._id ?? t.usuario ?? (t.email || ''),
+          nombre: t.nombre ?? t.nombre_completo ?? t.name ?? t.usuario ?? t.email ?? 'Sin nombre'
+        }));
+
+        // (Opcional) logs de depuración
+        // console.log('Tecnicos ->', tecnicos);
+      }catch(e){
+        console.error('Error cargarTecnicos', e);
+        tecnicos = [];
+      }
     }
+
     async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
     function renderAvisos(l){
       avisosCards.innerHTML="";
@@ -359,7 +374,7 @@
         .map(c=>`<option value="${esc(c.nombre||'')}">${esc(c.nombre||'')}</option>`).join('');
       const tecnicosOpts = tecnicos
         .map(t=>{
-          const name = t.nombre || t.nombre_completo || t.usuario || '';
+          const name = t.nombre || t.nombre_completo || t.name || t.usuario || '';
           return `<option value="${esc(name)}">${esc(name)}</option>`;
         }).join('');
 
@@ -414,7 +429,7 @@
         .map(c=>`<option ${ (a.cliente===c.nombre)?'selected':'' } value="${esc(c.nombre||'')}">${esc(c.nombre||'')}</option>`).join('');
       const tecnicosOpts = tecnicos
         .map(t=>{
-          const name = t.nombre || t.nombre_completo || t.usuario || '';
+          const name = t.nombre || t.nombre_completo || t.name || t.usuario || '';
           return `<option ${ (a.tecnico===name)?'selected':'' } value="${esc(name)}">${esc(name)}</option>`;
         }).join('');
       const fechaVal = (a.fecha_programada||'').slice(0,16);
