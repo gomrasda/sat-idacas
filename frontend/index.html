@@ -37,7 +37,6 @@
 
     .main { padding: 16px 16px 16px 24px; margin-top: 60px; }
 
-    /* ===== HERO ===== */
     #inicio{
       min-height: calc(100vh - 60px);
       display:flex; flex-direction:column; justify-content:center; align-items:center;
@@ -48,7 +47,6 @@
     #inicio h2{ margin:6px 0 0; font-weight:800; letter-spacing:.3px; color:#1f2937;
       font-size: clamp(22px, 6.5vw, 42px); }
 
-    /* Caja modal */
     .modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
       background:#fff; padding:20px; border-radius:12px; border:1px solid #ccc;
       z-index:1002; width:90%; max-width:520px; }
@@ -60,16 +58,10 @@
     .btn.primary{ background: var(--primary); color:#fff; border-color:transparent }
     .btn.primary:hover{ background: var(--primary-h) }
 
-    /* Backdrop para el modal (contenedor #modal) */
     #modal{
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.45);
-      z-index: 1001;
-      display: none;
+      position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1001; display: none;
     }
 
-    /* ==== Tarjetas ==== */
     .cards{ display:flex; flex-direction:column; gap:24px; margin-top:24px; }
     .card{
       background:#fff; border:2px solid var(--card-b); border-radius:0; padding:16px; width:100%;
@@ -77,14 +69,13 @@
     }
     .card .title{ font-size:24px; font-weight:800; margin:0 0 6px; text-transform:uppercase }
     .meta{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; margin:8px 0; }
-    .meta > span{ display:block; background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:8px 10px; }
+    .meta > span{ background:var(--chip); border:1px solid var(--b); border-radius:999px; padding:8px 10px; }
     .actions{ display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:12px }
     .actions .ico{ font-size:1.7em; line-height:1; vertical-align:-2px; display:inline-block; margin-right:8px }
     .actions button{ font-size:16px; padding:10px 14px; border-radius:10px; border:1px solid var(--b); background:#fff; cursor:pointer }
     .actions button:hover{ background:#f1f5fb }
     .actions .btn-ticket{ order:-1; margin-right:auto }
 
-    /* ==== Acciones (barra superior) ==== */
     .section-actions{ display:flex; flex-wrap:wrap; gap:16px; margin:8px 0 14px; }
     .section-actions input[type="text"], .section-actions select{
       min-width:380px; font-size:20px; height:52px; padding:12px 16px; border-radius:12px; border:1px solid var(--b); background:#fff;
@@ -92,38 +83,21 @@
     .section-actions .primary-btn{
       font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px; border:none; cursor:pointer; background:var(--primary); color:#fff;
     }
-    .section-actions .primary-btn:hover{ background: var(--primary-h) }
 
-    /* ===== Responsive ===== */
     @media (max-width:1024px){
       .actions .ico{ font-size:2em }
       .card{ padding:14px; font-size:20px }
       .card .title{ font-size:40px }
       .actions button{ font-size:32px; padding:20px }
       .cards{ gap:32px; margin-top:32px }
-
       .section-actions{ display:grid !important; grid-template-columns:1fr; gap:14px; }
-      .section-actions input[type="text"], .section-actions select, .section-actions .primary-btn{
-        width:100%; min-width:0;
-      }
       .section-actions input[type="text"], .section-actions select{ font-size:26px; height:64px; padding:16px 18px; border-radius:14px }
       .section-actions .primary-btn{ font-size:26px; min-height:64px; padding:16px 24px; border-radius:14px }
-
-      /* 📍 Titulos grandes en móvil */
-      #usuarios h2,
-      #clientes h2,
-      #avisos h2 {
-        font-size:54px !important;
-        font-weight:800;
-        text-align:left;
-        text-transform:uppercase;
-        margin:20px 0;
-      }
+      #usuarios h2, #clientes h2, #avisos h2 { font-size:54px !important; font-weight:800; text-align:left; text-transform:uppercase; margin:20px 0; }
     }
   </style>
 </head>
 <body>
-  <!-- Top -->
   <div class="topbar">
     <button onclick="toggleSidebar()">☰</button>
     <h2>SAT Control</h2>
@@ -131,7 +105,6 @@
   </div>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-  <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <button class="logout" onclick="logout()">Cerrar sesión</button>
     <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
@@ -139,7 +112,6 @@
     <button onclick="mostrar('avisos')">Avisos</button>
   </div>
 
-  <!-- Main -->
   <div class="main">
     <div id="inicio">
       <img src="logo.jpg" alt="Logo de la empresa">
@@ -155,7 +127,6 @@
       <div id="usuariosCards" class="cards"></div>
     </div>
 
-    <!-- 🔧 Quité el % erróneo -->
     <div id="clientes" style="display:none;">
       <h2>Clientes</h2>
       <div class="section-actions">
@@ -173,7 +144,6 @@
       <div id="avisosCards" class="cards"></div>
     </div>
 
-    <!-- Backdrop + contenedor del modal -->
     <div id="modal" style="display:none;"></div>
   </div>
 
@@ -360,7 +330,6 @@
         return;
       }
 
-      // Mostrar nombre, enviar ID
       const clientesOpts = clientesArr
         .map(c=>`<option value="${c.id}">${esc(c.nombre||'')}</option>`).join('');
       const tecnicosOpts = tecnicos
@@ -381,11 +350,14 @@
         </select>
         <textarea id="a_desc" placeholder="Descripción / detalle"></textarea>
       `, async () => {
+        const descripcion = (a_desc.value||'').trim();
         const data = {
-          cliente: parseInt(a_cliente.value,10),   // ID numérico
+          cliente: parseInt(a_cliente.value,10),
           fecha_programada: (a_fecha.value||'').trim(),
           tecnico: (a_tecnico.value||'').trim(),
-          descripcion: (a_desc.value||'').trim()
+          descripcion,
+          // 👇 Backend lo exige: lo generamos automáticamente
+          tarea: descripcion || 'AVISO'
         };
         if(!data.cliente || !data.fecha_programada || !data.tecnico){
           alert('Cliente, fecha y técnico son obligatorios'); return;
@@ -416,7 +388,6 @@
       if(!clientesArr.length) await cargarClientes();
       if(!tecnicos.length) await cargarTecnicos();
 
-      // En edición, marcamos selected comparando con id
       const clientesOpts = clientesArr
         .map(c=>`<option ${(a.cliente==c.id)?'selected':''} value="${c.id}">${esc(c.nombre||'')}</option>`).join('');
       const tecnicosOpts = tecnicos
@@ -424,7 +395,7 @@
           const name = t.nombre || t.nombre_completo || t.name || t.usuario || '';
           return `<option ${(a.tecnico===name)?'selected':''} value="${esc(name)}">${esc(name)}</option>`;
         }).join('');
-      const fechaVal = (a.fecha_programada||'').slice(0,10); // YYYY-MM-DD
+      const fechaVal = (a.fecha_programada||'').slice(0,10);
 
       openModal('Editar Aviso', `
         <select id="e_cliente">${clientesOpts}</select>
@@ -432,11 +403,14 @@
         <select id="e_tecnico">${tecnicosOpts}</select>
         <textarea id="e_desc" placeholder="Descripción / detalle">${esc(a.descripcion||'')}</textarea>
       `, async () => {
+        const descripcion = (e_desc.value||'').trim();
         const body = {
-          cliente: parseInt(e_cliente.value,10),   // ID numérico
+          cliente: parseInt(e_cliente.value,10),
           fecha_programada: (e_fecha.value||'').trim(),
           tecnico: (e_tecnico.value||'').trim(),
-          descripcion: (e_desc.value||'').trim()
+          descripcion,
+          // 👇 lo mantenemos para cumplir backend
+          tarea: descripcion || a.tarea || 'AVISO'
         };
         try{
           const r = await fetch(api + '/avisos/' + id, {
@@ -508,7 +482,6 @@
       });
     }
 
-    /* INIT */
     window.addEventListener('load',()=>{mostrar(location.hash.substring(1)||'inicio');});
   </script>
 </body>
