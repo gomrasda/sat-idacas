@@ -161,6 +161,21 @@
       margin: 0 !important; line-height: 1 !important;
     }
     .topbar button{ font-size: 2rem !important; }
+
+    /* ===== Más espacio entre icono y texto del sidebar ===== */
+.sidebar button,
+.sidebar .logout{
+  display: flex !important;
+  align-items: center !important;
+  gap: 24px !important;          /* separación grande */
+}
+
+.sidebar button i,
+.sidebar .logout i{
+  margin-right: 0 !important;    /* usamos gap, no margen */
+  width: 1.6em !important;       /* reserva ancho proporcional al tamaño */
+  text-align: center !important;
+}
   </style>
 </head>
 <body>
