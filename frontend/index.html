@@ -14,7 +14,7 @@
 
     /* ===== TOPBAR ===== */
     .topbar {
-      position: relative;  /* para centrar el título con absolute */
+      position: relative;
       background: #003366; color: white;
       display: flex; align-items: center; justify-content: flex-start;
       gap: 8px;
@@ -24,20 +24,20 @@
     .topbar h2 {
       position: absolute; left: 50%; transform: translateX(-50%);
       margin: 0; font-size: 1.2rem; line-height: 1;
-      pointer-events: none;     /* no captura clics */
+      pointer-events: none;
     }
     .topbar button {
       background:none; border:none; color:#fff; font-size:1.8rem; cursor:pointer;
     }
 
-    /* ===== SIDEBAR (animado por transform) ===== */
+    /* ===== SIDEBAR ===== */
     .sidebar{
       position: fixed; top: 0; left: 0;
-      width: 260px;         /* ancho por defecto escritorio */
+      width: 260px;
       height: 100%;
       background:#222; color:#fff;
       padding: 20px;
-      transform: translateX(-100%);   /* oculto */
+      transform: translateX(-100%);
       transition: transform .3s ease;
       z-index: 1001;
     }
@@ -111,27 +111,6 @@
       font-size:20px; padding:12px 20px; min-height:52px; border-radius:12px; border:none; cursor:pointer; background:var(--primary); color:#fff;
     }
 
-    /* ===== Responsive ===== */
-    @media (max-width: 768px){
-      .sidebar{
-        width: 75vw;                 /* 3/4 de la pantalla */
-        padding: 20px 16px;
-      }
-      .sidebar button,
-      .logout{
-        font-size: 1.25rem;          /* ~20px */
-        padding: 16px;               /* objetivo táctil grande */
-        line-height: 1.2;
-      }
-      .topbar h2{ font-size: 1.1rem; }
-      .topbar button{ font-size: 2rem; }
-    }
-
-    @media (min-width: 769px) and (max-width: 1024px){
-      .sidebar{ width: 320px; }
-      .sidebar button, .logout{ font-size: 1.15rem; padding: 14px; }
-    }
-
     @media (max-width:1024px){
       .actions .ico{ font-size:2em }
       .card{ padding:14px; font-size:20px }
@@ -143,6 +122,27 @@
       .section-actions .primary-btn{ font-size:26px; min-height:64px; padding:16px 24px; border-radius:14px }
       #usuarios h2, #clientes h2, #avisos h2 { font-size:54px !important; font-weight:800; text-align:left; text-transform:uppercase; margin:20px 0; }
     }
+
+    /* ====== OVERRIDES MÓVIL (forzados) ====== */
+    .sidebar{ left: 0 !important; transform: translateX(-100%) !important; transition: transform .3s ease !important; }
+    .sidebar.active{ transform: translateX(0) !important; }
+
+    @media (max-width: 1200px){
+      .sidebar, #sidebar{ width: 75vw !important; max-width: none !important; padding: 20px 16px !important; }
+    }
+
+    .sidebar button, .sidebar .logout{
+      font-size: 1.25rem !important;
+      padding: 16px !important;
+      line-height: 1.2 !important;
+    }
+
+    .topbar{ position: relative !important; }
+    .topbar h2{
+      position: absolute !important; left: 50% !important; transform: translateX(-50%) !important;
+      margin: 0 !important; line-height: 1 !important;
+    }
+    .topbar button{ font-size: 2rem !important; }
   </style>
 </head>
 <body>
@@ -529,6 +529,22 @@
     }
 
     window.addEventListener('load',()=>{mostrar(location.hash.substring(1)||'inicio');});
+
+    /* ====== Forzar 75vw por JS si el CSS no entra/cached ====== */
+    function applyMobileSidebarWidth(){
+      try{
+        if(window.innerWidth <= 1200){
+          var w = Math.round(window.innerWidth * 0.75) + 'px';
+          var el = document.getElementById('sidebar');
+          if(el) el.style.width = w;
+        }else{
+          var el2 = document.getElementById('sidebar');
+          if(el2) el2.style.width = '260px';
+        }
+      }catch(e){}
+    }
+    window.addEventListener('load', applyMobileSidebarWidth);
+    window.addEventListener('resize', applyMobileSidebarWidth);
   </script>
 </body>
 </html>
