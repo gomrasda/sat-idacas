@@ -49,7 +49,7 @@
     .sidebar.active{ transform: translateX(0); }
 
     .sidebar button{
-      display:flex; align-items:center; gap:24px;
+      display:flex; align-items:center; gap:24px; /* espacio icono-texto */
       width:100%; text-align:left;
       padding: 12px 14px;
       background:none; border:none; color:#fff;
@@ -60,8 +60,8 @@
     }
     .sidebar button i,
     .logout i{
-      margin-right: 0;
-      width: 1.6em;
+      margin-right: 0;      /* usamos gap */
+      width: 1.6em;         /* ancho fijo del icono */
       text-align: center;
       flex-shrink: 0;
     }
@@ -141,40 +141,14 @@
     .sidebar{ left: 0 !important; transform: translateX(-100%) !important; transition: transform .3s ease !important; }
     .sidebar.active{ transform: translateX(0) !important; }
 
+    /* Ancho 75vw en móviles/tablets */
     @media (max-width: 1200px){
       .sidebar, #sidebar{ width: 75vw !important; max-width: none !important; padding: 20px 16px !important; }
-    }
-
-    .sidebar button, .sidebar .logout{
-      font-size: 1.25rem !important;
-      padding: 16px !important;
-      line-height: 1.2 !important;
-    }
-
-    .topbar button{ font-size: 2rem !important; }
-
-    /* ====== Extra grande botones en el sidebar para móvil ====== */
-    @media (max-width: 1200px){
-      .sidebar button,
-      .sidebar .logout{
+      .sidebar button, .sidebar .logout{
         font-size: 3rem !important;
         padding: 32px !important;
         line-height: 1.5 !important;
       }
-    }
-
-    /* ===== Más espacio entre icono y texto del sidebar ===== */
-    .sidebar button,
-    .sidebar .logout{
-      display: flex !important;
-      align-items: center !important;
-      gap: 24px !important;
-    }
-    .sidebar button i,
-    .sidebar .logout i{
-      margin-right: 0 !important;
-      width: 1.6em !important;
-      text-align: center !important;
     }
 
     /* ===== Descripción Avisos ===== */
@@ -200,7 +174,7 @@
   </div>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-  <!-- Sidebar con iconos -->
+  <!-- Sidebar con iconos y Logout al final -->
   <div class="sidebar" id="sidebar">
     <button onclick="mostrar('usuarios')" id="btnUsuarios"><i class="fa-solid fa-users"></i> Usuarios</button>
     <button onclick="mostrar('clientes')"><i class="fa-solid fa-address-book"></i> Clientes</button>
@@ -265,7 +239,7 @@
     const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     const norm = s => (s ?? '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    /* Usuarios */
+    /* ===== Usuarios ===== */
     let usuariosArr=[];
     async function cargarUsuarios(){const r=await fetch(api+"/usuarios",{headers});usuariosArr=await r.json();renderUsuarios(usuariosArr);}
     function renderUsuarios(l){
@@ -287,7 +261,7 @@
       renderUsuarios(usuariosArr.filter(u=>(u.nombre||"").toLowerCase().includes(q)||(u.usuario||"").toLowerCase().includes(q)||(u.email||"").toLowerCase().includes(q)||(u.rol||"").toLowerCase().includes(q)));
     }
 
-    /* Clientes */
+    /* ===== Clientes ===== */
     let clientesArr=[];
     async function cargarClientes(){const r=await fetch(api+"/clientes",{headers});clientesArr=await r.json();renderClientes(clientesArr);}
     function renderClientes(l){
@@ -352,7 +326,7 @@
       }
     }
 
-    /* Avisos */
+    /* ===== Avisos ===== */
     let avisosArr=[],tecnicos=[];
     async function cargarTecnicos(){
       try{
@@ -529,7 +503,7 @@
       });
     }
 
-    /* ===== EDITAR / BORRAR AVISO ===== */
+    /* ===== EDITAR / BORRAR AVISO (robusto) ===== */
     async function editarAviso(id){
       const a = avisosArr.find(x=>x.id===id);
       if(!a){ alert('Aviso no encontrado'); return; }
@@ -537,20 +511,40 @@
       if(!clientesArr.length) await cargarClientes();
       if(!tecnicos.length) await cargarTecnicos();
 
+      // Resolver cliente seleccionado: acepta id, string numérica, objeto o nombre
+      let selectedClientId = a.cliente_id ?? a.clienteId ?? (a.cliente && a.cliente.id) ?? a.cliente;
+      if (typeof selectedClientId === 'string' && /^\d+$/.test(selectedClientId)) {
+        selectedClientId = parseInt(selectedClientId, 10);
+      }
+      if (!selectedClientId) {
+        const nameGuess = (a.cliente_nombre || a.cliente || '').toString();
+        const byName = clientesArr.find(c => norm(c.nombre||'') === norm(nameGuess));
+        if (byName) selectedClientId = byName.id;
+      }
+
       const clientesOpts = clientesArr
-        .map(c=>`<option ${(a.cliente==c.id)?'selected':''} value="${c.id}">${esc(c.nombre||'')}</option>`).join('');
+        .map(c => `<option ${c.id==selectedClientId?'selected':''} value="${c.id}">${esc(c.nombre||'')}</option>`)
+        .join('');
+
+      // Resolver técnico por nombre, ignorando mayúsculas/acentos
+      const tecActual = (a.tecnico_nombre || a.tecnico || '').toString();
+      const tecNorm = norm(tecActual);
       const tecnicosOpts = tecnicos
         .map(t=>{
           const name = t.nombre || t.nombre_completo || t.name || t.usuario || '';
-          return `<option ${(a.tecnico===name)?'selected':''} value="${esc(name)}">${esc(name)}</option>`;
-        }).join('');
+          const sel = (norm(name) === tecNorm) ? 'selected' : '';
+          return `<option ${sel} value="${esc(name)}">${esc(name)}</option>`;
+        })
+        .join('');
+
       const fechaVal = (a.fecha_programada||'').slice(0,10);
+      const descVal  = (a.descripcion||'');
 
       openModal('Editar Aviso', `
         <select id="e_cliente">${clientesOpts}</select>
         <input id="e_fecha" type="date" value="${esc(fechaVal)}">
         <select id="e_tecnico">${tecnicosOpts}</select>
-        <textarea id="e_desc" placeholder="Descripción / detalle">${esc(a.descripcion||'')}</textarea>
+        <textarea id="e_desc" placeholder="Descripción / detalle">${esc(descVal)}</textarea>
       `, async () => {
         const descripcion = (e_desc.value||'').trim();
         const body = {
