@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <title>SAT CRUD Completo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Font Awesome para iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
     :root{
       --b:#e9eef6; --bg:#f5f5f5; --ink:#1f2937; --chip:#eef2f7; --card-b:#cfd8e6;
@@ -40,23 +44,37 @@
       transform: translateX(-100%);
       transition: transform .3s ease;
       z-index: 1001;
+
+      display:flex;
+      flex-direction:column;
     }
     .sidebar.active{ transform: translateX(0); }
 
     .sidebar button{
-      display:block; width:100%; text-align:left;
+      display:flex; align-items:center;
+      width:100%; text-align:left;
       padding: 12px 14px;
       background:none; border:none; color:#fff;
       border-bottom:1px solid #444;
       margin: 6px 0;
       font-size: 1rem;
       cursor: pointer;
+      gap: 12px;
+    }
+
+    .sidebar button i,
+    .logout i{
+      margin-right: 12px;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
     }
 
     .logout{
       background:#dc3545; color:#fff; border:none;
-      padding: 10px 14px; border-radius:8px;
-      margin-bottom:16px; cursor:pointer; width:100%;
+      padding: 12px 14px; border-radius:8px;
+      margin-top:auto; cursor:pointer; width:100%;
+      display:flex; align-items:center; gap:12px;
     }
 
     .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; z-index:1000; }
@@ -123,7 +141,7 @@
       #usuarios h2, #clientes h2, #avisos h2 { font-size:54px !important; font-weight:800; text-align:left; text-transform:uppercase; margin:20px 0; }
     }
 
-    /* ====== OVERRIDES MÓVIL (forzados) ====== */
+    /* ====== Overrides móvil ====== */
     .sidebar{ left: 0 !important; transform: translateX(-100%) !important; transition: transform .3s ease !important; }
     .sidebar.active{ transform: translateX(0) !important; }
 
@@ -132,9 +150,9 @@
     }
 
     .sidebar button, .sidebar .logout{
-      font-size: 1.25rem !important;
-      padding: 16px !important;
-      line-height: 1.2 !important;
+      font-size: 3rem !important;  /* ~48px en móvil */
+      padding: 32px !important;
+      line-height: 1.5 !important;
     }
 
     .topbar{ position: relative !important; }
@@ -143,18 +161,6 @@
       margin: 0 !important; line-height: 1 !important;
     }
     .topbar button{ font-size: 2rem !important; }
-
-/* ====== Extra grande botones en el sidebar para móvil ====== */
-@media (max-width: 1200px){
-  .sidebar button,
-  .sidebar .logout{
-    font-size: 3rem !important;     /* ~32px, bien grande */
-    padding: 32px !important;       /* más altura para dedo */
-    line-height: 1.5 !important;
-  }
-}
-
-}
   </style>
 </head>
 <body>
@@ -165,11 +171,12 @@
   </div>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
+  <!-- Sidebar con iconos y logout al final -->
   <div class="sidebar" id="sidebar">
-    <button onclick="mostrar('usuarios')" id="btnUsuarios">Usuarios</button>
-    <button onclick="mostrar('clientes')">Clientes</button>
-    <button onclick="mostrar('avisos')">Avisos</button>
-    <button class="logout" onclick="logout()">Cerrar sesión</button>
+    <button onclick="mostrar('usuarios')" id="btnUsuarios"><i class="fa-solid fa-users"></i> Usuarios</button>
+    <button onclick="mostrar('clientes')"><i class="fa-solid fa-address-book"></i> Clientes</button>
+    <button onclick="mostrar('avisos')"><i class="fa-solid fa-bell"></i> Avisos</button>
+    <button class="logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</button>
   </div>
 
   <div class="main">
@@ -228,7 +235,7 @@
     const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     const norm = s => (s ?? '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    /* Usuarios */
+    /* ===== Usuarios ===== */
     let usuariosArr=[];
     async function cargarUsuarios(){const r=await fetch(api+"/usuarios",{headers});usuariosArr=await r.json();renderUsuarios(usuariosArr);}
     function renderUsuarios(l){
@@ -250,7 +257,7 @@
       renderUsuarios(usuariosArr.filter(u=>(u.nombre||"").toLowerCase().includes(q)||(u.usuario||"").toLowerCase().includes(q)||(u.email||"").toLowerCase().includes(q)||(u.rol||"").toLowerCase().includes(q)));
     }
 
-    /* Clientes */
+    /* ===== Clientes ===== */
     let clientesArr=[];
     async function cargarClientes(){const r=await fetch(api+"/clientes",{headers});clientesArr=await r.json();renderClientes(clientesArr);}
     function renderClientes(l){
@@ -272,7 +279,7 @@
       renderClientes(clientesArr.filter(c=>(c.nombre||"").toLowerCase().includes(q)||(c.obs||"").toLowerCase().includes(q)));
     }
 
-    /* Avisos */
+    /* ===== Avisos ===== */
     let avisosArr=[],tecnicos=[];
     async function cargarTecnicos(){
       try{
