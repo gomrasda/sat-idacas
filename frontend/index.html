@@ -5,7 +5,7 @@
   <title>SAT CRUD Completo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Font Awesome para iconos del menú lateral -->
+  <!-- Font Awesome para iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
@@ -41,7 +41,7 @@
       height: 100%;
       background:#222; color:#fff;
       padding: 20px;
-      transform: translateX(-100%);              /* cerrado por defecto (mobile) */
+      transform: translateX(-100%);
       transition: transform .3s ease;
       z-index: 1001;
       display:flex; flex-direction:column;
@@ -49,7 +49,7 @@
     .sidebar.active{ transform: translateX(0); }
 
     .sidebar button{
-      display:flex; align-items:center; gap:24px; /* espacio icono-texto */
+      display:flex; align-items:center; gap:24px;
       width:100%; text-align:left;
       padding: 12px 14px;
       background:none; border:none; color:#fff;
@@ -60,8 +60,8 @@
     }
     .sidebar button i,
     .logout i{
-      margin-right: 0;           /* usamos gap, no margen */
-      width: 1.6em;              /* reserva ancho del icono */
+      margin-right: 0;
+      width: 1.6em;
       text-align: center;
       flex-shrink: 0;
     }
@@ -138,19 +138,57 @@
     }
 
     /* ====== OVERRIDES MÓVIL (forzados) ====== */
-    /* Usamos transform en lugar de left para abrir/cerrar */
     .sidebar{ left: 0 !important; transform: translateX(-100%) !important; transition: transform .3s ease !important; }
     .sidebar.active{ transform: translateX(0) !important; }
 
-    /* Ancho 3/4 de pantalla en móviles/tablets */
     @media (max-width: 1200px){
       .sidebar, #sidebar{ width: 75vw !important; max-width: none !important; padding: 20px 16px !important; }
-      /* Botones del menú muy grandes en móvil */
-      .sidebar button, .sidebar .logout{
-        font-size: 3rem !important;     /* ~48px */
-        padding: 32px !important;       /* área táctil grande */
+    }
+
+    .sidebar button, .sidebar .logout{
+      font-size: 1.25rem !important;
+      padding: 16px !important;
+      line-height: 1.2 !important;
+    }
+
+    .topbar button{ font-size: 2rem !important; }
+
+    /* ====== Extra grande botones en el sidebar para móvil ====== */
+    @media (max-width: 1200px){
+      .sidebar button,
+      .sidebar .logout{
+        font-size: 3rem !important;
+        padding: 32px !important;
         line-height: 1.5 !important;
       }
+    }
+
+    /* ===== Más espacio entre icono y texto del sidebar ===== */
+    .sidebar button,
+    .sidebar .logout{
+      display: flex !important;
+      align-items: center !important;
+      gap: 24px !important;
+    }
+    .sidebar button i,
+    .sidebar .logout i{
+      margin-right: 0 !important;
+      width: 1.6em !important;
+      text-align: center !important;
+    }
+
+    /* ===== Descripción Avisos ===== */
+    .aviso-desc{
+      margin-top: 6px;
+      padding: 10px 12px;
+      border: 1px solid var(--b);
+      border-radius: 10px;
+      background: #f9fafb;
+      font-size: 16px;
+      white-space: pre-wrap;
+    }
+    @media (max-width:1024px){
+      .aviso-desc{ font-size: 22px; }
     }
   </style>
 </head>
@@ -162,7 +200,7 @@
   </div>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-  <!-- Sidebar con iconos y Cerrar sesión al final -->
+  <!-- Sidebar con iconos -->
   <div class="sidebar" id="sidebar">
     <button onclick="mostrar('usuarios')" id="btnUsuarios"><i class="fa-solid fa-users"></i> Usuarios</button>
     <button onclick="mostrar('clientes')"><i class="fa-solid fa-address-book"></i> Clientes</button>
@@ -205,6 +243,7 @@
     <div id="modal" style="display:none;"></div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
   <script>
     const token=localStorage.getItem('token'); if(!token) location.href='login.html';
     const payload=JSON.parse(atob(token.split('.')[1]||'e30=')); const rol=payload.rol;
@@ -269,10 +308,8 @@
       const q=filtroCliente.value.toLowerCase();
       renderClientes(clientesArr.filter(c=>(c.nombre||"").toLowerCase().includes(q)||(c.obs||"").toLowerCase().includes(q)));
     }
-
-    /* ===== AÑADIDO: EDITAR/BORRAR CLIENTE ===== */
     async function editarCliente(id){
-      const c = clientesArr.find(x=>x.id===id);
+      const c = clientesArr.find(x => x.id === id);
       if(!c){ alert('Cliente no encontrado'); return; }
 
       openModal('Editar Cliente', `
@@ -301,7 +338,6 @@
         }
       });
     }
-
     async function borrarCliente(id){
       if(!confirm('¿Borrar este cliente?')) return;
       try{
@@ -348,14 +384,24 @@
     function renderAvisos(l){
       avisosCards.innerHTML="";
       l.forEach(a=>{
+        const desc = (a.descripcion || "").trim();
+
         avisosCards.innerHTML+=`
           <div class="card">
             <div class="title">Cliente: ${esc(a.cliente_nombre || a.cliente || "")}</div>
+
+            <!-- Línea 2: fecha y técnico -->
             <div class="meta">
               <span><b>Fecha:</b> ${esc(a.fecha_programada||"")}</span>
               <span><b>Técnico:</b> ${esc(a.tecnico||"")}</span>
-              ${a.descripcion ? `<span><b>Observaciones:</b> ${esc(a.descripcion)}</span>` : '' }
             </div>
+
+            <!-- Línea 3: descripción siempre visible -->
+            <div class="aviso-desc">
+              ${desc ? esc(desc) : '<i>Sin descripción</i>'}
+            </div>
+
+            <!-- Línea 4: acciones -->
             <div class="actions">
               <button class="btn-ticket" onclick="abrirTicket(${a.id})"><span class="ico">🎫</span>Ticket</button>
               <button onclick="editarAviso(${a.id})"><span class="ico">✏️</span>Editar</button>
@@ -460,7 +506,6 @@
           fecha_programada: (a_fecha.value||'').trim(),
           tecnico: (a_tecnico.value||'').trim(),
           descripcion,
-          // 👇 Backend lo exige: lo generamos automáticamente
           tarea: descripcion || 'AVISO'
         };
         if(!data.cliente || !data.fecha_programada || !data.tecnico){
@@ -513,7 +558,6 @@
           fecha_programada: (e_fecha.value||'').trim(),
           tecnico: (e_tecnico.value||'').trim(),
           descripcion,
-          // 👇 lo mantenemos para cumplir backend
           tarea: descripcion || a.tarea || 'AVISO'
         };
         try{
@@ -597,7 +641,7 @@
           if(el) el.style.width = w;
         }else{
           var el2 = document.getElementById('sidebar');
-          if(el2) el2.style.width = '260px'; // escritorio
+          if(el2) el2.style.width = '260px';
         }
       }catch(e){}
     }
