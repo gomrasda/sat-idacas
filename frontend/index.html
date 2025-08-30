@@ -141,7 +141,7 @@
     .sidebar{ left: 0 !important; transform: translateX(-100%) !important; transition: transform .3s ease !important; }
     .sidebar.active{ transform: translateX(0) !important; }
 
-    /* Ancho 75vw en móviles/tablets */
+    /* Ancho 75vw en móviles/tablets + botones XL */
     @media (max-width: 1200px){
       .sidebar, #sidebar{ width: 75vw !important; max-width: none !important; padding: 20px 16px !important; }
       .sidebar button, .sidebar .logout{
@@ -358,7 +358,7 @@
     function renderAvisos(l){
       avisosCards.innerHTML="";
       l.forEach(a=>{
-        const desc = (a.descripcion || "").trim();
+        const desc = (a.descripcion || a.tarea || "").trim();
 
         avisosCards.innerHTML+=`
           <div class="card">
@@ -474,13 +474,13 @@
         </select>
         <textarea id="a_desc" placeholder="Descripción / detalle"></textarea>
       `, async () => {
-        const descripcion = (a_desc.value||'').trim();
+        const tareaText = (a_desc.value||'').trim();
         const data = {
           cliente: parseInt(a_cliente.value,10),
           fecha_programada: (a_fecha.value||'').trim(),
           tecnico: (a_tecnico.value||'').trim(),
-          descripcion,
-          tarea: descripcion || 'AVISO'
+          tarea: tareaText || 'AVISO'   // <--- backend espera 'tarea'
+          // estado: 'pendiente' // opcional, la BD ya tiene default
         };
         if(!data.cliente || !data.fecha_programada || !data.tecnico){
           alert('Cliente, fecha y técnico son obligatorios'); return;
@@ -538,7 +538,7 @@
         .join('');
 
       const fechaVal = (a.fecha_programada||'').slice(0,10);
-      const descVal  = (a.descripcion||'');
+      const descVal  = (a.descripcion || a.tarea || '');
 
       openModal('Editar Aviso', `
         <select id="e_cliente">${clientesOpts}</select>
@@ -546,13 +546,12 @@
         <select id="e_tecnico">${tecnicosOpts}</select>
         <textarea id="e_desc" placeholder="Descripción / detalle">${esc(descVal)}</textarea>
       `, async () => {
-        const descripcion = (e_desc.value||'').trim();
+        const tareaText = (e_desc.value||'').trim();
         const body = {
           cliente: parseInt(e_cliente.value,10),
           fecha_programada: (e_fecha.value||'').trim(),
           tecnico: (e_tecnico.value||'').trim(),
-          descripcion,
-          tarea: descripcion || a.tarea || 'AVISO'
+          tarea: tareaText || a.tarea || 'AVISO' // <--- solo 'tarea' al backend
         };
         try{
           const r = await fetch(api + '/avisos/' + id, {
