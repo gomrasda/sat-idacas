@@ -5,7 +5,7 @@
   <title>SAT CRUD Completo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Font Awesome para iconos -->
+  <!-- Font Awesome para iconos del menú lateral -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
@@ -31,7 +31,7 @@
       pointer-events: none;
     }
     .topbar button {
-      background:none; border:none; color:#fff; font-size:1.8rem; cursor:pointer;
+      background:none; border:none; color:#fff; font-size: 2rem; cursor:pointer;
     }
 
     /* ===== SIDEBAR ===== */
@@ -41,17 +41,15 @@
       height: 100%;
       background:#222; color:#fff;
       padding: 20px;
-      transform: translateX(-100%);
+      transform: translateX(-100%);              /* cerrado por defecto (mobile) */
       transition: transform .3s ease;
       z-index: 1001;
-
-      display:flex;
-      flex-direction:column;
+      display:flex; flex-direction:column;
     }
     .sidebar.active{ transform: translateX(0); }
 
     .sidebar button{
-      display:flex; align-items:center;
+      display:flex; align-items:center; gap:24px; /* espacio icono-texto */
       width:100%; text-align:left;
       padding: 12px 14px;
       background:none; border:none; color:#fff;
@@ -59,13 +57,11 @@
       margin: 6px 0;
       font-size: 1rem;
       cursor: pointer;
-      gap: 12px;
     }
-
     .sidebar button i,
     .logout i{
-      margin-right: 12px;
-      width: 24px;
+      margin-right: 0;           /* usamos gap, no margen */
+      width: 1.6em;              /* reserva ancho del icono */
       text-align: center;
       flex-shrink: 0;
     }
@@ -74,7 +70,7 @@
       background:#dc3545; color:#fff; border:none;
       padding: 12px 14px; border-radius:8px;
       margin-top:auto; cursor:pointer; width:100%;
-      display:flex; align-items:center; gap:12px;
+      display:flex; align-items:center; gap:24px;
     }
 
     .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; z-index:1000; }
@@ -141,41 +137,21 @@
       #usuarios h2, #clientes h2, #avisos h2 { font-size:54px !important; font-weight:800; text-align:left; text-transform:uppercase; margin:20px 0; }
     }
 
-    /* ====== Overrides móvil ====== */
+    /* ====== OVERRIDES MÓVIL (forzados) ====== */
+    /* Usamos transform en lugar de left para abrir/cerrar */
     .sidebar{ left: 0 !important; transform: translateX(-100%) !important; transition: transform .3s ease !important; }
     .sidebar.active{ transform: translateX(0) !important; }
 
+    /* Ancho 3/4 de pantalla en móviles/tablets */
     @media (max-width: 1200px){
       .sidebar, #sidebar{ width: 75vw !important; max-width: none !important; padding: 20px 16px !important; }
+      /* Botones del menú muy grandes en móvil */
+      .sidebar button, .sidebar .logout{
+        font-size: 3rem !important;     /* ~48px */
+        padding: 32px !important;       /* área táctil grande */
+        line-height: 1.5 !important;
+      }
     }
-
-    .sidebar button, .sidebar .logout{
-      font-size: 3rem !important;  /* ~48px en móvil */
-      padding: 32px !important;
-      line-height: 1.5 !important;
-    }
-
-    .topbar{ position: relative !important; }
-    .topbar h2{
-      position: absolute !important; left: 50% !important; transform: translateX(-50%) !important;
-      margin: 0 !important; line-height: 1 !important;
-    }
-    .topbar button{ font-size: 2rem !important; }
-
-    /* ===== Más espacio entre icono y texto del sidebar ===== */
-.sidebar button,
-.sidebar .logout{
-  display: flex !important;
-  align-items: center !important;
-  gap: 24px !important;          /* separación grande */
-}
-
-.sidebar button i,
-.sidebar .logout i{
-  margin-right: 0 !important;    /* usamos gap, no margen */
-  width: 1.6em !important;       /* reserva ancho proporcional al tamaño */
-  text-align: center !important;
-}
   </style>
 </head>
 <body>
@@ -186,7 +162,7 @@
   </div>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-  <!-- Sidebar con iconos y logout al final -->
+  <!-- Sidebar con iconos y Cerrar sesión al final -->
   <div class="sidebar" id="sidebar">
     <button onclick="mostrar('usuarios')" id="btnUsuarios"><i class="fa-solid fa-users"></i> Usuarios</button>
     <button onclick="mostrar('clientes')"><i class="fa-solid fa-address-book"></i> Clientes</button>
@@ -250,7 +226,7 @@
     const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     const norm = s => (s ?? '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    /* ===== Usuarios ===== */
+    /* Usuarios */
     let usuariosArr=[];
     async function cargarUsuarios(){const r=await fetch(api+"/usuarios",{headers});usuariosArr=await r.json();renderUsuarios(usuariosArr);}
     function renderUsuarios(l){
@@ -272,7 +248,7 @@
       renderUsuarios(usuariosArr.filter(u=>(u.nombre||"").toLowerCase().includes(q)||(u.usuario||"").toLowerCase().includes(q)||(u.email||"").toLowerCase().includes(q)||(u.rol||"").toLowerCase().includes(q)));
     }
 
-    /* ===== Clientes ===== */
+    /* Clientes */
     let clientesArr=[];
     async function cargarClientes(){const r=await fetch(api+"/clientes",{headers});clientesArr=await r.json();renderClientes(clientesArr);}
     function renderClientes(l){
@@ -294,7 +270,53 @@
       renderClientes(clientesArr.filter(c=>(c.nombre||"").toLowerCase().includes(q)||(c.obs||"").toLowerCase().includes(q)));
     }
 
-    /* ===== Avisos ===== */
+    /* ===== AÑADIDO: EDITAR/BORRAR CLIENTE ===== */
+    async function editarCliente(id){
+      const c = clientesArr.find(x=>x.id===id);
+      if(!c){ alert('Cliente no encontrado'); return; }
+
+      openModal('Editar Cliente', `
+        <input id="ec_nombre" value="${esc(c.nombre||'')}" placeholder="Nombre del cliente" autocomplete="off">
+        <textarea id="ec_obs" placeholder="Observaciones">${esc(c.obs||'')}</textarea>
+      `, async () => {
+        const payload = {
+          nombre: (ec_nombre.value || '').trim(),
+          obs: (ec_obs.value || '').trim()
+        };
+        if(!payload.nombre){ alert('El nombre es obligatorio'); return; }
+        try{
+          const r = await fetch(api + '/clientes/' + id, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify(payload)
+          });
+          if(!r.ok){
+            const txt = await r.text();
+            throw new Error(txt || 'No se pudo actualizar el cliente');
+          }
+          closeModal();
+          cargarClientes();
+        }catch(err){
+          alert(err.message || 'Error actualizando el cliente');
+        }
+      });
+    }
+
+    async function borrarCliente(id){
+      if(!confirm('¿Borrar este cliente?')) return;
+      try{
+        const r = await fetch(api + '/clientes/' + id, { method:'DELETE', headers });
+        if(!r.ok){
+          const txt = await r.text();
+          throw new Error(txt || 'No se pudo borrar el cliente');
+        }
+        cargarClientes();
+      }catch(err){
+        alert(err.message || 'Error borrando el cliente');
+      }
+    }
+
+    /* Avisos */
     let avisosArr=[],tecnicos=[];
     async function cargarTecnicos(){
       try{
@@ -438,6 +460,7 @@
           fecha_programada: (a_fecha.value||'').trim(),
           tecnico: (a_tecnico.value||'').trim(),
           descripcion,
+          // 👇 Backend lo exige: lo generamos automáticamente
           tarea: descripcion || 'AVISO'
         };
         if(!data.cliente || !data.fecha_programada || !data.tecnico){
@@ -490,6 +513,7 @@
           fecha_programada: (e_fecha.value||'').trim(),
           tecnico: (e_tecnico.value||'').trim(),
           descripcion,
+          // 👇 lo mantenemos para cumplir backend
           tarea: descripcion || a.tarea || 'AVISO'
         };
         try{
@@ -573,7 +597,7 @@
           if(el) el.style.width = w;
         }else{
           var el2 = document.getElementById('sidebar');
-          if(el2) el2.style.width = '260px';
+          if(el2) el2.style.width = '260px'; // escritorio
         }
       }catch(e){}
     }
