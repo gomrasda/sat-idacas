@@ -28,8 +28,19 @@
 
     td textarea{ resize:none; overflow:hidden; min-height:56px; line-height:1.4; width:100%; }
 
-    .actions-row{ display:flex; gap:12px; justify-content:space-between; margin:8px 0 10px; }
-    .actions-row .btn { flex:1 1 50%; text-align:center; font-size:20px; }
+    /* Fila con 3 botones iguales */
+    .actions-row{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 8px 0 10px;
+    }
+    .actions-row .btn{
+      width: 100%;
+      text-align:center;
+      font-size: 20px;
+      padding: 14px 20px;
+    }
 
     #resumen { display:flex; justify-content:space-between; align-items:center;
       font-size:24px; font-weight:700; color:#1f2937;
@@ -126,9 +137,11 @@
     <option value="Facturado">Facturado</option>
   </select>
 
+  <!-- 3 botones en la misma fila -->
   <div class="actions-row">
     <button class="btn btn-grey" id="btnVolver">🔙 Volver a Avisos</button>
     <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
+    <button class="btn" id="btnExportar">📄 Exportar Excel</button>
   </div>
 
   <div id="resumen">
@@ -160,16 +173,11 @@ function autoResize(el){if(!el)return;el.style.height="auto";el.style.height=el.
 function ajustarTodos(){document.querySelectorAll("textarea").forEach(autoResize)}
 document.addEventListener("input",e=>{if(e.target.tagName==="TEXTAREA")autoResize(e.target)})
 
-// ✅ Nueva función robusta para cargar técnicos
+// Cargar técnicos
 async function cargarTecnicos(){
   const u = await apiFetch(api + "/usuarios", { headers });
 
-  const norm = s => (s ?? "")
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "");
-
+  const norm = s => (s ?? "").toString().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
   const hasTecRole = (user) => {
     const rRaw = user.rol ?? user.role ?? user.roles ?? "";
     const roles = Array.isArray(rRaw) ? rRaw : [rRaw];
@@ -178,13 +186,7 @@ async function cargarTecnicos(){
 
   tecnicos = (u || [])
     .filter(hasTecRole)
-    .map(t => ({
-      id: t.id ?? t._id ?? null,
-      nombre: t.nombre ?? t.name ?? t.usuario ?? "Sin nombre"
-    }));
-
-  console.log("Usuarios recibidos:", u);
-  console.log("Técnicos filtrados:", tecnicos);
+    .map(t => ({ id: t.id ?? t._id ?? null, nombre: t.nombre ?? t.name ?? t.usuario ?? "Sin nombre" }));
 }
 
 async function cargarTitulo(){const a=await apiFetch(api+"/avisos/"+avisoId,{headers});tituloCliente.innerText=a?.cliente?`Tickets de ${a.cliente}`:`Tickets (ID:${avisoId})`}
@@ -217,7 +219,7 @@ async function cargarTickets(){
           <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
         </select></td>
         <td class="acciones"><button onclick=editarTicket(${t.id})>✏️</button><button onclick=borrarTicket(${t.id})>🗑️</button></td>
-      </tr>`
+      </tr>`;
   });ajustarTodos();actualizarResumen();
 }
 
@@ -235,7 +237,7 @@ async function cambiarEstadoTicket(id,e,s){const t=ticketsLista.find(x=>x.id===i
   cargarTickets();
 }
 
-// ✅ Modal actualizado
+// Modal
 function abrirModal(){
   const opciones = tecnicos.length
     ? tecnicos.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join("")
@@ -271,7 +273,7 @@ async function guardarTicket(){
       description:descripcion.value
     })
   });
-  cerrarModal();cargarTickets()
+  cerrarModal();cargarTickets();
 }
 
 async function editarTicket(id){const t=ticketsLista.find(x=>x.id===id);
@@ -279,10 +281,83 @@ async function editarTicket(id){const t=ticketsLista.find(x=>x.id===id);
   <input id=fecha value="${t.fecha}"><input id=horas_totales value="${t.horas_totales}"><input id=precio_materiales value="${t.precio_materiales}">
   <select id=estado><option ${t.estado==="Pausado"?"selected":""}>Pausado</option><option ${t.estado==="Cerrado"?"selected":""}>Cerrado</option><option ${t.estado==="Facturado"?"selected":""}>Facturado</option></select>
   <textarea id=descripcion>${t.description||""}</textarea>
-  <button onclick=guardarEdicion(${t.id})>Guardar</button><button onclick=cerrarModal()>Cancelar</button></div>`;modal.style.display="block"}
-async function guardarEdicion(id){const d={fecha:fecha.value,horas_totales:+horas_totales.value||0,precio_materiales:+precio_materiales.value||0,estado:estado.value,description:descripcion.value};await apiFetch(api+"/tickets/"+id,{method:"PUT",headers,body:JSON.stringify(d)});cerrarModal();cargarTickets()}
+  <button onclick=guardarEdicion(${t.id})>Guardar</button><button onclick=cerrarModal()>Cancelar</button></div>`;
+  modal.style.display="block";
+}
+async function guardarEdicion(id){
+  const d={fecha:fecha.value,horas_totales:+horas_totales.value||0,precio_materiales:+precio_materiales.value||0,estado:estado.value,description:descripcion.value};
+  await apiFetch(api+"/tickets/"+id,{method:"PUT",headers,body:JSON.stringify(d)});
+  cerrarModal();cargarTickets();
+}
 
-cargarTitulo();cargarTecnicos().then(cargarTickets)
+/* ===== Exportar a CSV (Excel) ===== */
+function csvEscape(value){
+  const s = (value ?? "").toString().replace(/\r?\n|\r/g, " ");
+  return /[;"\t]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+function num(n){
+  const v = typeof n === "number" ? n : parseFloat((n ?? "").toString().replace(",", "."));
+  return isNaN(v) ? 0 : v;
+}
+function recogerDatosDeTickets(){
+  const filtro = (document.getElementById("filtroEstado")?.value) || "Todos";
+  return (ticketsLista || [])
+    .filter(t => filtro === "Todos" || t.estado === filtro)
+    .map(t => ({
+      Fecha      : t.fecha ? new Date(t.fecha).toLocaleDateString("es-ES") : "",
+      Técnico    : t.tecnico || "",
+      Descripción: t.description || "",
+      Horas      : num(t.horas_totales),
+      Materiales : num(t.precio_materiales),
+      Estado     : t.estado || ""
+    }));
+}
+function construirCSV(rows){
+  const SEP = ";";
+  const head = ["Fecha","Técnico","Descripción","Horas","Materiales","Estado"];
+  const lineas = [head.join(SEP)];
+
+  rows.forEach(r=>{
+    lineas.push([
+      csvEscape(r.Fecha),
+      csvEscape(r.Técnico),
+      csvEscape(r.Descripción),
+      r.Horas,
+      r.Materiales,
+      csvEscape(r.Estado)
+    ].join(SEP));
+  });
+
+  const totHoras = rows.reduce((a,r)=>a + num(r.Horas), 0);
+  const totMats  = rows.reduce((a,r)=>a + num(r.Materiales), 0);
+  lineas.push(["","","Totales", totHoras, totMats, ""].join(SEP));
+
+  const contenido = "\uFEFF" + lineas.join("\n"); // BOM UTF-8
+  return new Blob([contenido], {type: "text/csv;charset=utf-8;"});
+}
+function exportarExcel(){
+  const datos = recogerDatosDeTickets();
+  if(!datos.length){ alert("No hay tickets para exportar."); return; }
+  const blob = construirCSV(datos);
+  const a = document.createElement("a");
+  const id = new URLSearchParams(location.search).get("avisoId") || "sin_id";
+  a.href = URL.createObjectURL(blob);
+  a.download = `aviso_${id}_tickets.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
+}
+
+// Click del botón Exportar
+document.addEventListener("DOMContentLoaded", ()=>{
+  const b = document.getElementById("btnExportar");
+  if(b) b.addEventListener("click", exportarExcel);
+});
+
+/* ===== Fin exportación ===== */
+
+cargarTitulo();cargarTecnicos().then(cargarTickets);
 </script>
 </body>
 </html>
