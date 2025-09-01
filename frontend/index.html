@@ -13,6 +13,14 @@
       --b:#e9eef6; --bg:#f5f5f5; --ink:#1f2937; --chip:#eef2f7; --card-b:#cfd8e6;
       --primary:#007bff; --primary-h:#0056b3;
     }
+    /* 🔹 Colores de estado como en tickets */
+    :root{
+      --paused:#facc15;   /* Pendiente  */
+      --progress:#f97316; /* En proceso */
+      --closed:#22c55e;   /* Cerrado    */
+      --billed:#3b82f6;   /* Facturado  */
+    }
+
     *{box-sizing:border-box}
     body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--ink); }
 
@@ -164,6 +172,17 @@
     @media (max-width:1024px){
       .aviso-desc{ font-size: 22px; }
     }
+
+    /* 🔹 NUEVO: Estado en tarjetas de AVISOS (igual que Tickets) */
+    .aviso-state{ margin:10px 0 8px; }
+    .aviso-state select{
+      padding:10px 12px; border-radius:8px; width:100%;
+      color:#fff; font-weight:600; border:1px solid var(--b);
+    }
+    .aviso-state.pending  select{ background:var(--paused);   color:#000; }
+    .aviso-state.progress select{ background:var(--progress); }
+    .aviso-state.closed   select{ background:var(--closed);   }
+    .aviso-state.billed   select{ background:var(--billed);   }
   </style>
 </head>
 <body>
@@ -355,10 +374,45 @@
     }
 
     async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
+
+    /* 🔹 NUEVO: helpers de estado para color y PUT */
+    function estadoClaseAviso(estado){
+      switch((estado||"").toLowerCase()){
+        case "pendiente":  return "pending";
+        case "en proceso": return "progress";
+        case "cerrado":    return "closed";
+        case "facturado":  return "billed";
+        default:           return "pending";
+      }
+    }
+    async function cambiarEstadoAviso(id, val, el){
+      try{
+        const r = await fetch(api + '/avisos/' + id, {
+          method:'PUT',
+          headers,
+          body: JSON.stringify({ estado: val })
+        });
+        if(!r.ok) throw new Error(await r.text() || 'PUT /avisos falló');
+
+        // ajusta color visual
+        const wrap = el.closest('.aviso-state');
+        if(wrap) wrap.className = 'aviso-state ' + estadoClaseAviso(val);
+
+        // también actualiza en memoria si existe
+        const a = (avisosArr||[]).find(x=>x.id===id);
+        if(a) a.estado = val;
+
+      }catch(e){
+        alert('No se pudo actualizar el estado del aviso');
+      }
+    }
+
     function renderAvisos(l){
       avisosCards.innerHTML="";
       l.forEach(a=>{
         const desc = (a.descripcion || a.tarea || "").trim();
+        const estadoVal = a.estado || "Pendiente";
+        const cls = estadoClaseAviso(estadoVal);
 
         avisosCards.innerHTML+=`
           <div class="card">
@@ -375,6 +429,16 @@
               ${desc ? esc(desc) : '<i>Sin descripción</i>'}
             </div>
 
+            <!-- 🔹 NUEVO: Estado (debajo de la descripción y encima de acciones) -->
+            <div class="aviso-state ${cls}">
+              <select onchange="cambiarEstadoAviso(${a.id}, this.value, this)">
+                <option value="Pendiente"  ${estadoVal==="Pendiente"  ? "selected":""}>Pendiente</option>
+                <option value="En proceso" ${estadoVal==="En proceso" ? "selected":""}>En proceso</option>
+                <option value="Cerrado"    ${estadoVal==="Cerrado"    ? "selected":""}>Cerrado</option>
+                <option value="Facturado"  ${estadoVal==="Facturado"  ? "selected":""}>Facturado</option>
+              </select>
+            </div>
+
             <!-- Línea 4: acciones -->
             <div class="actions">
               <button class="btn-ticket" onclick="abrirTicket(${a.id})"><span class="ico">🎫</span>Ticket</button>
@@ -384,6 +448,7 @@
           </div>`;
       });
     }
+
     function abrirTicket(id){window.open('ticket.html?avisoId='+id,'_blank');}
 
     /* ===== MODAL GENÉRICO ===== */
@@ -479,8 +544,8 @@
           cliente: parseInt(a_cliente.value,10),
           fecha_programada: (a_fecha.value||'').trim(),
           tecnico: (a_tecnico.value||'').trim(),
-          tarea: tareaText || 'AVISO'   // <--- backend espera 'tarea'
-          // estado: 'pendiente' // opcional, la BD ya tiene default
+          tarea: tareaText || 'AVISO'   // backend espera 'tarea'
+          // estado: 'Pendiente' // opcional si tu API lo pone por defecto
         };
         if(!data.cliente || !data.fecha_programada || !data.tecnico){
           alert('Cliente, fecha y técnico son obligatorios'); return;
@@ -503,7 +568,7 @@
       });
     }
 
-    /* ===== EDITAR / BORRAR AVISO (robusto) ===== */
+    /* ===== EDITAR / BORRAR AVISO (igual que tenías) ===== */
     async function editarAviso(id){
       const a = avisosArr.find(x=>x.id===id);
       if(!a){ alert('Aviso no encontrado'); return; }
@@ -511,7 +576,7 @@
       if(!clientesArr.length) await cargarClientes();
       if(!tecnicos.length) await cargarTecnicos();
 
-      // Resolver cliente seleccionado: acepta id, string numérica, objeto o nombre
+      // Resolver cliente seleccionado
       let selectedClientId = a.cliente_id ?? a.clienteId ?? (a.cliente && a.cliente.id) ?? a.cliente;
       if (typeof selectedClientId === 'string' && /^\d+$/.test(selectedClientId)) {
         selectedClientId = parseInt(selectedClientId, 10);
@@ -526,8 +591,8 @@
         .map(c => `<option ${c.id==selectedClientId?'selected':''} value="${c.id}">${esc(c.nombre||'')}</option>`)
         .join('');
 
-      // Resolver técnico por nombre, ignorando mayúsculas/acentos
-      const tecActual = (a.tecnico_nombre || a.tecnico || '').toString();
+      // Técnico por nombre
+      const tecActual = (a.tecnico || '').toString();
       const tecNorm = norm(tecActual);
       const tecnicosOpts = tecnicos
         .map(t=>{
@@ -551,7 +616,7 @@
           cliente: parseInt(e_cliente.value,10),
           fecha_programada: (e_fecha.value||'').trim(),
           tecnico: (e_tecnico.value||'').trim(),
-          tarea: tareaText || a.tarea || 'AVISO' // <--- solo 'tarea' al backend
+          tarea: tareaText || a.tarea || 'AVISO'
         };
         try{
           const r = await fetch(api + '/avisos/' + id, {
@@ -625,7 +690,7 @@
 
     window.addEventListener('load',()=>{mostrar(location.hash.substring(1)||'inicio');});
 
-    /* ====== Forzar 75vw por JS si el CSS no entra/cached ====== */
+    /* Forzar 75vw por JS si el CSS no entra/cached */
     function applyMobileSidebarWidth(){
       try{
         if(window.innerWidth <= 1200){
