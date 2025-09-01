@@ -375,7 +375,7 @@
 
     async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
 
-    /* 🔹 NUEVO: helpers de estado para color y PUT */
+    /* 🔹 NUEVO: helpers de estado + resolver cliente */
     function estadoClaseAviso(estado){
       switch((estado||"").toLowerCase()){
         case "pendiente":  return "pending";
@@ -385,25 +385,65 @@
         default:           return "pending";
       }
     }
-    async function cambiarEstadoAviso(id, val, el){
+    function estadoToAPI(s){
+      const m={ "Pendiente":"pendiente","En proceso":"en proceso","Cerrado":"cerrado","Facturado":"facturado" };
+      return m[s] || "pendiente";
+    }
+    function estadoFromAPI(s){
+      s=(s||"").toLowerCase().trim().replace("_"," ");
+      if(s==="en proceso") return "En proceso";
+      if(s==="cerrado")    return "Cerrado";
+      if(s==="facturado")  return "Facturado";
+      return "Pendiente";
+    }
+    function resolveClienteId(aviso){
+      let c = aviso?.cliente_id ?? aviso?.clienteId ?? aviso?.cliente;
+      if (typeof c === 'number') return c;
+      if (typeof c === 'string' && /^\d+$/.test(c)) return parseInt(c,10);
+      const nombre = aviso?.cliente_nombre || (typeof aviso?.cliente === 'string' ? aviso.cliente : '');
+      const found = (window.clientesArr || []).find(x => norm(x.nombre||'') === norm(nombre||''));
+      return found?.id ?? null;
+    }
+
+    async function cambiarEstadoAviso(id, valUI, el){
+      const viejo = (avisosArr||[]).find(x=>x.id===id);
       try{
+        // Asegura que tenemos todo el aviso
+        let a = viejo;
+        if(!a || !a.cliente || !a.tarea || !a.fecha_programada || !a.tecnico){
+          try{
+            const rg = await fetch(`${api}/avisos/${id}`, { headers });
+            if(rg.ok) a = await rg.json();
+          }catch{}
+        }
+
+        const body = {
+          cliente: resolveClienteId(a) ?? a?.cliente,
+          tarea: (a?.tarea || a?.descripcion || 'AVISO').toString(),
+          fecha_programada: (a?.fecha_programada || '').toString().slice(0,10),
+          tecnico: (a?.tecnico || '').toString(),
+          estado: estadoToAPI(valUI) // 👈 mapeo minúsculas para BD
+        };
+
         const r = await fetch(api + '/avisos/' + id, {
           method:'PUT',
           headers,
-          body: JSON.stringify({ estado: val })
+          body: JSON.stringify(body)
         });
-        if(!r.ok) throw new Error(await r.text() || 'PUT /avisos falló');
+        const txt = await r.text();
+        if(!r.ok) throw new Error(txt || 'PUT /avisos falló');
 
         // ajusta color visual
         const wrap = el.closest('.aviso-state');
-        if(wrap) wrap.className = 'aviso-state ' + estadoClaseAviso(val);
+        if(wrap) wrap.className = 'aviso-state ' + estadoClaseAviso(valUI);
 
-        // también actualiza en memoria si existe
-        const a = (avisosArr||[]).find(x=>x.id===id);
-        if(a) a.estado = val;
+        // también actualiza en memoria
+        if(viejo) viejo.estado = body.estado;
 
       }catch(e){
+        console.error('PUT /avisos error:', e);
         alert('No se pudo actualizar el estado del aviso');
+        if(el && viejo) el.value = estadoFromAPI(viejo.estado || 'pendiente');
       }
     }
 
@@ -411,7 +451,7 @@
       avisosCards.innerHTML="";
       l.forEach(a=>{
         const desc = (a.descripcion || a.tarea || "").trim();
-        const estadoVal = a.estado || "Pendiente";
+        const estadoVal = estadoFromAPI(a.estado) || "Pendiente"; // 👈 mostrar bonito
         const cls = estadoClaseAviso(estadoVal);
 
         avisosCards.innerHTML+=`
@@ -429,7 +469,7 @@
               ${desc ? esc(desc) : '<i>Sin descripción</i>'}
             </div>
 
-            <!-- 🔹 NUEVO: Estado (debajo de la descripción y encima de acciones) -->
+            <!-- 🔹 Nuevo: Estado -->
             <div class="aviso-state ${cls}">
               <select onchange="cambiarEstadoAviso(${a.id}, this.value, this)">
                 <option value="Pendiente"  ${estadoVal==="Pendiente"  ? "selected":""}>Pendiente</option>
@@ -544,8 +584,8 @@
           cliente: parseInt(a_cliente.value,10),
           fecha_programada: (a_fecha.value||'').trim(),
           tecnico: (a_tecnico.value||'').trim(),
-          tarea: tareaText || 'AVISO'   // backend espera 'tarea'
-          // estado: 'Pendiente' // opcional si tu API lo pone por defecto
+          tarea: tareaText || 'AVISO',   // backend espera 'tarea'
+          estado: 'pendiente'            // por coherencia con tu BD
         };
         if(!data.cliente || !data.fecha_programada || !data.tecnico){
           alert('Cliente, fecha y técnico son obligatorios'); return;
