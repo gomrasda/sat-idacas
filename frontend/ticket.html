@@ -8,7 +8,9 @@
     :root{
       --b:#e9eef6; --bg:#f5f7fb; --ink:#1f2937; --muted:#6b7280; --chip:#eef2f7;
       --card-b:#cfd8e6; --alt-bg:#f6f8fb;
-      --paused:#facc15; --closed:#22c55e; --billed:#3b82f6;
+      /* Solo dos estados */
+      --open:#0ea5e9;   /* Abierto (azul)  */
+      --closed:#22c55e; /* Cerrado (verde) */
     }
     body { margin:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--ink); }
     .container { max-width:980px; margin:auto; padding:16px; }
@@ -28,7 +30,6 @@
 
     td textarea{ resize:none; overflow:hidden; min-height:56px; line-height:1.4; width:100%; }
 
-    /* Fila con 3 botones iguales */
     .actions-row{
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -75,9 +76,8 @@
     }
 
     .estado select{ padding:10px 12px; border-radius:8px; color:#fff; width:100%; }
-    .estado.paused select{ background:var(--paused); color:#000; }
+    .estado.open  select{ background:var(--open); }
     .estado.closed select{ background:var(--closed); }
-    .estado.billed select{ background:var(--billed); }
 
     .acciones {
       display:flex !important;
@@ -132,12 +132,10 @@
   <label>Filtrar por Estado:</label>
   <select id="filtroEstado" onchange="cargarTickets()">
     <option value="Todos">Todos</option>
-    <option value="Pausado">Pausado</option>
+    <option value="Abierto">Abierto</option>
     <option value="Cerrado">Cerrado</option>
-    <option value="Facturado">Facturado</option>
   </select>
 
-  <!-- 3 botones en la misma fila -->
   <div class="actions-row">
     <button class="btn btn-grey" id="btnVolver">🔙 Volver a Avisos</button>
     <button class="btn" id="btnNuevo">➕ Crear Ticket</button>
@@ -176,14 +174,12 @@ document.addEventListener("input",e=>{if(e.target.tagName==="TEXTAREA")autoResiz
 // Cargar técnicos
 async function cargarTecnicos(){
   const u = await apiFetch(api + "/usuarios", { headers });
-
   const norm = s => (s ?? "").toString().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
   const hasTecRole = (user) => {
     const rRaw = user.rol ?? user.role ?? user.roles ?? "";
     const roles = Array.isArray(rRaw) ? rRaw : [rRaw];
     return roles.some(r => norm(r).includes("tecn"));
   };
-
   tecnicos = (u || [])
     .filter(hasTecRole)
     .map(t => ({ id: t.id ?? t._id ?? null, nombre: t.nombre ?? t.name ?? t.usuario ?? "Sin nombre" }));
@@ -195,18 +191,28 @@ async function cargarTitulo(){const a=await apiFetch(api+"/avisos/"+avisoId,{hea
 btnNuevo.onclick=async()=>{await cargarTecnicos();abrirModal()}
 btnVolver.onclick=()=>location.href="index.html#avisos"
 
-async function actualizarCampo(id,c,v){const t=ticketsLista.find(x=>x.id===id);if(!t)return;
+async function actualizarCampo(id,c,v){
+  const t=ticketsLista.find(x=>x.id===id);if(!t)return;
   const p={...t};p[c]=c==="description"?v:+v||v;
   await apiFetch(api+"/tickets/"+id,{method:"PUT",headers,body:JSON.stringify(p)});
-  Object.assign(t,p);actualizarResumen();}
+  Object.assign(t,p);actualizarResumen();
+}
 
 async function cargarTickets(){
   const ts=await apiFetch(api+"/tickets?aviso_id="+avisoId,{headers});
   ticketsLista=ts||[];const body=ticketsBody;body.innerHTML="";
   ts.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha)).forEach((t,i)=>{
-    if(filtroEstado.value!=="Todos"&&t.estado!==filtroEstado.value)return;
-    const dis=t.estado==="Pausado"?"":"disabled",f=t.fecha?new Date(t.fecha).toLocaleDateString("es-ES"):"",d=t.description||"",alt=i%2?" alt":"";
-    let claseEstado=t.estado==="Pausado"?"paused":t.estado==="Cerrado"?"closed":"billed";
+    // FILTRO: solo Abierto/Cerrado
+    if(filtroEstado.value!=="Todos" && t.estado!==filtroEstado.value) return;
+
+    // Solo editable si está Abierto
+    const dis = t.estado==="Abierto" ? "" : "disabled";
+    const f=t.fecha?new Date(t.fecha).toLocaleDateString("es-ES"):"";
+    const d=t.description||"";
+    const alt=i%2?" alt":"";
+
+    const claseEstado = (t.estado==="Abierto") ? "open" : "closed";
+
     body.innerHTML+=`
       <tr class="r1${alt}"><td><span class="chip">${f}</span></td><td><span class="chip">${t.tecnico||""}</span></td></tr>
       <tr class="r2${alt}"><td class="desc" data-label="Descripción" style="grid-column:1/-1;"><textarea onchange="actualizarCampo(${t.id},'description',this.value)" ${dis}>${d}</textarea></td></tr>
@@ -214,9 +220,8 @@ async function cargarTickets(){
       <td class="materiales" data-label="Materiales"><input type="number" value="${t.precio_materiales||0}" onchange="actualizarCampo(${t.id},'precio_materiales',this.value)" ${dis}></td></tr>
       <tr class="r4${alt}">
         <td class="estado ${claseEstado}" data-label="Estado"><select onchange="cambiarEstadoTicket(${t.id},this.value,this)">
-          <option value="Pausado" ${t.estado==="Pausado"?"selected":""}>Pausado</option>
-          <option value="Cerrado" ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
-          <option value="Facturado" ${t.estado==="Facturado"?"selected":""}>Facturado</option>
+          <option value="Abierto"  ${t.estado==="Abierto"?"selected":""}>Abierto</option>
+          <option value="Cerrado"  ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
         </select></td>
         <td class="acciones"><button onclick=editarTicket(${t.id})>✏️</button><button onclick=borrarTicket(${t.id})>🗑️</button></td>
       </tr>`;
@@ -231,8 +236,13 @@ function actualizarResumen(){
 }
 
 async function borrarTicket(id){if(confirm("¿Eliminar?")){await apiFetch(api+"/tickets/"+id,{method:"DELETE",headers});cargarTickets()}}
-async function cambiarEstadoTicket(id,e,s){const t=ticketsLista.find(x=>x.id===id);if(!t)return;
-  if((e==="Cerrado"||e==="Facturado")&&(!t.horas_totales||t.horas_totales<=0)){alert("Horas requeridas");s.value=t.estado;return}
+
+async function cambiarEstadoTicket(id,e,s){
+  const t=ticketsLista.find(x=>x.id===id);if(!t)return;
+  // Si cierras, exige horas > 0
+  if(e==="Cerrado" && (!t.horas_totales || t.horas_totales<=0)){
+    alert("Para cerrar, indica horas > 0"); s.value=t.estado; return;
+  }
   await apiFetch(api+"/tickets/"+id,{method:"PUT",headers,body:JSON.stringify({...t,estado:e})});
   cargarTickets();
 }
@@ -249,7 +259,8 @@ function abrirModal(){
     <input id=horas_totales type=number>
     <input id=precio_materiales type=number>
     <select id=estado>
-      <option>Pausado</option><option>Cerrado</option><option>Facturado</option>
+      <option>Abierto</option>
+      <option>Cerrado</option>
     </select>
     <textarea id=descripcion></textarea>
     <button onclick=guardarTicket()>Guardar</button>
@@ -269,23 +280,35 @@ async function guardarTicket(){
       tecnico:tecnico.value,
       horas_totales:+horas_totales.value||0,
       precio_materiales:+precio_materiales.value||0,
-      estado:estado.value,
+      estado:estado.value,               // 'Abierto' | 'Cerrado'
       description:descripcion.value
     })
   });
   cerrarModal();cargarTickets();
 }
 
-async function editarTicket(id){const t=ticketsLista.find(x=>x.id===id);
+async function editarTicket(id){
+  const t=ticketsLista.find(x=>x.id===id);
   modal.innerHTML=`<div class=modal><h3>Editar</h3>
-  <input id=fecha value="${t.fecha}"><input id=horas_totales value="${t.horas_totales}"><input id=precio_materiales value="${t.precio_materiales}">
-  <select id=estado><option ${t.estado==="Pausado"?"selected":""}>Pausado</option><option ${t.estado==="Cerrado"?"selected":""}>Cerrado</option><option ${t.estado==="Facturado"?"selected":""}>Facturado</option></select>
+  <input id=fecha value="${t.fecha||''}">
+  <input id=horas_totales type="number" value="${t.horas_totales||0}">
+  <input id=precio_materiales type="number" value="${t.precio_materiales||0}">
+  <select id=estado>
+    <option ${t.estado==="Abierto"?"selected":""}>Abierto</option>
+    <option ${t.estado==="Cerrado"?"selected":""}>Cerrado</option>
+  </select>
   <textarea id=descripcion>${t.description||""}</textarea>
   <button onclick=guardarEdicion(${t.id})>Guardar</button><button onclick=cerrarModal()>Cancelar</button></div>`;
   modal.style.display="block";
 }
 async function guardarEdicion(id){
-  const d={fecha:fecha.value,horas_totales:+horas_totales.value||0,precio_materiales:+precio_materiales.value||0,estado:estado.value,description:descripcion.value};
+  const d={
+    fecha:fecha.value,
+    horas_totales:+horas_totales.value||0,
+    precio_materiales:+precio_materiales.value||0,
+    estado:estado.value,                 // 'Abierto' | 'Cerrado'
+    description:descripcion.value
+  };
   await apiFetch(api+"/tickets/"+id,{method:"PUT",headers,body:JSON.stringify(d)});
   cerrarModal();cargarTickets();
 }
