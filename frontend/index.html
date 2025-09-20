@@ -57,7 +57,7 @@
     .sidebar.active{ transform: translateX(0); }
 
     .sidebar button{
-      display:flex; align-items:center; gap:24px; /* espacio icono-texto */
+      display:flex; align-items:center; gap:24px;
       width:100%; text-align:left;
       padding: 12px 14px;
       background:none; border:none; color:#fff;
@@ -68,8 +68,8 @@
     }
     .sidebar button i,
     .logout i{
-      margin-right: 0;      /* usamos gap */
-      width: 1.6em;         /* ancho fijo del icono */
+      margin-right: 0;
+      width: 1.6em;
       text-align: center;
       flex-shrink: 0;
     }
@@ -145,11 +145,10 @@
       #usuarios h2, #clientes h2, #avisos h2 { font-size:54px !important; font-weight:800; text-align:left; text-transform:uppercase; margin:20px 0; }
     }
 
-    /* ====== OVERRIDES MÓVIL (forzados) ====== */
+    /* ====== OVERRIDES MÓVIL ====== */
     .sidebar{ left: 0 !important; transform: translateX(-100%) !important; transition: transform .3s ease !important; }
     .sidebar.active{ transform: translateX(0) !important; }
 
-    /* Ancho 75vw en móviles/tablets + botones XL */
     @media (max-width: 1200px){
       .sidebar, #sidebar{ width: 75vw !important; max-width: none !important; padding: 20px 16px !important; }
       .sidebar button, .sidebar .logout{
@@ -173,7 +172,7 @@
       .aviso-desc{ font-size: 22px; }
     }
 
-    /* 🔹 NUEVO: Estado en tarjetas de AVISOS (igual que Tickets) */
+    /* 🔹 Estado en tarjetas de AVISOS (igual que Tickets) */
     .aviso-state{ margin:10px 0 8px; }
     .aviso-state select{
       padding:10px 12px; border-radius:8px; width:100%;
@@ -184,18 +183,17 @@
     .aviso-state.closed   select{ background:var(--closed);   }
     .aviso-state.billed   select{ background:var(--billed);   }
 
-    /* === Estado de Avisos: tamaño XL en móvil (igual que tickets) === */
-@media (max-width:1024px){
-  .aviso-state select{
-    font-size: 40px !important;
-    font-weight: 600;
-    padding: 16px 18px;
-    min-height: 68px;
-    line-height: 1.25;
-    border-radius: 14px;
-  }
-}
-
+    /* Estado XL en móvil */
+    @media (max-width:1024px){
+      .aviso-state select{
+        font-size: 40px !important;
+        font-weight: 600;
+        padding: 16px 18px;
+        min-height: 68px;
+        line-height: 1.25;
+        border-radius: 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -206,7 +204,7 @@
   </div>
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-  <!-- Sidebar con iconos y Logout al final -->
+  <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <button onclick="mostrar('usuarios')" id="btnUsuarios"><i class="fa-solid fa-users"></i> Usuarios</button>
     <button onclick="mostrar('clientes')"><i class="fa-solid fa-address-book"></i> Clientes</button>
@@ -241,6 +239,16 @@
     <div id="avisos" style="display:none;">
       <h2>Avisos</h2>
       <div class="section-actions">
+        <label for="filtro-estado-avisos" style="font-weight:600;align-self:center">Filtrar por Estado:</label>
+        <select id="filtro-estado-avisos" class="form-select" style="max-width:220px">
+          <option value="todos">Todos</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="en proceso">En proceso</option>
+          <option value="cerrado">Cerrado</option>
+          <option value="facturado">Facturado</option>
+        </select>
+        <span id="contador-avisos" style="align-self:center;opacity:.7"></span>
+
         <button class="primary-btn" onclick="nuevoAviso()">➕ Nuevo Aviso</button>
       </div>
       <div id="avisosCards" class="cards"></div>
@@ -388,7 +396,7 @@
 
     async function cargarAvisos(){const r=await fetch(api+"/avisos",{headers});avisosArr=await r.json();renderAvisos(avisosArr);}
 
-    /* 🔹 NUEVO: helpers de estado + resolver cliente */
+    /* helpers de estado + resolver cliente */
     function estadoClaseAviso(estado){
       switch((estado||"").toLowerCase()){
         case "pendiente":  return "pending";
@@ -421,7 +429,6 @@
     async function cambiarEstadoAviso(id, valUI, el){
       const viejo = (avisosArr||[]).find(x=>x.id===id);
       try{
-        // Asegura que tenemos todo el aviso
         let a = viejo;
         if(!a || !a.cliente || !a.tarea || !a.fecha_programada || !a.tecnico){
           try{
@@ -435,7 +442,7 @@
           tarea: (a?.tarea || a?.descripcion || 'AVISO').toString(),
           fecha_programada: (a?.fecha_programada || '').toString().slice(0,10),
           tecnico: (a?.tecnico || '').toString(),
-          estado: estadoToAPI(valUI) // 👈 mapeo minúsculas para BD
+          estado: estadoToAPI(valUI)
         };
 
         const r = await fetch(api + '/avisos/' + id, {
@@ -446,11 +453,8 @@
         const txt = await r.text();
         if(!r.ok) throw new Error(txt || 'PUT /avisos falló');
 
-        // ajusta color visual
         const wrap = el.closest('.aviso-state');
         if(wrap) wrap.className = 'aviso-state ' + estadoClaseAviso(valUI);
-
-        // también actualiza en memoria
         if(viejo) viejo.estado = body.estado;
 
       }catch(e){
@@ -464,25 +468,23 @@
       avisosCards.innerHTML="";
       l.forEach(a=>{
         const desc = (a.descripcion || a.tarea || "").trim();
-        const estadoVal = estadoFromAPI(a.estado) || "Pendiente"; // 👈 mostrar bonito
+        const estadoVal = estadoFromAPI(a.estado) || "Pendiente";
         const cls = estadoClaseAviso(estadoVal);
+        const estadoKey = (a.estado || 'pendiente').toString().toLowerCase().replace('_',' ');
 
         avisosCards.innerHTML+=`
-          <div class="card">
+          <div class="card" data-estado="${esc(estadoKey)}">
             <div class="title">Cliente: ${esc(a.cliente_nombre || a.cliente || "")}</div>
 
-            <!-- Línea 2: fecha y técnico -->
             <div class="meta">
               <span><b>Fecha:</b> ${esc(a.fecha_programada||"")}</span>
               <span><b>Técnico:</b> ${esc(a.tecnico||"")}</span>
             </div>
 
-            <!-- Línea 3: descripción siempre visible -->
             <div class="aviso-desc">
               ${desc ? esc(desc) : '<i>Sin descripción</i>'}
             </div>
 
-            <!-- 🔹 Nuevo: Estado -->
             <div class="aviso-state ${cls}">
               <select onchange="cambiarEstadoAviso(${a.id}, this.value, this)">
                 <option value="Pendiente"  ${estadoVal==="Pendiente"  ? "selected":""}>Pendiente</option>
@@ -492,7 +494,6 @@
               </select>
             </div>
 
-            <!-- Línea 4: acciones -->
             <div class="actions">
               <button class="btn-ticket" onclick="abrirTicket(${a.id})"><span class="ico">🎫</span>Ticket</button>
               <button onclick="editarAviso(${a.id})"><span class="ico">✏️</span>Editar</button>
@@ -500,9 +501,53 @@
             </div>
           </div>`;
       });
+
+      aplicarFiltroAvisos(); // filtra después de pintar
     }
 
     function abrirTicket(id){window.open('ticket.html?avisoId='+id,'_blank');}
+
+    /* ===== Filtro por estado en Avisos ===== */
+    function aplicarFiltroAvisos(){
+      const sel = document.getElementById('filtro-estado-avisos');
+      if(!sel) return;
+      const val = sel.value || 'todos';
+
+      const cards = document.querySelectorAll('#avisosCards .card');
+      let total = 0, visibles = 0;
+
+      cards.forEach(card=>{
+        total++;
+        const est = (card.getAttribute('data-estado') || '').toLowerCase();
+        const show = (val === 'todos') || (est === val);
+        card.style.display = show ? '' : 'none';
+        if(show) visibles++;
+      });
+
+      const c = document.getElementById('contador-avisos');
+      if(c) c.textContent = `Mostrando ${visibles} de ${total}`;
+
+      localStorage.setItem('filtro_estado_avisos', val);
+      const p = new URLSearchParams(location.search);
+      if(val === 'todos'){ p.delete('estado'); } else { p.set('estado', val); }
+      history.replaceState(null, '', `${location.pathname}?${p.toString()}`);
+    }
+
+    document.addEventListener('change', (e)=>{
+      if(e.target && e.target.id === 'filtro-estado-avisos'){
+        aplicarFiltroAvisos();
+      }
+    });
+
+    // Valor inicial del selector desde URL/localStorage
+    window.addEventListener('load', ()=>{
+      const sel = document.getElementById('filtro-estado-avisos');
+      if(sel){
+        const params = new URLSearchParams(location.search);
+        const inicial = params.get('estado') || localStorage.getItem('filtro_estado_avisos') || 'todos';
+        if([...sel.options].some(o=>o.value === inicial)) sel.value = inicial;
+      }
+    });
 
     /* ===== MODAL GENÉRICO ===== */
     function openModal(title, bodyHtml, onSave) {
@@ -597,8 +642,8 @@
           cliente: parseInt(a_cliente.value,10),
           fecha_programada: (a_fecha.value||'').trim(),
           tecnico: (a_tecnico.value||'').trim(),
-          tarea: tareaText || 'AVISO',   // backend espera 'tarea'
-          estado: 'pendiente'            // por coherencia con tu BD
+          tarea: tareaText || 'AVISO',
+          estado: 'pendiente'
         };
         if(!data.cliente || !data.fecha_programada || !data.tecnico){
           alert('Cliente, fecha y técnico son obligatorios'); return;
@@ -621,7 +666,7 @@
       });
     }
 
-    /* ===== EDITAR / BORRAR AVISO (igual que tenías) ===== */
+    /* ===== EDITAR / BORRAR AVISO ===== */
     async function editarAviso(id){
       const a = avisosArr.find(x=>x.id===id);
       if(!a){ alert('Aviso no encontrado'); return; }
@@ -629,7 +674,6 @@
       if(!clientesArr.length) await cargarClientes();
       if(!tecnicos.length) await cargarTecnicos();
 
-      // Resolver cliente seleccionado
       let selectedClientId = a.cliente_id ?? a.clienteId ?? (a.cliente && a.cliente.id) ?? a.cliente;
       if (typeof selectedClientId === 'string' && /^\d+$/.test(selectedClientId)) {
         selectedClientId = parseInt(selectedClientId, 10);
@@ -644,7 +688,6 @@
         .map(c => `<option ${c.id==selectedClientId?'selected':''} value="${c.id}">${esc(c.nombre||'')}</option>`)
         .join('');
 
-      // Técnico por nombre
       const tecActual = (a.tecnico || '').toString();
       const tecNorm = norm(tecActual);
       const tecnicosOpts = tecnicos
@@ -743,7 +786,7 @@
 
     window.addEventListener('load',()=>{mostrar(location.hash.substring(1)||'inicio');});
 
-    /* Forzar 75vw por JS si el CSS no entra/cached */
+    /* Sidebar width móvil */
     function applyMobileSidebarWidth(){
       try{
         if(window.innerWidth <= 1200){
